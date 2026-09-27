@@ -50,8 +50,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind antippen | Freudensprung |
 | Kind auf die Schaukel ziehen | Kind schaukelt, bis man es wieder runterzieht |
 | Kind auf die Rutsche ziehen | klettert hoch und rutscht runter |
-| Ball antippen | Ball fliegt weg |
+| Ball antippen | Ball fliegt im Bogen weg und rollt aus |
 | Eimer / Baum antippen | wackelt |
+| Spielzeug schnell ziehen und loslassen | wird geworfen, prallt an den Bildrändern ab |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 
 ## Projektstruktur
@@ -59,9 +60,11 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 ```
 src/
   config.ts            Auflösung, Boden-Höhe, Konstanten
-  data/                Spielgeräte, Gegenstände, Figuren (alles im Code)
-  objects/             Verhalten: Kid, Prop, Equipment (Schaukel, Rutsche, …)
+  data/                Spielgeräte, Spielzeug-Katalog (toys.ts), Figuren (alles im Code)
+  objects/             Verhalten: Kid, Equipment (Schaukel, Rutsche, …)
+  objects/toys/        Spielzeug, Wurf-Physik und Verhaltensbausteine
   scenes/BootScene     Grafiken laden bzw. Platzhalter erzeugen
+  scenes/placeholders/ Platzhalter-Zeichnungen der Spielzeuge
   scenes/Playground    die Spielwiese
 public/assets/         hier kommen später die echten Grafiken hin
 ```

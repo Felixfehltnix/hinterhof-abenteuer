@@ -12,3 +12,6 @@ export const DRAG_THRESHOLD = 12;
 
 // Tiefe für Objekte, die gerade gezogen werden (immer ganz vorne).
 export const DEPTH_DRAGGING = 10_000;
+
+// Mindestgröße der Touch-Fläche (px). Kleine Spielzeuge bekommen einen unsichtbaren Rand.
+export const MIN_TOUCH_SIZE = 140;

@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { CHARACTERS } from '../data/characters';
+import { TOYS } from '../data/toys';
+import { TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
 // Sobald echte Grafiken da sind: PNGs nach public/assets/ legen, hier in preload()
@@ -100,31 +102,7 @@ export class BootScene extends Phaser.Scene {
       g.fillCircle(170, 200, 12);
     });
 
-    this.makeTexture('ball', 80, 80, (g) => {
-      g.fillStyle(0xef476f);
-      g.fillCircle(40, 40, 38);
-      g.fillStyle(0xffffff);
-      g.fillCircle(40, 40, 14);
-      g.fillStyle(0xffffff, 0.5);
-      g.fillCircle(26, 24, 8);
-    });
-
-    this.makeTexture('bucket', 90, 90, (g) => {
-      g.lineStyle(5, 0x023047);
-      g.beginPath();
-      g.arc(45, 30, 30, Math.PI, 0, false);
-      g.strokePath();
-      g.fillStyle(0x219ebc);
-      g.fillPoints(
-        [
-          new Phaser.Math.Vector2(10, 28),
-          new Phaser.Math.Vector2(80, 28),
-          new Phaser.Math.Vector2(70, 90),
-          new Phaser.Math.Vector2(20, 90),
-        ],
-        true,
-      );
-    });
+    TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');
   }

@@ -9,10 +9,11 @@ import {
   GROUND_TOP,
 } from '../config';
 import { CHARACTERS } from '../data/characters';
-import { EQUIPMENT, PROPS } from '../data/playground';
+import { EQUIPMENT, PLACED_TOYS } from '../data/playground';
+import { getToyDef } from '../data/toys';
 import { createEquipment, type Equipment } from '../objects/Equipment';
 import { Kid } from '../objects/Kid';
-import { Prop } from '../objects/Prop';
+import { Toy } from '../objects/toys/Toy';
 
 export class PlaygroundScene extends Phaser.Scene {
   private equipment: Equipment[] = [];
@@ -25,7 +26,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.drawBackground();
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
-    PROPS.forEach((def) => new Prop(this, def));
+    PLACED_TOYS.forEach((t) => new Toy(this, getToyDef(t.toy), t.x, t.y));
     CHARACTERS.forEach((def) => new Kid(this, def));
 
     this.setupInput();
@@ -41,34 +42,37 @@ export class PlaygroundScene extends Phaser.Scene {
     this.input.dragDistanceThreshold = DRAG_THRESHOLD;
 
     this.input.on('dragstart', (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-      if (!(obj instanceof Phaser.GameObjects.Image)) return;
-      this.tweens.killTweensOf(obj);
-
-      if (obj instanceof Kid) {
-        obj.seatedOn?.unseat(obj);
-        obj.mode = 'dragging';
+      if (obj instanceof Toy) {
+        obj.handleDragStart();
+        return;
       }
+      if (!(obj instanceof Kid)) return;
+      this.tweens.killTweensOf(obj);
+      obj.seatedOn?.unseat(obj);
+      obj.mode = 'dragging';
       obj.setRotation(0).setScale(1.08).setDepth(DEPTH_DRAGGING);
     });
 
     this.input.on(
       'drag',
-      (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.Image, dragX: number, dragY: number) => {
-        obj.setPosition(dragX, dragY);
+      (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
+        if (obj instanceof Toy) obj.handleDrag(p, dragX, dragY);
+        else if (obj instanceof Kid) obj.setPosition(dragX, dragY);
       },
     );
 
-    this.input.on('dragend', (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-      if (!(obj instanceof Phaser.GameObjects.Image)) return;
+    this.input.on('dragend', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
+      if (obj instanceof Toy) {
+        obj.handleDragEnd(p);
+        return;
+      }
+      if (!(obj instanceof Kid)) return;
       obj.setScale(1);
-
-      if (obj instanceof Kid) {
-        obj.mode = 'idle';
-        const spot = this.equipment.find((e) => e.accepts(obj, obj.x, obj.y));
-        if (spot) {
-          spot.use(obj);
-          return;
-        }
+      obj.mode = 'idle';
+      const spot = this.equipment.find((e) => e.accepts(obj, obj.x, obj.y));
+      if (spot) {
+        spot.use(obj);
+        return;
       }
       this.settle(obj);
     });
@@ -81,8 +85,8 @@ export class PlaygroundScene extends Phaser.Scene {
     });
   }
 
-  /** Lässt ein Objekt auf die Wiese fallen, falls es in der Luft losgelassen wurde. */
-  private settle(obj: Phaser.GameObjects.Image): void {
+  /** Lässt ein Kind auf die Wiese fallen, falls es in der Luft losgelassen wurde. */
+  private settle(obj: Kid): void {
     obj.x = Phaser.Math.Clamp(obj.x, 60, GAME_WIDTH - 60);
     const targetY = Phaser.Math.Clamp(obj.y, GROUND_MIN_Y, GROUND_MAX_Y);
 

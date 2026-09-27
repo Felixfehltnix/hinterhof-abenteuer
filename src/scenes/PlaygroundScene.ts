@@ -111,6 +111,12 @@ export class PlaygroundScene extends Phaser.Scene {
     this.toys.delete(toy);
   }
 
+  /** Spielzeug verschwindet ohne Animation (z. B. geplatzter Ballon). */
+  removeToy(toy: Toy): void {
+    this.forgetToy(toy);
+    toy.destroy();
+  }
+
   /** Ein gezogenes Spielzeug wurde losgelassen: wegräumen oder auf die Wiese. */
   releaseToy(toy: Toy, pointer: Phaser.Input.Pointer): void {
     if (this.toyBox.accepts(pointer.x, pointer.y)) this.toyBox.putAway(toy);
@@ -150,6 +156,13 @@ export class PlaygroundScene extends Phaser.Scene {
     if (this.gate.accepts(pointer.x, pointer.y)) {
       this.gate.sendHome(kid);
       return;
+    }
+    // Auf ein Spielzeug gezogen, das Kinder annimmt (z. B. Drachen, Ballon festhalten)?
+    for (const toy of this.toys) {
+      if (toy.getBounds().contains(pointer.x, pointer.y) && toy.offerKid(kid)) {
+        kid.settle();
+        return;
+      }
     }
     const spot = this.equipment.find((e) => e.accepts(kid, kid.x, kid.y));
     if (spot) {

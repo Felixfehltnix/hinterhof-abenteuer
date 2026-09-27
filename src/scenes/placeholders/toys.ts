@@ -83,6 +83,69 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.lineStyle(3, 0xf1c0e8);
     g.strokeEllipse(55, 16, 52, 9);
   },
+
+  paperplane: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.fillStyle(0xffffff);
+    g.fillPoints([v(0, 10), v(100, 25), v(20, 48)], true);
+    g.fillStyle(0xdde6ee);
+    g.fillPoints([v(0, 10), v(100, 25), v(30, 28)], true);
+    g.lineStyle(2, 0x9aa5b1);
+    g.strokePoints([v(0, 10), v(100, 25), v(20, 48)], true);
+    g.lineBetween(30, 28, 100, 25);
+  },
+
+  boomerang: (g) => {
+    g.lineStyle(22, 0xbc6c25);
+    g.beginPath();
+    g.moveTo(14, 86);
+    g.lineTo(50, 20);
+    g.lineTo(86, 86);
+    g.strokePath();
+    g.fillStyle(0xbc6c25);
+    g.fillCircle(14, 86, 11);
+    g.fillCircle(86, 86, 11);
+    g.fillCircle(50, 20, 11);
+    g.fillStyle(0xfefae0);
+    g.fillCircle(50, 24, 5);
+  },
+
+  kite: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.fillStyle(0xef476f);
+    g.fillPoints([v(60, 0), v(118, 50), v(60, 110), v(2, 50)], true);
+    g.fillStyle(0xffd166);
+    g.fillPoints([v(60, 0), v(118, 50), v(60, 50)], true);
+    g.fillPoints([v(60, 50), v(60, 110), v(2, 50)], true);
+    g.lineStyle(3, 0x6d4c41);
+    g.lineBetween(60, 0, 60, 110);
+    g.lineBetween(2, 50, 118, 50);
+    // Schwanz mit Schleifchen
+    g.lineStyle(3, 0x4a4a4a);
+    g.lineBetween(60, 110, 60, 150);
+    g.fillStyle(0x118ab2);
+    g.fillTriangle(50, 122, 70, 122, 60, 132);
+    g.fillTriangle(50, 142, 70, 142, 60, 132);
+  },
+
+  balloon: (g) => {
+    g.lineStyle(2, 0x4a4a4a);
+    g.lineBetween(45, 108, 45, 150);
+    g.fillStyle(0xe63946);
+    g.fillEllipse(45, 55, 84, 104);
+    g.fillTriangle(38, 110, 52, 110, 45, 100);
+    g.fillStyle(0xffffff, 0.45);
+    g.fillEllipse(30, 34, 18, 28);
+  },
+
+  bubblewand: (g) => {
+    g.fillStyle(0x4d96ff);
+    g.fillRoundedRect(25, 50, 10, 70, 4);
+    g.lineStyle(7, 0x4d96ff);
+    g.strokeCircle(30, 26, 22);
+    g.lineStyle(2, 0xbde0fe, 0.8);
+    g.strokeCircle(30, 26, 15);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

@@ -56,6 +56,11 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Fußball / Basketball / Wasserball antippen | flacher Schuss / hoher Bogen / schwebt lange |
 | Frisbee werfen | gleitet weit und sinkt sanft |
 | Ball auf ein Kind fallen lassen | das Kind kickt ihn weg |
+| Papierflieger / Bumerang werfen | gleitet mit Looping / fliegt einen Bogen und kommt zurück |
+| Drachen ziehen | steigt an der Schnur hoch |
+| Luftballon | steigt und schwebt, Antippen: platzt mit Konfetti |
+| Drachen oder Ballon und ein Kind zusammenbringen | das Kind hält die Schnur |
+| Seifenblasenstab antippen | Blasen steigen auf, Antippen lässt sie platzen |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

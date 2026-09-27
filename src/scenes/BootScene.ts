@@ -123,6 +123,15 @@ export class BootScene extends Phaser.Scene {
       g.fillRoundedRect(95, 22, 30, 14, 4);
     });
 
+    this.makeTexture('bubble', 60, 60, (g) => {
+      g.fillStyle(0xffffff, 0.18);
+      g.fillCircle(30, 30, 28);
+      g.lineStyle(3, 0xffffff, 0.85);
+      g.strokeCircle(30, 30, 27);
+      g.fillStyle(0xffffff, 0.9);
+      g.fillEllipse(20, 18, 12, 8);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

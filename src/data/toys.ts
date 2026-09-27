@@ -5,7 +5,20 @@
 // Die id ist gleichzeitig der Texture-Key (echte Grafik: assets/…png unter derselben id laden).
 
 /** Verhaltensbausteine, siehe src/objects/toys/behaviors/. */
-export type BehaviorId = 'draggable' | 'fling' | 'kick' | 'wobble' | 'glide' | 'kidKick';
+export type BehaviorId =
+  | 'draggable'
+  | 'fling'
+  | 'kick'
+  | 'wobble'
+  | 'glide'
+  | 'kidKick'
+  | 'plane'
+  | 'boomerang'
+  | 'kite'
+  | 'float'
+  | 'holdable'
+  | 'pop'
+  | 'bubbles';
 
 export interface ToyParams {
   /** Schwerkraft in px/s². */
@@ -18,6 +31,10 @@ export interface ToyParams {
   airDrag: number;
   /** Auftrieb 0..1: Anteil der Schwerkraft, der bei schnellem Flug wegfällt (Frisbee). */
   lift: number;
+  /** Wie stark Wind das Spielzeug in der Luft mitnimmt (0 = gar nicht, 1 = voll). */
+  windFactor: number;
+  /** holdable: so hoch über der Hand des Kindes hängt es an der Schnur (px). */
+  holdHeight: number;
   /** Dreht sich beim Rollen und Fliegen (Ball ja, Eimer nein). */
   spin: boolean;
   /** kick: waagerechte Schussgeschwindigkeit in px/s. */
@@ -34,6 +51,8 @@ export const DEFAULT_TOY_PARAMS: ToyParams = {
   rollFriction: 4,
   airDrag: 0.3,
   lift: 0,
+  windFactor: 0,
+  holdHeight: 150,
   spin: false,
   kickSpeed: 260,
   kickLift: 950,
@@ -96,6 +115,46 @@ export const TOYS = [
     height: 34,
     behaviors: ['draggable', 'fling', 'glide', 'wobble'],
     params: { bounce: 0.15, rollFriction: 6, gravity: 2600, lift: 0.85, airDrag: 0.3, throwFactor: 1.2 },
+  },
+  {
+    // Werfen: gleitet in Wurfrichtung, sinkt sanft, ab und zu ein Looping.
+    id: 'paperplane',
+    width: 100,
+    height: 50,
+    behaviors: ['draggable', 'fling', 'plane'],
+    params: { gravity: 1800, lift: 0.9, airDrag: 0.35, bounce: 0.1, rollFriction: 8, windFactor: 0.8, throwFactor: 0.9 },
+  },
+  {
+    // Werfen: großer Bogen, kommt zurück.
+    id: 'boomerang',
+    width: 100,
+    height: 100,
+    behaviors: ['draggable', 'fling', 'boomerang', 'wobble'],
+    params: { gravity: 2400, airDrag: 0, bounce: 0.2, rollFriction: 8, spin: true },
+  },
+  {
+    // Ziehen: steigt an der Schnur hoch. Ein Kind darauf ziehen: Es hält die Schnur.
+    id: 'kite',
+    width: 120,
+    height: 150,
+    behaviors: ['draggable', 'kite', 'holdable'],
+    params: { gravity: 150, airDrag: 2.5, bounce: 0, rollFriction: 10, windFactor: 1, holdHeight: 380 },
+  },
+  {
+    // Steigt und schwebt. Antippen: platzt. Auf ein Kind ziehen: Es hält ihn.
+    id: 'balloon',
+    width: 90,
+    height: 150,
+    behaviors: ['draggable', 'float', 'holdable', 'pop'],
+    params: { windFactor: 1, holdHeight: 170 },
+  },
+  {
+    // Antippen: Seifenblasen steigen auf.
+    id: 'bubblewand',
+    width: 60,
+    height: 120,
+    behaviors: ['draggable', 'fling', 'bubbles'],
+    params: { bounce: 0.2, rollFriction: 8 },
   },
 ] as const satisfies readonly ToyDef[];
 

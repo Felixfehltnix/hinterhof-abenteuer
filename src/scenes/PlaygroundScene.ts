@@ -149,9 +149,15 @@ export class PlaygroundScene extends Phaser.Scene {
     }
     // Auf ein anderes Spielzeug fallen gelassen, das es aufnimmt (z. B. Schubkarre)?
     for (const other of this.toys) {
-      if (other !== toy && this.dropZone(other).contains(pointer.x, pointer.y) && other.offerToy(toy)) {
-        toy.handleDragEnd(pointer);
-        toy.physics.stop();
+      const zone = other !== toy ? this.dropZone(other) : undefined;
+      // Großzügig: Finger oder Mitte des Spielzeugs über dem anderen Spielzeug
+      const over = zone && (zone.contains(pointer.x, pointer.y) || zone.contains(toy.x, toy.y - toy.displayHeight / 2));
+      if (over && other.offerToy(toy)) {
+        // Das Spielzeug kann dabei verschwunden sein (z. B. Schneebälle verschmelzen).
+        if (toy.active) {
+          toy.handleDragEnd(pointer);
+          toy.physics.stop();
+        }
         return;
       }
     }
@@ -260,7 +266,10 @@ export class PlaygroundScene extends Phaser.Scene {
 
     // Tippen auf eine freie Stelle schließt offene Leisten.
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
-      if (over.length === 0 && pointer.getDistance() < DRAG_THRESHOLD) this.closeInventories();
+      if (over.length === 0 && pointer.getDistance() < DRAG_THRESHOLD) {
+        this.closeInventories();
+        this.weather.onFreeTap(pointer.x, pointer.y);
+      }
     });
 
     // Tippen = Finger runter und wieder hoch, ohne nennenswert zu ziehen.

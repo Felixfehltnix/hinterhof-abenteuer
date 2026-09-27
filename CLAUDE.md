@@ -21,6 +21,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
   Wind setzt `environment.wind` (Grundwind + Böen), `windStrength()` gibt 0..~1,6.
   Spielzeuge driften über `params.windFactor` (in der Luft und am Boden).
+  Schnee (`src/world/Snow.ts`): Schneedecke, Mützen, Schmelzen. Schneebälle/Schneemänner sind
+  Katalog-Spielzeuge mit `hidden: true` (nicht in der Kiste) und `tags: ['snow']` (schmelzen).
 - Inhalte (Spielgeräte, Gegenstände, Figuren) stehen als Daten in `src/data/`.
   Neues Zeug zuerst dort anlegen, Verhalten in `src/objects/`.
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,

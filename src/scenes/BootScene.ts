@@ -330,6 +330,24 @@ export class BootScene extends Phaser.Scene {
       g.lineBetween(2, 8, 24, 8);
     });
 
+    this.makeTexture('snowflake', 14, 14, (g) => {
+      g.fillStyle(0xffffff, 0.35);
+      g.fillCircle(7, 7, 7);
+      g.fillStyle(0xffffff);
+      g.fillCircle(7, 7, 4);
+    });
+
+    // Mütze (weiß, wird in der Pulli-Farbe des Kindes eingefärbt)
+    this.makeTexture('beanie', 100, 62, (g) => {
+      g.fillStyle(0xffffff);
+      g.slice(50, 58, 46, Math.PI, 0, false);
+      g.fillPath();
+      g.fillRoundedRect(2, 46, 96, 16, 7);
+      g.fillCircle(50, 10, 10);
+      g.fillStyle(0xdddddd);
+      for (let x = 10; x < 95; x += 12) g.fillRect(x, 48, 4, 12);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

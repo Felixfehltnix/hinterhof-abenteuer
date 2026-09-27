@@ -3,10 +3,11 @@ import { DEPTH_TINT, GAME_WIDTH, GROUND_TOP } from '../config';
 import type { Kid } from '../objects/Kid';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 import type { DayCycle } from './DayCycle';
+import { Snow } from './Snow';
 import { environment, type WeatherKind } from './environment';
 
 /** Reihenfolge beim Antippen einer Wolke. Wind (#14) und Schnee (#15) werden hier eingereiht. */
-export const WEATHER_ORDER: WeatherKind[] = ['sunny', 'cloudy', 'rain', 'wind'];
+export const WEATHER_ORDER: WeatherKind[] = ['sunny', 'cloudy', 'rain', 'wind', 'snow'];
 
 interface WeatherLook {
   /** Wie grau Himmel und Welt werden (0..1). */
@@ -20,6 +21,7 @@ const LOOKS: Record<WeatherKind, WeatherLook> = {
   cloudy: { grey: 0.4, clouds: 1 },
   rain: { grey: 0.75, clouds: 1 },
   wind: { grey: 0.1, clouds: 0.7 },
+  snow: { grey: 0.35, clouds: 1 },
 };
 
 // Wind (px/s²): Grundwind und Böen, die ab und zu kommen.
@@ -55,12 +57,16 @@ export class Weather {
   private readonly rainbow: Phaser.GameObjects.Image;
   private readonly leaves: Phaser.GameObjects.Particles.ParticleEmitter;
   private gust = 0;
+  /** Schnee, Schneedecke, Mützen, Schmelzen */
+  readonly snow: Snow;
   private nextGust = 0;
 
   constructor(
     private readonly scene: PlaygroundScene,
     private readonly dayCycle: DayCycle,
   ) {
+    this.snow = new Snow(scene);
+
     // Zusätzliche Wolken für bewölkt/Regen
     for (const [x, y, s] of [
       [150, 90, 1.1],
@@ -113,9 +119,12 @@ export class Weather {
     this.leaves.setDepth(DEPTH_TINT - 20);
 
     scene.registerWorldState('weather', {
-      save: () => this.kind,
+      save: () => ({ kind: this.kind, snow: Math.round(this.snow.coverAmount * 100) / 100 }),
       load: (v) => {
-        if (typeof v === 'string' && (WEATHER_ORDER as string[]).includes(v)) this.set(v as WeatherKind, true);
+        // Früher nur der Name als Text, jetzt ein Objekt mit Schneedecke
+        const obj = typeof v === 'object' && v !== null ? (v as { kind?: unknown; snow?: unknown }) : { kind: v };
+        if (typeof obj.kind === 'string' && (WEATHER_ORDER as string[]).includes(obj.kind)) this.set(obj.kind as WeatherKind, true);
+        if (typeof obj.snow === 'number' && Number.isFinite(obj.snow)) this.snow.setCover(obj.snow);
       },
     });
     scene.events.on(Phaser.Scenes.Events.UPDATE, (_t: number, delta: number) => this.update(delta));
@@ -139,6 +148,7 @@ export class Weather {
     else this.rain.stop();
     if (kind === 'wind') this.leaves.start();
     else this.leaves.stop();
+    this.snow.setActive(kind === 'snow');
     if (instant) {
       this.grey = LOOKS[kind].grey;
       this.cloudAlpha = LOOKS[kind].clouds;
@@ -148,6 +158,11 @@ export class Weather {
       // Wenn der Regen aufhört: Regenbogen!
       if (wasRaining && kind !== 'rain') this.showRainbow();
     }
+  }
+
+  /** Tippen auf eine freie Stelle (z. B. Schneeball auf der Schneedecke). */
+  onFreeTap(x: number, y: number): void {
+    this.snow.onFreeTap(x, y);
   }
 
   /** Steht (x, y) in einer Pfütze? */
@@ -222,6 +237,7 @@ export class Weather {
     this.extraClouds.forEach((c) => c.setAlpha(this.cloudAlpha).setTint(cloudTint));
 
     this.updateWind(dt);
+    this.snow.update(dt);
     const drift = CLOUD_DRIFT + Math.max(0, environment.wind) * CLOUD_WIND;
     for (const c of [...this.dayCycle.clouds, ...this.extraClouds]) {
       c.x += drift * dt;

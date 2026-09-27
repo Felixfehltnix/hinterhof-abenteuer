@@ -4,7 +4,7 @@
 export type TimeOfDay = 'morning' | 'noon' | 'evening' | 'night';
 
 /** Wetterarten. Wind (#14) und Schnee (#15) kommen dazu. */
-export type WeatherKind = 'sunny' | 'cloudy' | 'rain' | 'wind';
+export type WeatherKind = 'sunny' | 'cloudy' | 'rain' | 'wind' | 'snow';
 
 export const environment = {
   /** Aktuelle Tageszeit (Ziel des gerade laufenden Übergangs). */

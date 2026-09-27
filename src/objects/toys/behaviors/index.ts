@@ -22,6 +22,7 @@ import { pool } from './pool';
 import { pop } from './pop';
 import { rideable } from './rideable';
 import { seesaw } from './seesaw';
+import { snowmerge } from './snowmerge';
 import { sprinkler } from './sprinkler';
 import { tent } from './tent';
 import { trampoline } from './trampoline';
@@ -73,4 +74,5 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   tent,
   handheld,
   flashlight,
+  snowmerge,
 };

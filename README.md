@@ -80,8 +80,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind ins Zelt ziehen, Zelt antippen | Kind verschwindet, guckt heraus, kommt heraus |
 | Taschenlampe antippen / aufs Kind ziehen | Licht an und aus / Kind hält sie |
 | Sonne bzw. Mond antippen | nächste Tageszeit: Morgen → Mittag → Abend → Nacht |
-| Wolke antippen | nächstes Wetter: Sonne → bewölkt → Regen (danach Regenbogen) → Wind |
+| Wolke antippen | nächstes Wetter: Sonne → bewölkt → Regen (danach Regenbogen) → Wind → Schnee |
 | Kind bei Regen in eine Pfütze ziehen | es spritzt |
+| Bei Schnee auf die Wiese tippen | Schneeball; drei Schneebälle aufeinander = Schneemann |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

@@ -1,0 +1,14 @@
+// Feste Spielauflösung. Phaser skaliert das Ganze auf jedes Tablet/Handy (Querformat).
+export const GAME_WIDTH = 1920;
+export const GAME_HEIGHT = 1080;
+
+// Ab dieser Höhe beginnt die Wiese. Figuren und Gegenstände landen immer darunter.
+export const GROUND_TOP = 700;
+export const GROUND_MIN_Y = GROUND_TOP + 40;
+export const GROUND_MAX_Y = GAME_HEIGHT - 20;
+
+// Ab wie vielen Pixeln Fingerbewegung ein Tippen zum Ziehen wird.
+export const DRAG_THRESHOLD = 12;
+
+// Tiefe für Objekte, die gerade gezogen werden (immer ganz vorne).
+export const DEPTH_DRAGGING = 10_000;

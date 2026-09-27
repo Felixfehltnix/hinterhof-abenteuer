@@ -20,6 +20,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   und werden in `BootScene.preload()` unter demselben Texture-Key geladen.
 - Code-Kommentare auf Deutsch, Bezeichner auf Englisch.
 
+## Kinder
+- Alle Kinder stehen in `src/data/characters.ts`, wer beim Start da ist in `PLACED_KIDS`
+  (`src/data/playground.ts`). Die übrigen holt man durchs Gartentor.
+- Texturen: `kid-<id>` (ganze Figur) und `portrait-<id>` (Kopf fürs Tor),
+  Platzhalter in `src/scenes/placeholders/kids.ts`.
+- Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
+  Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
+
 ## So fügt man ein Spielzeug hinzu
 1. Eintrag in `TOYS` in `src/data/toys.ts`: `id` (zugleich Texture-Key), `width`/`height`,
    `behaviors` (Bausteine) und optional `params` (Abweichungen von `DEFAULT_TOY_PARAMS`,

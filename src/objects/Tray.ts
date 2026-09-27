@@ -29,6 +29,8 @@ const HEIGHT = 200;
 const SLOT = 175;
 const ICON = 140;
 const PADDING = 30;
+// Steiler als ca. 35° nach oben = herausziehen (großzügig, Kinder ziehen oft schräg).
+const PULL_SLOPE = 0.7;
 
 type Gesture =
   | { kind: 'pending'; item?: string; startX: number; startY: number }
@@ -168,8 +170,8 @@ export class Tray {
       const dy = p.y - g.startY;
       if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
 
-      if (-dy > Math.abs(dx)) {
-        // Senkrecht nach oben: Symbol herausnehmen.
+      if (-dy > Math.abs(dx) * PULL_SLOPE) {
+        // Nach oben (auch schräg): Symbol herausnehmen. Nur flaches Wischen blättert.
         const session =
           g.item && !(this.opts.isDisabled?.(g.item) ?? false) ? this.opts.pull(g.item, p) : null;
         if (session) {

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
+import { drawKid, drawPortrait, KID_HEIGHT, KID_WIDTH, PORTRAIT_SIZE } from './placeholders/kids';
 import { TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -18,34 +19,35 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    CHARACTERS.forEach((c) =>
-      this.makeTexture(`kid-${c.id}`, 140, 240, (g) => {
-        // Beine
-        g.fillStyle(c.pants);
-        g.fillRoundedRect(42, 170, 24, 70, 8);
-        g.fillRoundedRect(74, 170, 24, 70, 8);
-        // Arme
-        g.fillStyle(c.skin);
-        g.fillRoundedRect(14, 100, 22, 70, 10);
-        g.fillRoundedRect(104, 100, 22, 70, 10);
-        // Körper
-        g.fillStyle(c.shirt);
-        g.fillRoundedRect(30, 92, 80, 92, 18);
-        // Haare + Gesicht
-        g.fillStyle(c.hair);
-        g.fillCircle(70, 50, 48);
-        g.fillStyle(c.skin);
-        g.fillCircle(70, 62, 40);
-        // Augen + Lächeln
-        g.fillStyle(0x222222);
-        g.fillCircle(56, 60, 5);
-        g.fillCircle(84, 60, 5);
-        g.lineStyle(4, 0x222222);
-        g.beginPath();
-        g.arc(70, 72, 14, 0.15 * Math.PI, 0.85 * Math.PI, false);
-        g.strokePath();
-      }),
-    );
+    CHARACTERS.forEach((c) => {
+      this.makeTexture(`kid-${c.id}`, KID_WIDTH * c.size, KID_HEIGHT * c.size, (g) => drawKid(g, c));
+      this.makeTexture(`portrait-${c.id}`, PORTRAIT_SIZE, PORTRAIT_SIZE, (g) => drawPortrait(g, c));
+    });
+
+    this.makeTexture('gate', 200, 150, (g) => {
+      // Pfosten
+      g.fillStyle(0x8d6e63);
+      g.fillRoundedRect(0, 0, 22, 150, 6);
+      g.fillRoundedRect(178, 0, 22, 150, 6);
+      // Durchgang (dahinter sieht man den Weg)
+      g.fillStyle(0xd7ccc8);
+      g.fillRect(22, 20, 156, 130);
+      g.fillStyle(0xbcaaa4);
+      g.fillRect(60, 60, 80, 90);
+    });
+
+    this.makeTexture('gate-door', 156, 124, (g) => {
+      g.fillStyle(0xe9c46a);
+      for (let x = 0; x < 156; x += 26) g.fillRoundedRect(x + 2, 0, 22, 124, { tl: 11, tr: 11, bl: 0, br: 0 });
+      g.fillStyle(0xd4a373);
+      g.fillRect(0, 30, 156, 14);
+      g.fillRect(0, 88, 156, 14);
+      // Herz
+      g.fillStyle(0xef476f);
+      g.fillCircle(70, 62, 10);
+      g.fillCircle(86, 62, 10);
+      g.fillTriangle(61, 66, 95, 66, 78, 84);
+    });
 
     this.makeTexture('slide', 400, 420, (g) => {
       // Leiter

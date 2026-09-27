@@ -1,27 +1,26 @@
 import Phaser from 'phaser';
 import {
-  DEPTH_DRAGGING,
   DRAG_THRESHOLD,
   GAME_HEIGHT,
   GAME_WIDTH,
-  GROUND_MAX_Y,
-  GROUND_MIN_Y,
   GROUND_TOP,
   MAX_OBJECTS,
 } from '../config';
-import { CHARACTERS } from '../data/characters';
-import { EQUIPMENT, PLACED_TOYS, TOY_BOX } from '../data/playground';
+import { getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
+import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
 import { getToyDef, type ToyDef } from '../data/toys';
 import { createEquipment, type Equipment } from '../objects/Equipment';
+import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 
 export class PlaygroundScene extends Phaser.Scene {
   private equipment: Equipment[] = [];
-  private kids: Kid[] = [];
+  private readonly kids = new Set<Kid>();
   private readonly toys = new Set<Toy>();
   private toyBox!: ToyBox;
+  private gate!: GardenGate;
 
   constructor() {
     super('Playground');
@@ -31,7 +30,8 @@ export class PlaygroundScene extends Phaser.Scene {
     this.drawBackground();
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
-    this.kids = CHARACTERS.map((def) => new Kid(this, def));
+    this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
+    PLACED_KIDS.forEach((k) => this.spawnKid(getCharacterDef(k.kid), k.x, k.y));
     PLACED_TOYS.forEach((t) => this.spawnToy(getToyDef(t.toy), t.x, t.y));
     this.toyBox = new ToyBox(this, TOY_BOX.x, TOY_BOX.y);
 
@@ -46,7 +46,7 @@ export class PlaygroundScene extends Phaser.Scene {
 
   /** Legt ein neues Spielzeug auf die Wiese. null, wenn die Obergrenze erreicht ist. */
   spawnToy(def: ToyDef, x: number, y: number): Toy | null {
-    if (this.toys.size + this.kids.length >= MAX_OBJECTS) return null;
+    if (this.isFull()) return null;
     const toy = new Toy(this, def, x, y);
     this.toys.add(toy);
     return toy;
@@ -63,9 +63,52 @@ export class PlaygroundScene extends Phaser.Scene {
     else toy.handleDragEnd(pointer);
   }
 
+  // --- Kinder auf der Wiese -----------------------------------------------
+
+  /** Holt ein Kind auf die Wiese. null, wenn es schon da ist oder die Obergrenze erreicht ist. */
+  spawnKid(def: CharacterDef, x: number, y: number): Kid | null {
+    if (this.isFull() || this.hasKid(def.id as CharacterId)) return null;
+    const kid = new Kid(this, def, x, y);
+    this.kids.add(kid);
+    this.gate?.refresh();
+    return kid;
+  }
+
+  hasKid(id: CharacterId): boolean {
+    for (const kid of this.kids) if (kid.def.id === id) return true;
+    return false;
+  }
+
+  /** Kind zählt nicht mehr zur Wiese (geht gerade nach Hause). */
+  forgetKid(kid: Kid): void {
+    this.kids.delete(kid);
+    this.gate.refresh();
+  }
+
+  /** Ein gezogenes Kind wurde losgelassen: nach Hause, auf ein Spielgerät oder auf die Wiese. */
+  releaseKid(kid: Kid, pointer: Phaser.Input.Pointer, arriving = false): void {
+    kid.endDrag();
+    if (this.gate.accepts(pointer.x, pointer.y)) {
+      this.gate.sendHome(kid);
+      return;
+    }
+    const spot = this.equipment.find((e) => e.accepts(kid, kid.x, kid.y));
+    if (spot) {
+      spot.use(kid);
+      return;
+    }
+    // Neu angekommene Kinder freuen sich mit einem Hüpfer.
+    kid.settle(arriving ? () => kid.hop() : undefined);
+  }
+
+  private isFull(): boolean {
+    return this.toys.size + this.kids.size >= MAX_OBJECTS;
+  }
+
   /** Schließt offene Leisten (Spielzeugkiste, Gartentor). */
   closeInventories(): void {
     this.toyBox?.close();
+    this.gate?.close();
   }
 
   // --- Eingabe -------------------------------------------------------------
@@ -78,18 +121,14 @@ export class PlaygroundScene extends Phaser.Scene {
         obj.handleDragStart();
         return;
       }
-      if (!(obj instanceof Kid)) return;
-      this.tweens.killTweensOf(obj);
-      obj.seatedOn?.unseat(obj);
-      obj.mode = 'dragging';
-      obj.setRotation(0).setScale(1.08).setDepth(DEPTH_DRAGGING);
+      if (obj instanceof Kid) obj.handleDragStart();
     });
 
     this.input.on(
       'drag',
       (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
         if (obj instanceof Toy) obj.handleDrag(p, dragX, dragY);
-        else if (obj instanceof Kid) obj.setPosition(dragX, dragY);
+        else if (obj instanceof Kid) obj.handleDrag(p, dragX, dragY);
       },
     );
 
@@ -98,15 +137,7 @@ export class PlaygroundScene extends Phaser.Scene {
         this.releaseToy(obj, p);
         return;
       }
-      if (!(obj instanceof Kid)) return;
-      obj.setScale(1);
-      obj.mode = 'idle';
-      const spot = this.equipment.find((e) => e.accepts(obj, obj.x, obj.y));
-      if (spot) {
-        spot.use(obj);
-        return;
-      }
-      this.settle(obj);
+      if (obj instanceof Kid) this.releaseKid(obj, p);
     });
 
     // Tippen auf eine freie Stelle schließt offene Leisten.
@@ -119,29 +150,6 @@ export class PlaygroundScene extends Phaser.Scene {
       if (pointer.getDistance() >= DRAG_THRESHOLD) return;
       const onTap: unknown = obj.getData('onTap');
       if (typeof onTap === 'function') onTap();
-    });
-  }
-
-  /** Lässt ein Kind auf die Wiese fallen, falls es in der Luft losgelassen wurde. */
-  private settle(obj: Kid): void {
-    obj.x = Phaser.Math.Clamp(obj.x, 60, GAME_WIDTH - 60);
-    const targetY = Phaser.Math.Clamp(obj.y, GROUND_MIN_Y, GROUND_MAX_Y);
-
-    if (obj.y >= targetY) {
-      obj.y = targetY;
-      obj.setDepth(obj.y);
-      return;
-    }
-
-    const fall = targetY - obj.y;
-    this.tweens.add({
-      targets: obj,
-      y: targetY,
-      duration: 250 + fall * 0.8,
-      ease: 'Bounce.easeOut',
-      onUpdate: () => {
-        obj.setDepth(obj.y);
-      },
     });
   }
 

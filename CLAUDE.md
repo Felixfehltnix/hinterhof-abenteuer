@@ -16,6 +16,9 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Sterne), liegt darüber (`DEPTH_LIGHTS`, `DEPTH_SKY_LIGHTS`), alles andere darunter –
   auch gezogene Objekte (`DEPTH_DRAGGING` < `DEPTH_TINT`). Himmel, Sonne, Mond und Wolken
   zeichnet der DayCycle, die Szene nur Zaun und Wiese.
+- Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
+  Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
+  keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
 - Inhalte (Spielgeräte, Gegenstände, Figuren) stehen als Daten in `src/data/`.
   Neues Zeug zuerst dort anlegen, Verhalten in `src/objects/`.
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,

@@ -244,8 +244,9 @@ export class DayCycle {
         tint: lerpColor(look.tint, lerpColor(0xc4c8d4, look.tint, 0.5), w),
         cloudTint: lerpColor(look.cloudTint, 0xa0a8b8, w),
         sunAlpha: look.sunAlpha * (1 - w * 0.8),
-        starsAlpha: look.starsAlpha * (1 - w),
-        moonAlpha: look.moonAlpha * (1 - w * 0.7),
+        // Bei Regen sind die Sterne weg und der Mond nur noch schwach hinter den Wolken
+        starsAlpha: look.starsAlpha * Math.max(0, 1 - w * 1.6),
+        moonAlpha: look.moonAlpha * (1 - w * 0.85),
       };
     }
     this.apply(look);

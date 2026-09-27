@@ -19,6 +19,7 @@ import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
 import { DayCycle } from '../world/DayCycle';
+import { Weather } from '../world/Weather';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
 
 /** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
@@ -38,6 +39,8 @@ export class PlaygroundScene extends Phaser.Scene {
   garden!: Garden;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
+  /** Wetter (Regen, Pfützen, Regenbogen) */
+  weather!: Weather;
   private readonly worldStates = new Map<string, WorldState>();
   private savedWorld: Record<string, unknown> = {};
 
@@ -62,6 +65,7 @@ export class PlaygroundScene extends Phaser.Scene {
 
     this.garden = new Garden(this);
     this.dayCycle = new DayCycle(this);
+    this.weather = new Weather(this, this.dayCycle);
 
     this.setupInput();
     new AutoSave(this, () => this.snapshot());
@@ -208,8 +212,11 @@ export class PlaygroundScene extends Phaser.Scene {
       spot.use(kid);
       return;
     }
-    // Neu angekommene Kinder freuen sich mit einem Hüpfer.
-    kid.settle(arriving ? () => kid.hop() : undefined);
+    kid.settle(() => {
+      // Neu angekommene Kinder freuen sich mit einem Hüpfer; in einer Pfütze spritzt es.
+      this.weather.onKidLanded(kid);
+      if (arriving) kid.hop();
+    });
   }
 
   private isFull(): boolean {

@@ -28,6 +28,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
 
+## Speichern
+- Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
+  `AutoSave` vergleicht alle 250 ms den Stand und schreibt 500 ms nach der letzten Änderung.
+- Gespeichert werden Kinder und Spielzeuge mit ihrer `restPosition()` (laufende Aktionen
+  zählen nicht) sowie Weltzustände, die per `scene.registerWorldState(key, …)` angemeldet sind.
+- Format ändern: `SAVE_VERSION` erhöhen. Unbekannte Versionen und kaputte Daten führen zur
+  Standard-Wiese (`PLACED_KIDS`/`PLACED_TOYS`), nie zu einem Absturz.
+
 ## So fügt man ein Spielzeug hinzu
 1. Eintrag in `TOYS` in `src/data/toys.ts`: `id` (zugleich Texture-Key), `width`/`height`,
    `behaviors` (Bausteine) und optional `params` (Abweichungen von `DEFAULT_TOY_PARAMS`,

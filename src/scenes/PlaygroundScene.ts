@@ -3,17 +3,28 @@ import {
   DRAG_THRESHOLD,
   GAME_HEIGHT,
   GAME_WIDTH,
+  GROUND_MAX_Y,
+  GROUND_MIN_Y,
   GROUND_TOP,
   MAX_OBJECTS,
 } from '../config';
-import { getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
+import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
 import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
-import { getToyDef, type ToyDef } from '../data/toys';
+import { getToyDef, TOYS, type ToyDef } from '../data/toys';
 import { createEquipment, type Equipment } from '../objects/Equipment';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
+import { AutoSave } from '../save/AutoSave';
+import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
+
+/** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
+export interface WorldState {
+  save(): unknown;
+  /** Bekommt den gespeicherten Wert – kann alles sein, selbst prüfen! */
+  load(value: unknown): void;
+}
 
 export class PlaygroundScene extends Phaser.Scene {
   private equipment: Equipment[] = [];
@@ -21,6 +32,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private readonly toys = new Set<Toy>();
   private toyBox!: ToyBox;
   private gate!: GardenGate;
+  private readonly worldStates = new Map<string, WorldState>();
+  private savedWorld: Record<string, unknown> = {};
 
   constructor() {
     super('Playground');
@@ -31,15 +44,56 @@ export class PlaygroundScene extends Phaser.Scene {
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
-    PLACED_KIDS.forEach((k) => this.spawnKid(getCharacterDef(k.kid), k.x, k.y));
-    PLACED_TOYS.forEach((t) => this.spawnToy(getToyDef(t.toy), t.x, t.y));
     this.toyBox = new ToyBox(this, TOY_BOX.x, TOY_BOX.y);
 
+    const save = loadSave();
+    if (save) this.restore(save);
+    else {
+      // Allererster Start: die Standard-Wiese.
+      PLACED_KIDS.forEach((k) => this.spawnKid(getCharacterDef(k.kid), k.x, k.y));
+      PLACED_TOYS.forEach((t) => this.spawnToy(getToyDef(t.toy), t.x, t.y));
+    }
+
     this.setupInput();
+    new AutoSave(this, () => this.snapshot());
   }
 
   update(): void {
     this.equipment.forEach((e) => e.update());
+  }
+
+  // --- Speichern ----------------------------------------------------------
+
+  /** Meldet einen Weltzustand zum Mitspeichern an; ein gespeicherter Wert wird sofort geladen. */
+  registerWorldState(key: string, state: WorldState): void {
+    this.worldStates.set(key, state);
+    if (key in this.savedWorld) state.load(this.savedWorld[key]);
+  }
+
+  private snapshot(): SaveData {
+    const pos = (p: { x: number; y: number }) => ({ x: Math.round(p.x), y: Math.round(p.y) });
+    const world: Record<string, unknown> = {};
+    for (const [key, state] of this.worldStates) world[key] = state.save();
+    return {
+      version: SAVE_VERSION,
+      kids: [...this.kids].map((k) => ({ id: k.def.id, ...pos(k.restPosition()) })),
+      toys: [...this.toys].map((t) => ({ id: t.def.id, ...pos(t.restPosition()) })),
+      world,
+    };
+  }
+
+  private restore(save: SaveData): void {
+    const x = (v: number) => Phaser.Math.Clamp(v, 60, GAME_WIDTH - 60);
+    const y = (v: number) => Phaser.Math.Clamp(v, GROUND_MIN_Y, GROUND_MAX_Y);
+    for (const k of save.kids) {
+      const def = CHARACTERS.find((c) => c.id === k.id);
+      if (def) this.spawnKid(def, x(k.x), y(k.y));
+    }
+    for (const t of save.toys) {
+      const def = TOYS.find((d) => d.id === t.id);
+      if (def) this.spawnToy(def, x(t.x), y(t.y));
+    }
+    this.savedWorld = save.world;
   }
 
   // --- Spielzeuge auf der Wiese -------------------------------------------

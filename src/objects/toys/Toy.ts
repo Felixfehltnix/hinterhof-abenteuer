@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MIN_TOUCH_SIZE } from '../../config';
+import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, MIN_TOUCH_SIZE } from '../../config';
 import { DEFAULT_TOY_PARAMS, type ToyDef, type ToyParams } from '../../data/toys';
 import { BEHAVIORS, type Release, type ToyBehavior } from './behaviors';
 import { ToyPhysics } from './ToyPhysics';
@@ -65,6 +65,15 @@ export class Toy extends Phaser.GameObjects.Image {
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
     // Auch ohne Wurf: fällt aus der Luft zurück auf die Wiese.
     this.physics.launch(release.vx, release.vy);
+  }
+
+  /** Position fürs Speichern: ein fliegendes Spielzeug liegt schon dort, wo es landen wird. */
+  restPosition(): { x: number; y: number } {
+    const y = this.physics.active ? this.physics.groundY : this.y;
+    return {
+      x: Phaser.Math.Clamp(this.x, this.width / 2, GAME_WIDTH - this.width / 2),
+      y: Phaser.Math.Clamp(y, GROUND_MIN_Y, GROUND_MAX_Y),
+    };
   }
 
   preUpdate(_time: number, delta: number): void {

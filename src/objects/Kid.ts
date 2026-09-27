@@ -13,6 +13,8 @@ export class Kid extends Phaser.GameObjects.Image {
   readonly def: CharacterDef;
   mode: KidMode = 'idle';
   seatedOn?: Seat;
+  /** Wo das Kind steht, wenn eine laufende Aktion (Schaukeln, Rutschen) abbricht. */
+  exitPoint?: { x: number; y: number };
 
   constructor(scene: Phaser.Scene, def: CharacterDef, x: number, y: number) {
     super(scene, x, y, `kid-${def.id}`);
@@ -78,6 +80,15 @@ export class Kid extends Phaser.GameObjects.Image {
       yoyo: true,
       ease: 'Quad.easeOut',
     });
+  }
+
+  /** Position fürs Speichern: laufende Aktionen zählen nicht, das Kind steht neben dem Gerät. */
+  restPosition(): { x: number; y: number } {
+    const p = this.mode !== 'idle' && this.exitPoint ? this.exitPoint : this;
+    return {
+      x: Phaser.Math.Clamp(p.x, 60, GAME_WIDTH - 60),
+      y: Phaser.Math.Clamp(p.y, GROUND_MIN_Y, GROUND_MAX_Y),
+    };
   }
 
   /** Winkt zum Abschied (wackelt hin und her). */

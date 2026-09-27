@@ -1,3 +1,4 @@
+import type { CharacterId } from './characters';
 import type { ToyId } from './toys';
 
 // Die Spielwiese im Hinterhof – komplett im Code definiert.
@@ -33,3 +34,18 @@ export const PLACED_TOYS: PlacedToy[] = [
 
 // Die Spielzeugkiste steht fest unten links (Fußpunkt).
 export const TOY_BOX = { x: 150, y: 1050 };
+
+// Kinder, die beim Start auf der Wiese sind. Alle anderen kommen durchs Gartentor.
+export interface PlacedKid {
+  kid: CharacterId;
+  x: number;
+  y: number;
+}
+
+export const PLACED_KIDS: PlacedKid[] = [
+  { kid: 'kind-a', x: 460, y: 960 },
+  { kid: 'kind-b', x: 1700, y: 990 },
+];
+
+// Das Gartentor im Zaun rechts (Fußpunkt auf der Zaunlinie).
+export const GARDEN_GATE = { x: 1790, y: 700 };

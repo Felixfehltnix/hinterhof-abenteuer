@@ -57,6 +57,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |
 | Spielzeug auf Kiste oder Leiste ziehen | wird weggeräumt |
+| Gartentor (rechts im Zaun) antippen | Leiste mit allen Kindern geht auf |
+| Kind aus der Leiste ziehen | kommt auf die Wiese und hüpft vor Freude |
+| Kind aufs Tor ziehen | winkt und geht nach Hause |
 
 ## Projektstruktur
 
@@ -76,7 +79,8 @@ public/assets/         hier kommen später die echten Grafiken hin
 
 1. PNG mit transparentem Hintergrund nach `public/assets/` legen.
 2. In `BootScene.preload()` unter demselben Key laden, z. B.
-   `this.load.image('kid-kind-a', 'assets/kinder/kind-a.png')`.
+   `this.load.image('kid-kind-a', 'assets/kinder/kind-a.png')`. Für jedes Kind gibt es
+   zusätzlich ein Porträt (nur der Kopf) fürs Gartentor: `portrait-kind-a`.
 3. Fertig – der Platzhalter wird dann automatisch übersprungen.
 
 Bei Schaukel und Rutsche hängen Seil- bzw. Rutschpunkte an der Grafik

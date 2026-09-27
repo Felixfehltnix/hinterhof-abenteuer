@@ -146,6 +146,59 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.lineStyle(2, 0xbde0fe, 0.8);
     g.strokeCircle(30, 26, 15);
   },
+
+  hoop: (g) => {
+    // Standfuß und Stange
+    g.fillStyle(0x495057);
+    g.fillRoundedRect(45, 312, 80, 18, 6);
+    g.fillRect(78, 90, 14, 225);
+    // Brett
+    g.fillStyle(0xffffff);
+    g.fillRoundedRect(25, 0, 120, 95, 8);
+    g.lineStyle(4, 0xe63946);
+    g.strokeRect(60, 40, 50, 38);
+    g.lineStyle(3, 0xadb5bd);
+    g.strokeRoundedRect(25, 0, 120, 95, 8);
+    // Ring
+    g.lineStyle(6, 0xf77f00);
+    g.strokeEllipse(85, 108, 96, 18);
+  },
+
+  goal: (g) => {
+    // Netz
+    g.fillStyle(0xffffff, 0.25);
+    g.fillRect(12, 12, 276, 158);
+    g.lineStyle(2, 0xffffff, 0.8);
+    for (let x = 12; x <= 288; x += 23) g.lineBetween(x, 12, x, 170);
+    for (let y = 12; y <= 170; y += 20) g.lineBetween(12, y, 288, y);
+    // Pfosten und Latte
+    g.fillStyle(0xf8f9fa);
+    g.fillRect(0, 0, 12, 170);
+    g.fillRect(288, 0, 12, 170);
+    g.fillRect(0, 0, 300, 12);
+    g.lineStyle(2, 0xadb5bd);
+    g.strokeRect(0, 0, 300, 12);
+  },
+
+  cans: (g) => {
+    g.fillStyle(0xa0522d);
+    g.fillRoundedRect(0, 0, 170, 60, 8);
+    g.lineStyle(4, 0x7f3f1a);
+    g.lineBetween(6, 20, 164, 20);
+    g.lineBetween(6, 40, 164, 40);
+    g.strokeRoundedRect(0, 0, 170, 60, 8);
+  },
+
+  pins: (g) => {
+    g.fillStyle(0xe9c46a);
+    g.fillEllipse(120, 20, 236, 28);
+    g.lineStyle(3, 0xbc6c25);
+    g.strokeEllipse(120, 20, 236, 28);
+    g.fillStyle(0xbc6c25);
+    g.fillCircle(56, 16, 3);
+    g.fillCircle(120, 16, 3);
+    g.fillCircle(184, 16, 3);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

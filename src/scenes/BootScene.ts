@@ -132,6 +132,41 @@ export class BootScene extends Phaser.Scene {
       g.fillEllipse(20, 18, 12, 8);
     });
 
+    this.makeTexture('star', 28, 28, (g) => {
+      g.fillStyle(0xffd166);
+      g.fillPoints(starPoints(14, 14, 13, 6), true);
+    });
+
+    this.makeTexture('can', 40, 56, (g) => {
+      g.fillStyle(0xadb5bd);
+      g.fillRoundedRect(0, 0, 40, 56, 6);
+      g.fillStyle(0xe63946);
+      g.fillRect(0, 12, 40, 32);
+      g.fillStyle(0xffffff);
+      g.fillCircle(20, 28, 8);
+    });
+
+    this.makeTexture('pin', 30, 72, (g) => {
+      g.fillStyle(0xffffff);
+      g.fillEllipse(15, 50, 28, 42);
+      g.fillCircle(15, 14, 11);
+      g.fillRect(10, 18, 10, 18);
+      g.fillStyle(0xe63946);
+      g.fillRect(9, 24, 12, 4);
+      g.fillRect(9, 31, 12, 4);
+    });
+
+    this.makeTexture('hoop-net', 96, 60, (g) => {
+      g.lineStyle(3, 0xffffff, 0.95);
+      for (let i = 0; i <= 6; i++) {
+        g.lineBetween(4 + i * 14.6, 0, 20 + i * 9.3, 60);
+      }
+      for (let y = 15; y <= 60; y += 15) {
+        const inset = (y / 60) * 16;
+        g.lineBetween(4 + inset, y, 92 - inset, y);
+      }
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

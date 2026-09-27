@@ -18,7 +18,14 @@ export type BehaviorId =
   | 'float'
   | 'holdable'
   | 'pop'
-  | 'bubbles';
+  | 'bubbles'
+  | 'hoop'
+  | 'goal'
+  | 'cans'
+  | 'pins';
+
+/** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
+export type ToyTag = 'ball';
 
 export interface ToyParams {
   /** Schwerkraft in px/s². */
@@ -65,6 +72,7 @@ export interface ToyDef {
   width: number;
   height: number;
   behaviors: readonly BehaviorId[];
+  tags?: readonly ToyTag[];
   /** Abweichungen von DEFAULT_TOY_PARAMS. */
   params?: Partial<ToyParams>;
 }
@@ -72,6 +80,7 @@ export interface ToyDef {
 export const TOYS = [
   {
     id: 'ball',
+    tags: ['ball'],
     width: 80,
     height: 80,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
@@ -87,6 +96,7 @@ export const TOYS = [
   {
     // Flacher Schuss, rollt weit über die Wiese.
     id: 'football',
+    tags: ['ball'],
     width: 76,
     height: 76,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
@@ -95,6 +105,7 @@ export const TOYS = [
   {
     // Hoher Bogen, springt ein paarmal nach.
     id: 'basketball',
+    tags: ['ball'],
     width: 84,
     height: 84,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
@@ -103,6 +114,7 @@ export const TOYS = [
   {
     // Groß und leicht: fliegt langsam und schwebt lange.
     id: 'beachball',
+    tags: ['ball'],
     width: 130,
     height: 130,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
@@ -155,6 +167,38 @@ export const TOYS = [
     height: 120,
     behaviors: ['draggable', 'fling', 'bubbles'],
     params: { bounce: 0.2, rollFriction: 8 },
+  },
+  {
+    // Ball fliegt oder fällt durch den Ring: Netz wackelt, Sterne sprühen.
+    id: 'hoop',
+    width: 170,
+    height: 330,
+    behaviors: ['draggable', 'hoop'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Ball rollt ins Tor: Netz beult sich, alle Kinder jubeln.
+    id: 'goal',
+    width: 300,
+    height: 170,
+    behaviors: ['draggable', 'goal'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // 6 Dosen auf einer Kiste. Ball trifft: purzeln. Antippen: neu aufbauen.
+    id: 'cans',
+    width: 170,
+    height: 60,
+    behaviors: ['draggable', 'cans'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // 6 Kegel auf einer Matte. Ball rollt hinein: fallen um. Antippen: aufstellen.
+    id: 'pins',
+    width: 240,
+    height: 34,
+    behaviors: ['draggable', 'pins'],
+    params: { bounce: 0, rollFriction: 20 },
   },
 ] as const satisfies readonly ToyDef[];
 

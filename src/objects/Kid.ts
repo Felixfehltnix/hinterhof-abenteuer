@@ -165,6 +165,20 @@ export class Kid extends Phaser.GameObjects.Image {
     });
   }
 
+  /** Böe: lehnt sich gegen den Wind und hält sich fest (kurzes Zittern). */
+  brace(windDir: number): void {
+    if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;
+    const lean = -windDir * 8;
+    this.scene.tweens.chain({
+      targets: this,
+      tweens: [
+        { angle: lean, duration: 250, ease: 'Sine.easeOut' },
+        { angle: lean - windDir * 3, duration: 70, yoyo: true, repeat: 4 },
+        { angle: 0, duration: 350, ease: 'Sine.easeInOut' },
+      ],
+    });
+  }
+
   /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */
   kick(dir: number): void {
     if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;

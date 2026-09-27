@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { EquipmentDef } from '../data/playground';
+import { windStrength } from '../world/environment';
 import type { Kid, Seat } from './Kid';
 
 /**
@@ -99,7 +100,13 @@ export class Swing extends Equipment implements Seat {
   }
 
   override update(): void {
-    if (!this.rider) return;
+    if (!this.rider) {
+      // Leere Schaukel wiegt sich im Wind
+      if (this.scene.tweens.isTweening(this.ropes)) return;
+      const target = Math.sin(this.scene.time.now / 700) * 0.12 * Math.min(1.5, windStrength());
+      this.ropes.rotation += (target - this.ropes.rotation) * 0.05;
+      return;
+    }
     const r = this.ropes.rotation;
     const L = Swing.ROPE_LENGTH;
     this.rider
@@ -178,9 +185,11 @@ export class Slide extends Equipment {
 // ---------------------------------------------------------------------------
 
 export class Tree extends Equipment {
+  private readonly image: Phaser.GameObjects.Image;
+
   constructor(scene: Phaser.Scene, def: EquipmentDef) {
     super(scene, def);
-    const image = scene.add.image(def.x, def.y, 'tree').setOrigin(0.5, 1).setDepth(def.y);
+    const image = (this.image = scene.add.image(def.x, def.y, 'tree').setOrigin(0.5, 1).setDepth(def.y));
     image.setInteractive({ useHandCursor: true });
     image.setData('onTap', () => {
       if (scene.tweens.isTweening(image)) return;
@@ -195,6 +204,14 @@ export class Tree extends Equipment {
         },
       });
     });
+  }
+
+  /** Im Wind wiegt sich der Baum (um den Stamm unten). */
+  override update(): void {
+    if (this.scene.tweens.isTweening(this.image)) return;
+    const w = Math.min(1.6, windStrength());
+    const target = w > 0.01 ? 1.5 * w + Math.sin(this.scene.time.now / 500) * 1.5 * w : 0;
+    this.image.angle += (target - this.image.angle) * 0.05;
   }
 }
 

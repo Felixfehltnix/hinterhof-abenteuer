@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, MIN_TOUCH_SIZE } from '../../config';
 import { DEFAULT_TOY_PARAMS, type ToyDef, type ToyParams } from '../../data/toys';
 import { BEHAVIORS, type Release, type ToyBehavior } from './behaviors';
+import { environment } from '../../world/environment';
 import type { Kid } from '../Kid';
 import { ToyPhysics } from './ToyPhysics';
 
@@ -106,6 +107,16 @@ export class Toy extends Phaser.GameObjects.Image {
   }
 
   preUpdate(_time: number, delta: number): void {
+    // Wind weckt leichte, liegende Spielzeuge (Schwebendes bewegt sich selbst).
+    if (
+      !this.physics.active &&
+      !this.isDragging &&
+      !this.heldBy &&
+      Math.abs(environment.wind * this.params.windFactor) > 40 &&
+      !this.def.behaviors.some((b) => b === 'float' || b === 'kite')
+    ) {
+      this.physics.launch(0, 0);
+    }
     this.physics.update(delta);
     this.behaviors.forEach((b) => b.update?.(delta));
   }

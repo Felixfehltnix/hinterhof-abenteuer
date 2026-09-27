@@ -135,7 +135,7 @@ export const TOYS = [
     width: 130,
     height: 130,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
-    params: { bounce: 0.65, rollFriction: 2.5, spin: true, gravity: 900, airDrag: 0.7, kickSpeed: 320, kickLift: 750, throwFactor: 0.75 },
+    params: { bounce: 0.65, rollFriction: 2.5, spin: true, gravity: 900, airDrag: 0.7, kickSpeed: 320, kickLift: 750, throwFactor: 0.75, windFactor: 0.6 },
   },
   {
     // Werfen: gleitet waagerecht weit und sinkt am Ende sanft.

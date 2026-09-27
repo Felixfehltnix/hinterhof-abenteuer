@@ -4,7 +4,7 @@
 export type TimeOfDay = 'morning' | 'noon' | 'evening' | 'night';
 
 /** Wetterarten. Wind (#14) und Schnee (#15) kommen dazu. */
-export type WeatherKind = 'sunny' | 'cloudy' | 'rain';
+export type WeatherKind = 'sunny' | 'cloudy' | 'rain' | 'wind';
 
 export const environment = {
   /** Aktuelle Tageszeit (Ziel des gerade laufenden Übergangs). */
@@ -14,6 +14,11 @@ export const environment = {
   /** Wind in px/s² (positiv = nach rechts). Leichte Dinge driften damit mit. */
   wind: 0,
 };
+
+/** Wie stark es gerade weht, grob 0 (still) bis 1 (normaler Wind), bei Böen mehr. */
+export function windStrength(): number {
+  return Math.abs(environment.wind) / 250;
+}
 
 /** Regnet es gerade? */
 export function isRaining(): boolean {

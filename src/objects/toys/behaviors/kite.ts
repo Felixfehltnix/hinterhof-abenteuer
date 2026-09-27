@@ -1,3 +1,4 @@
+import { environment, windStrength } from '../../../world/environment';
 import { drawString } from '../string';
 import type { BehaviorFactory } from './types';
 
@@ -13,9 +14,12 @@ export const kite: BehaviorFactory = (toy) => {
   let anchor: { x: number; y: number } | undefined;
   let pos = { x: toy.x, y: toy.y };
   let line: Phaser.GameObjects.Graphics | undefined;
+  /** Bei Wind: Punkt am Boden, an dem die Schnur festhängt, während der Drachen von selbst steigt. */
+  let windAnchor: { x: number; y: number } | undefined;
 
   return {
     onDragStart: () => {
+      windAnchor = undefined;
       pos = { x: toy.x, y: toy.y };
       anchor = { x: toy.x, y: toy.y };
       line ??= toy.scene.add.graphics();
@@ -34,6 +38,32 @@ export const kite: BehaviorFactory = (toy) => {
     },
     update: (delta) => {
       const t = toy.scene.time.now / 1000;
+      // Wind: Der Drachen steigt von selbst an seiner Schnur (wenn ihn niemand hält).
+      const windy = windStrength() > 0.3;
+      if (windy && !toy.isDragging && !toy.heldBy) {
+        if (!windAnchor) {
+          windAnchor = { x: toy.x, y: toy.physics.active ? toy.physics.groundY : toy.y };
+          toy.physics.stop();
+          pos = { x: toy.x, y: toy.y };
+          line ??= toy.scene.add.graphics();
+        }
+        const dir = Math.sign(environment.wind) || 1;
+        const tx = windAnchor.x + dir * 90 + Math.sin(t * 2.6) * 30;
+        const ty = Math.max(toy.displayHeight + 10, windAnchor.y - 380 - windStrength() * 60 + Math.sin(t * 2) * 20);
+        const k = 1 - Math.exp(-1.2 * (delta / 1000));
+        pos = { x: pos.x + (tx - pos.x) * k, y: pos.y + (ty - pos.y) * k };
+        toy.setPosition(pos.x, pos.y).setAngle(Math.sin(t * 5) * 10).setDepth(windAnchor.y);
+        line!.setDepth(windAnchor.y - 1);
+        drawString(line!, windAnchor.x, windAnchor.y, toy.x, toy.y - 20, 40);
+        return;
+      }
+      if (windAnchor && !toy.isDragging) {
+        // Wind vorbei: sanft wieder herabsinken
+        const a = windAnchor;
+        windAnchor = undefined;
+        line?.clear();
+        if (!toy.heldBy) toy.physics.launch(0, 0, a.y);
+      }
       if (anchor && toy.isDragging && line) {
         const tx = anchor.x + RISE_X + Math.sin(t * 3) * 25;
         const ty = Math.max(toy.displayHeight + 10, anchor.y + RISE_Y + Math.sin(t * 2.3) * 15);

@@ -323,6 +323,13 @@ export class BootScene extends Phaser.Scene {
       });
     });
 
+    this.makeTexture('leaf', 26, 16, (g) => {
+      g.fillStyle(0xffffff);
+      g.fillEllipse(13, 8, 26, 14);
+      g.lineStyle(2, 0xdddddd);
+      g.lineBetween(2, 8, 24, 8);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

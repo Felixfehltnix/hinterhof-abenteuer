@@ -6,7 +6,7 @@ import type { DayCycle } from './DayCycle';
 import { environment, type WeatherKind } from './environment';
 
 /** Reihenfolge beim Antippen einer Wolke. Wind (#14) und Schnee (#15) werden hier eingereiht. */
-export const WEATHER_ORDER: WeatherKind[] = ['sunny', 'cloudy', 'rain'];
+export const WEATHER_ORDER: WeatherKind[] = ['sunny', 'cloudy', 'rain', 'wind'];
 
 interface WeatherLook {
   /** Wie grau Himmel und Welt werden (0..1). */
@@ -19,7 +19,15 @@ const LOOKS: Record<WeatherKind, WeatherLook> = {
   sunny: { grey: 0, clouds: 0 },
   cloudy: { grey: 0.4, clouds: 1 },
   rain: { grey: 0.75, clouds: 1 },
+  wind: { grey: 0.1, clouds: 0.7 },
 };
+
+// Wind (px/s²): Grundwind und Böen, die ab und zu kommen.
+const WIND_BASE = 250;
+const WIND_GUST = 350;
+// Wolken ziehen immer ein bisschen, bei Wind schneller (px/s pro px/s² Wind).
+const CLOUD_DRIFT = 6;
+const CLOUD_WIND = 0.25;
 
 // Pfützen auf der Wiese (Mitte, Fußpunkt), abseits vom Sandkasten.
 const PUDDLES = [
@@ -45,6 +53,9 @@ export class Weather {
   private readonly rain: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly puddles: { img: Phaser.GameObjects.Image; size: number }[];
   private readonly rainbow: Phaser.GameObjects.Image;
+  private readonly leaves: Phaser.GameObjects.Particles.ParticleEmitter;
+  private gust = 0;
+  private nextGust = 0;
 
   constructor(
     private readonly scene: PlaygroundScene,
@@ -86,6 +97,21 @@ export class Weather {
     });
     this.rain.setDepth(DEPTH_TINT - 10);
 
+    // Wind: Blätter wehen von links durchs Bild
+    this.leaves = scene.add.particles(-40, 0, 'leaf', {
+      y: { min: 80, max: 1000 },
+      speedX: { onEmit: () => 250 + environment.wind * 0.8 },
+      speedY: { min: -40, max: 60 },
+      rotate: { start: 0, end: 540 },
+      lifespan: 6000,
+      frequency: 180,
+      quantity: 1,
+      tint: [0x8ac926, 0x6a994e, 0xf4a259, 0xe9c46a],
+      scale: { min: 0.6, max: 1.1 },
+      emitting: false,
+    });
+    this.leaves.setDepth(DEPTH_TINT - 20);
+
     scene.registerWorldState('weather', {
       save: () => this.kind,
       load: (v) => {
@@ -111,6 +137,8 @@ export class Weather {
     environment.weather = kind;
     if (kind === 'rain') this.rain.start();
     else this.rain.stop();
+    if (kind === 'wind') this.leaves.start();
+    else this.leaves.stop();
     if (instant) {
       this.grey = LOOKS[kind].grey;
       this.cloudAlpha = LOOKS[kind].clouds;
@@ -138,6 +166,21 @@ export class Weather {
     this.splash(kid.x, kid.y);
     kid.giggle();
     this.scene.events.emit('sound', { kind: 'splash', x: kid.x });
+  }
+
+  /** Grundwind plus gelegentliche Böe; bei einer Böe halten sich alle Kinder fest. */
+  private updateWind(dt: number): void {
+    const now = this.scene.time.now;
+    const windy = this.kind === 'wind';
+    if (windy && now > this.nextGust) {
+      this.nextGust = now + Phaser.Math.Between(6000, 11000);
+      this.scene.tweens.add({ targets: this, gust: 1, duration: 500, yoyo: true, hold: 900, ease: 'Sine.easeInOut' });
+      this.scene.kidsOnMeadow().forEach((kid, i) => this.scene.time.delayedCall(300 + i * 60, () => kid.brace(1)));
+      this.scene.events.emit('sound', { kind: 'gust' });
+    }
+    const target = windy ? WIND_BASE + this.gust * WIND_GUST : 0;
+    environment.wind += (target - environment.wind) * (1 - Math.exp(-1.2 * dt));
+    if (Math.abs(environment.wind) < 1) environment.wind = 0;
   }
 
   private splash(x: number, y: number): void {
@@ -177,6 +220,13 @@ export class Weather {
     this.dayCycle.setWeatherGrey(this.grey);
     const cloudTint = this.dayCycle.clouds[0]?.tintTopLeft ?? 0xffffff;
     this.extraClouds.forEach((c) => c.setAlpha(this.cloudAlpha).setTint(cloudTint));
+
+    this.updateWind(dt);
+    const drift = CLOUD_DRIFT + Math.max(0, environment.wind) * CLOUD_WIND;
+    for (const c of [...this.dayCycle.clouds, ...this.extraClouds]) {
+      c.x += drift * dt;
+      if (c.x > GAME_WIDTH + c.displayWidth / 2 + 20) c.x = -c.displayWidth / 2 - 20;
+    }
 
     const raining = this.kind === 'rain';
     for (const p of this.puddles) {

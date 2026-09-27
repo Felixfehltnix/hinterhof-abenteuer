@@ -9,6 +9,8 @@ const MIN_BOUNCE_SPEED = 120;
 const MIN_ROLL_SPEED = 8;
 // Ab dieser waagerechten Geschwindigkeit (px/s) wirkt der volle Auftrieb (Frisbee).
 const LIFT_FULL_SPEED = 700;
+// Anteil des Windes, der am Boden noch schiebt.
+const GROUND_WIND = 0.5;
 
 /**
  * Einfache 2,5D-Bewegung für Spielzeuge: Das Spielzeug hat eine Bodenlinie (groundY,
@@ -75,7 +77,11 @@ export class ToyPhysics {
       this.z = 0;
       if (this.vz < -MIN_BOUNCE_SPEED) this.vz = -this.vz * p.bounce;
       else this.vz = 0;
-      if (this.vz === 0) this.vx *= Math.exp(-p.rollFriction * dt);
+      if (this.vz === 0) {
+        this.vx *= Math.exp(-p.rollFriction * dt);
+        // Leichtes rollt auch am Boden mit dem Wind
+        this.vx += environment.wind * p.windFactor * GROUND_WIND * dt;
+      }
       if (impact) this.landListeners.forEach((fn) => fn());
     }
 
@@ -99,6 +105,7 @@ export class ToyPhysics {
     if (p.spin) obj.rotation += (this.vx * dt) / half;
     obj.setPosition(x, this.groundY - this.z);
 
-    if (this.z === 0 && this.vz === 0 && Math.abs(this.vx) < MIN_ROLL_SPEED) this.stop();
+    const pushedByWind = Math.abs(environment.wind * p.windFactor) > 40;
+    if (this.z === 0 && this.vz === 0 && Math.abs(this.vx) < MIN_ROLL_SPEED && !pushedByWind) this.stop();
   }
 }

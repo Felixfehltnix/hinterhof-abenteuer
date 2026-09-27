@@ -1,5 +1,6 @@
 import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
 import type { Kid } from '../../Kid';
+import { windStrength } from '../../../world/environment';
 import { drawString } from '../string';
 import type { BehaviorFactory } from './types';
 
@@ -51,7 +52,8 @@ export const holdable: BehaviorFactory = (toy) => {
       }
       const hand = kid.handPoint();
       const t = toy.scene.time.now / 1000;
-      const sway = Math.sin(t * 1.6 + phase) * 14;
+      // Im Wind flattert es stärker
+      const sway = Math.sin(t * 1.6 * (1 + windStrength() * 0.5) + phase) * 14 * (1 + Math.min(1.5, windStrength()));
       const tx = hand.x + sway;
       const ty = Math.max(toy.displayHeight + 10, hand.y - toy.params.holdHeight + Math.sin(t * 2.1 + phase) * 6);
       // Weich hinterherziehen statt springen

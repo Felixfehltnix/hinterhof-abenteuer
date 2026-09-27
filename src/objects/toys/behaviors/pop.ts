@@ -9,6 +9,7 @@ export const pop: BehaviorFactory = (toy) => ({
   onTap: () => {
     const scene = toy.scene as PlaygroundScene;
     confetti(scene, toy.x, toy.y - toy.displayHeight * 0.6);
+    scene.events.emit('sound', { kind: 'pop', x: toy.x });
     scene.removeToy(toy);
   },
 });

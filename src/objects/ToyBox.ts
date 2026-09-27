@@ -83,6 +83,7 @@ export class ToyBox {
       onComplete: () => toy.destroy(),
     });
     this.sparkle(toy.x, toy.y - toy.height / 2);
+    this.scene.events.emit('sound', { kind: 'pop', x: toy.x });
     this.hop();
   }
 

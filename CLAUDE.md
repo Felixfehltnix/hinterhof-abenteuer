@@ -51,10 +51,23 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
 
-## Töne (vorbereitet)
-Noch gibt es keinen Ton. Alles, was klingen soll, sendet `scene.events.emit('sound', { kind, pitch?, x })`.
-Bisher: `honk`, `drum` (pitch 0), `xylophone` (pitch 0–7), `sprinkler-on`/`-off`, `click`, `peekaboo`.
-Eine spätere Tonausgabe muss nur auf `'sound'` hören.
+## Töne
+- Alles, was klingen soll, sendet `scene.events.emit('sound', { kind, pitch?, value?, voice?, x? })`
+  (Typ `SoundEvent` in `src/data/sounds.ts`). `x` ist die Weltposition (leichtes Stereo).
+- `src/audio/Sound.ts` (`scene.audio`) spielt dazu die Datei oder einen Platzhalter-Ton (WebAudio).
+  Ton gibt es erst nach dem ersten Tippen (AudioContext entsteht dann, ohne Knopf).
+  Höchstens 8 Töne gleichzeitig. Fehlende oder kaputte Dateien sind nie ein Fehler.
+- **Neuen Ton ergänzen:** Eintrag in `SOUNDS` (`src/data/sounds.ts`) mit Platzhalter-`synth`,
+  dann das Ereignis senden. Unbekannte `kind`s piepsen leise.
+- **Datei ergänzen:** `public/assets/sounds/<kind>.mp3` (auch .ogg/.m4a/.wav), mit Tonhöhe
+  `<kind>-<pitch>.mp3` (Xylophon 0–7). Welche Dateien es gibt, ermittelt ein Vite-Plugin beim
+  Start/Bauen (`virtual:sound-files`) – nach neuen Dateien den Dev-Server neu starten.
+- **Zählen:** `{ kind: 'count', value: n, voice: kidId }`. Gesucht wird
+  `sounds/voices/<kidId>/count-<n>.mp3`, dann `sounds/voices/default/count-<n>.mp3`, dann
+  deutsche Sprachausgabe (falls das Gerät eine hat), sonst n kurze Töne.
+  Echte Kinderstimmen nur mit Okay der Eltern und nicht ins öffentliche Repo (#38).
+- Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
+  `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
@@ -84,7 +97,7 @@ der Schnur), `float` (schwebt am Himmel), `holdable` (Kind hält es an der Schnu
 (Dosen/Kegel purzeln, Antippen baut neu auf; gemeinsame Logik in `toys/knockdown.ts`).
 Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst großzügig.
 `rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße in `src/data/vehicles.ts`),
-`honk` (Antippen = Hupe; sendet `scene.events.emit('sound', { kind })` für den späteren Sound).
+`honk` (Antippen = Hupe; Ton über `scene.events.emit('sound', { kind: 'honk' })`).
 `trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
 Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind, hört auf
 bei `kid.emit('tapped'|'grabbed')`.

@@ -220,7 +220,7 @@ export class DayCycle {
     this.scene.tweens.killTweensOf(this.progress);
     this.progress.t = 0;
     this.scene.tweens.add({ targets: this.progress, t: 1, duration: TRANSITION_MS, ease: 'Sine.easeInOut' });
-    this.scene.events.emit('sound', { kind: 'daytime', x: this.sun.x });
+    this.scene.events.emit('sound', { kind: 'daytime' });
   }
 
   /** Sofort auf eine Tageszeit springen (z. B. beim Laden). */

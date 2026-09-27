@@ -24,7 +24,12 @@ export type BehaviorId =
   | 'cans'
   | 'pins'
   | 'rideable'
-  | 'honk';
+  | 'honk'
+  | 'trampoline'
+  | 'seesaw'
+  | 'hopper'
+  | 'hula'
+  | 'pool';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball';
@@ -233,6 +238,46 @@ export const TOYS = [
     height: 110,
     behaviors: ['draggable', 'rideable', 'wobble'],
     params: { bounce: 0.1, rollFriction: 2.5 },
+  },
+  {
+    // Kind darauf: hüpft von selbst. Antippen: Salto.
+    id: 'trampoline',
+    width: 230,
+    height: 90,
+    behaviors: ['draggable', 'trampoline'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Ein Kind: diese Seite runter. Zwei Kinder: wippt.
+    id: 'seesaw',
+    width: 360,
+    height: 90,
+    behaviors: ['draggable', 'seesaw'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Kind darauf: hüpft in kleinen Sprüngen über die Wiese.
+    id: 'hopperball',
+    width: 90,
+    height: 100,
+    behaviors: ['draggable', 'fling', 'hopper'],
+    params: { bounce: 0.5, rollFriction: 3 },
+  },
+  {
+    // Auf ein Kind ziehen: kreist um die Hüfte.
+    id: 'hulahoop',
+    width: 130,
+    height: 40,
+    behaviors: ['draggable', 'fling', 'hula'],
+    params: { bounce: 0.3, rollFriction: 6 },
+  },
+  {
+    // Kinder und Spielzeug hinein: planschen und schwimmen.
+    id: 'pool',
+    width: 320,
+    height: 100,
+    behaviors: ['draggable', 'pool'],
+    params: { bounce: 0, rollFriction: 20 },
   },
 ] as const satisfies readonly ToyDef[];
 

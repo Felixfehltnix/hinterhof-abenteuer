@@ -177,6 +177,31 @@ export class BootScene extends Phaser.Scene {
       g.lineBetween(4, 22, 40, 22);
     });
 
+    this.makeTexture('seesaw-beam', 330, 22, (g) => {
+      g.fillStyle(0xe76f51);
+      g.fillRoundedRect(0, 0, 330, 22, 10);
+      g.fillStyle(0x2b2d42);
+      g.fillRoundedRect(22, -2, 12, 10, 4);
+      g.fillRoundedRect(296, -2, 12, 10, 4);
+    });
+
+    // Vorderer Rand des Planschbeckens mit halbdurchsichtigem Wasser: liegt über Kindern
+    // und Spielzeug im Becken, damit sie „im Wasser“ sitzen.
+    this.makeTexture('pool-front', 320, 100, (g) => {
+      const half = (cx: number, cy: number, rx: number, ry: number, reverse = false) => {
+        const pts: Phaser.Math.Vector2[] = [];
+        for (let i = 0; i <= 24; i++) {
+          const a = (i / 24) * Math.PI;
+          pts.push(new Phaser.Math.Vector2(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry));
+        }
+        return reverse ? pts.reverse() : pts;
+      };
+      g.fillStyle(0x8ecae6, 0.6);
+      g.fillPoints(half(160, 46, 138, 35), true);
+      g.fillStyle(0x4d96ff);
+      g.fillPoints([...half(160, 50, 158, 48), ...half(160, 46, 138, 35, true)], true);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

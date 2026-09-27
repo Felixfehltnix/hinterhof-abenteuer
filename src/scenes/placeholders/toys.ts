@@ -241,6 +241,57 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0x21867a);
     g.fillRect(22, 22, 156, 8);
   },
+
+  trampoline: (g) => {
+    g.lineStyle(8, 0x495057);
+    g.lineBetween(30, 50, 20, 90);
+    g.lineBetween(200, 50, 210, 90);
+    g.lineBetween(115, 60, 115, 90);
+    g.fillStyle(0x4d96ff);
+    g.fillEllipse(115, 44, 228, 50);
+    g.fillStyle(0x2b2d42);
+    g.fillEllipse(115, 42, 196, 34);
+  },
+
+  // Nur der Bock in der Mitte; das Brett (seesaw-beam) zeichnet der Baustein drehbar darüber.
+  seesaw: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.fillStyle(0x6d4c41);
+    g.fillPoints([v(180, 18), v(222, 90), v(138, 90)], true);
+    g.fillStyle(0xffd166);
+    g.fillCircle(180, 20, 9);
+  },
+
+  hopperball: (g) => {
+    g.fillStyle(0xf77f00);
+    g.fillCircle(45, 56, 43);
+    g.lineStyle(9, 0xf77f00);
+    g.beginPath();
+    g.arc(28, 12, 12, Math.PI * 0.2, Math.PI * 1.2, true);
+    g.strokePath();
+    g.beginPath();
+    g.arc(62, 12, 12, -Math.PI * 0.2, Math.PI * 0.8, false);
+    g.strokePath();
+    g.fillStyle(0xffffff, 0.45);
+    g.fillEllipse(30, 40, 20, 28);
+  },
+
+  hulahoop: (g) => {
+    g.lineStyle(9, 0xf15bb5);
+    g.strokeEllipse(65, 20, 120, 30);
+    g.lineStyle(3, 0xfee440);
+    g.strokeEllipse(65, 20, 120, 30);
+  },
+
+  pool: (g) => {
+    g.fillStyle(0x4d96ff);
+    g.fillEllipse(160, 50, 316, 96);
+    g.fillStyle(0x8ecae6);
+    g.fillEllipse(160, 46, 276, 70);
+    g.fillStyle(0xffffff, 0.5);
+    g.fillEllipse(110, 38, 60, 10);
+    g.fillEllipse(200, 52, 40, 8);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

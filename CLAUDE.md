@@ -47,7 +47,8 @@ Eine spätere Tonausgabe muss nur auf `'sound'` hören.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
-  `AutoSave` vergleicht alle 250 ms den Stand und schreibt 500 ms nach der letzten Änderung.
+  `AutoSave` vergleicht alle 250 ms den Stand und schreibt 500 ms nach der letzten Änderung,
+  spätestens aber 3 s nach der ersten ungespeicherten (falls sich ständig etwas ändert, z. B. Schnee).
 - Gespeichert werden Kinder und Spielzeuge mit ihrer `restPosition()` (laufende Aktionen
   zählen nicht) sowie Weltzustände, die per `scene.registerWorldState(key, …)` angemeldet sind.
 - Format ändern: `SAVE_VERSION` erhöhen. Unbekannte Versionen und kaputte Daten führen zur

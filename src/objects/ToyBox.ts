@@ -115,12 +115,14 @@ export class ToyBox {
     toy.handleDragStart();
     // Frisch aus der Kiste: keine „Aufhebe-Linie“, in der Luft losgelassen landet es hinten.
     toy.pickupGroundY = undefined;
+    // Die Szene führt es nach, auch beim Scrollen am Bildschirmrand.
+    this.scene.beginDrag(pointer, toy, (p, x, y) => toy.handleDrag(p, x, y));
     return {
-      move: (p) => {
-        const pw = this.scene.worldPoint(p);
-        toy.handleDrag(p, pw.x, pw.y + offsetY);
+      move: (p) => this.scene.followDrag(p),
+      release: (p) => {
+        this.scene.endDrag(p);
+        this.scene.releaseToy(toy, p);
       },
-      release: (p) => this.scene.releaseToy(toy, p),
     };
   }
 

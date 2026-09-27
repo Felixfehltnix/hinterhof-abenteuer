@@ -16,6 +16,10 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Einfärbung, Regen/Schnee/Blätter, Spielzeugkiste, Leisten) haben `setScrollFactor(0)` und
   rechnen in Bildschirmkoordinaten (`GAME_WIDTH`); Wolken `CLOUD_PARALLAX`. „Zur Bildmitte“
   heißt: `cameras.main.worldView.centerX`.
+- Ziehen: Die Szene führt jedes gezogene Objekt selbst nach (`beginDrag`/`followDrag`/`endDrag`,
+  Versatz zum Finger bleibt). Neue Arten, etwas zu ziehen (z. B. aus einer Leiste), müssen sich dort
+  anmelden, sonst folgen sie beim Scrollen am Bildschirmrand (`EDGE_SCROLL_ZONE`) nicht dem Finger.
+  Die Wurfgeschwindigkeit misst die Fingerbewegung auf dem Bildschirm (Mitscrollen ist kein Wurf).
 - Position eines Objekts = Fußpunkt (Origin 0.5, 1).
 - Tiefe = y-Koordinate (weiter unten = weiter vorne). Gezogene Objekte: `DEPTH_DRAGGING`.
 - Tageszeit (`src/world/DayCycle.ts`): Die ganze Szene wird über ein Rechteck mit

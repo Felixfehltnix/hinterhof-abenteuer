@@ -80,6 +80,7 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind ins Zelt ziehen, Zelt antippen | Kind verschwindet, guckt heraus, kommt heraus |
 | Taschenlampe antippen / aufs Kind ziehen | Licht an und aus / Kind hält sie |
 | Über die freie Wiese wischen | die Welt scrollt nach links und rechts (3 Bildschirme breit) |
+| Kind oder Spielzeug an den Bildschirmrand ziehen | die Welt scrollt mit |
 | Sonne bzw. Mond antippen | nächste Tageszeit: Morgen → Mittag → Abend → Nacht |
 | Wolke antippen | nächstes Wetter: Sonne → bewölkt → Regen (danach Regenbogen) → Wind → Schnee |
 | Kind bei Regen in eine Pfütze ziehen | es spritzt |

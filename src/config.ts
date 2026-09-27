@@ -6,6 +6,11 @@ export const GAME_HEIGHT = 1080;
 // Weltgrenzen (Bande, Wiese, Zaun) benutzen WORLD_WIDTH, der sichtbare Ausschnitt GAME_WIDTH.
 export const WORLD_WIDTH = GAME_WIDTH * 3;
 
+// Zieht man etwas so nah an den linken/rechten Bildschirmrand (px), scrollt die Welt mit.
+export const EDGE_SCROLL_ZONE = 150;
+// Höchste Scroll-Geschwindigkeit ganz am Rand (px/s).
+export const EDGE_SCROLL_SPEED = 900;
+
 // Ab dieser Höhe beginnt die Wiese. Figuren und Gegenstände landen immer darunter.
 export const GROUND_TOP = 700;
 export const GROUND_MIN_Y = GROUND_TOP + 40;

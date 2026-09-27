@@ -69,8 +69,10 @@ export class Toy extends Phaser.GameObjects.Image {
   handleDrag(pointer: Phaser.Input.Pointer, x: number, y: number): void {
     this.setPosition(x, y);
     // Zeitstempel des Touch-Ereignisses, nicht des Frames: bleibt auch bei Rucklern genau.
+    // Wurfgeschwindigkeit = Bewegung des Fingers auf dem Bildschirm. So zählt das Mitscrollen
+    // am Bildschirmrand nicht als Wurf, nur ein echter Schwung des Fingers.
     const now = pointer.moveTime;
-    this.track.push({ x, y, t: now });
+    this.track.push({ x: pointer.x, y: pointer.y, t: now });
     while (this.track.length > 2 && now - this.track[0].t > VELOCITY_WINDOW_MS) this.track.shift();
     this.behaviors.forEach((b) => b.onDrag?.(x, y));
   }

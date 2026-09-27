@@ -59,6 +59,10 @@ Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst
 `trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
 Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind, hört auf
 bei `kid.emit('tapped'|'grabbed')`.
+`dig` (Schaufel), `fillable` (Eimer füllt sich), `mold` (Sandkuchen), `water` (Gießkanne,
+Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
+(`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
+Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
 Weitere Hooks: `onToyDropped` (Spielzeug auf Spielzeug, z. B. Schubkarre), `onRemove`
 (vor dem Wegräumen: Kinder absteigen lassen, Ladung ausschütten).
 Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).

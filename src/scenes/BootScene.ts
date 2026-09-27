@@ -202,6 +202,47 @@ export class BootScene extends Phaser.Scene {
       g.fillPoints([...half(160, 50, 158, 48), ...half(160, 46, 138, 35, true)], true);
     });
 
+    this.makeTexture('drop', 10, 14, (g) => {
+      g.fillStyle(0x4cc9f0);
+      g.fillCircle(5, 9, 5);
+      g.fillTriangle(1, 8, 9, 8, 5, 0);
+    });
+
+    this.makeTexture('bucket-sand', 72, 26, (g) => {
+      g.fillStyle(0xe9c46a);
+      g.fillEllipse(36, 18, 72, 16);
+      g.fillEllipse(36, 12, 50, 24);
+    });
+
+    this.makeTexture('sandcake', 72, 44, (g) => {
+      g.fillStyle(0xd4a373);
+      g.fillPoints(
+        [new Phaser.Math.Vector2(14, 0), new Phaser.Math.Vector2(58, 0), new Phaser.Math.Vector2(70, 40), new Phaser.Math.Vector2(2, 40)],
+        true,
+      );
+      g.fillStyle(0xe9c46a);
+      for (let i = 0; i < 6; i++) g.fillCircle(8 + i * 11.2, 38, 7);
+      g.fillStyle(0xf4d9a4);
+      g.fillEllipse(36, 3, 40, 8);
+    });
+
+    const flowerColors = [0xff70a6, 0xffd166, 0x9b5de5, 0xff9770];
+    flowerColors.forEach((color, i) =>
+      this.makeTexture(`flower-${i}`, 40, 60, (g) => {
+        g.lineStyle(4, 0x2d6a4f);
+        g.lineBetween(20, 24, 20, 60);
+        g.fillStyle(0x40916c);
+        g.fillEllipse(28, 46, 14, 7);
+        g.fillStyle(color);
+        for (let p = 0; p < 5; p++) {
+          const a = (p / 5) * Math.PI * 2;
+          g.fillCircle(20 + Math.cos(a) * 9, 18 + Math.sin(a) * 9, 7);
+        }
+        g.fillStyle(0xffffff);
+        g.fillCircle(20, 18, 5);
+      }),
+    );
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

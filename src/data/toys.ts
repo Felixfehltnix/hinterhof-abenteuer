@@ -29,7 +29,12 @@ export type BehaviorId =
   | 'seesaw'
   | 'hopper'
   | 'hula'
-  | 'pool';
+  | 'pool'
+  | 'dig'
+  | 'fillable'
+  | 'mold'
+  | 'water'
+  | 'sprinkler';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball';
@@ -97,7 +102,7 @@ export const TOYS = [
     id: 'bucket',
     width: 90,
     height: 90,
-    behaviors: ['draggable', 'fling', 'wobble'],
+    behaviors: ['draggable', 'fling', 'wobble', 'fillable'],
     params: { bounce: 0.15, rollFriction: 10 },
   },
   {
@@ -278,6 +283,38 @@ export const TOYS = [
     height: 100,
     behaviors: ['draggable', 'pool'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Im Sandkasten ziehen: buddeln. Neben dem Eimer: Eimer füllt sich.
+    id: 'shovel',
+    width: 50,
+    height: 120,
+    behaviors: ['draggable', 'fling', 'dig'],
+    params: { bounce: 0.2, rollFriction: 10 },
+  },
+  {
+    // Im Sandkasten antippen: Sandkuchen.
+    id: 'sandmold',
+    width: 76,
+    height: 50,
+    behaviors: ['draggable', 'fling', 'mold'],
+    params: { bounce: 0.2, rollFriction: 10 },
+  },
+  {
+    // Ziehen: gießt. Blumen wachsen, Kinder lachen.
+    id: 'wateringcan',
+    width: 120,
+    height: 90,
+    behaviors: ['draggable', 'water'],
+    params: { bounce: 0.1, rollFriction: 15 },
+  },
+  {
+    // Antippen: an/aus. Fontäne, Kinder hüpfen.
+    id: 'sprinkler',
+    width: 80,
+    height: 60,
+    behaviors: ['draggable', 'sprinkler'],
+    params: { bounce: 0.1, rollFriction: 15 },
   },
 ] as const satisfies readonly ToyDef[];
 

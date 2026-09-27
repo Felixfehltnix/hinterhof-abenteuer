@@ -204,6 +204,11 @@ export class Sandbox extends Equipment {
     // Liegt flach auf dem Boden -> ganz hinten, damit alles darüber gezeichnet wird.
     scene.add.image(def.x, def.y, 'sandbox').setOrigin(0.5, 1).setDepth(def.y - 120);
   }
+
+  /** Liegt (x, y) im Sand? Großzügig: auch knapp auf dem Rand zählt. (Platzhalter 360×120) */
+  contains(x: number, y: number): boolean {
+    return Math.abs(x - this.def.x) < 180 && y > this.def.y - 110 && y < this.def.y + 10;
+  }
 }
 
 // ---------------------------------------------------------------------------

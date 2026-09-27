@@ -39,10 +39,11 @@ export type BehaviorId =
   | 'xylophone'
   | 'tent'
   | 'handheld'
-  | 'flashlight';
+  | 'flashlight'
+  | 'snowmerge';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
-export type ToyTag = 'ball';
+export type ToyTag = 'ball' | 'snow';
 
 export interface ToyParams {
   /** Schwerkraft in px/s². */
@@ -90,6 +91,8 @@ export interface ToyDef {
   height: number;
   behaviors: readonly BehaviorId[];
   tags?: readonly ToyTag[];
+  /** Nicht in der Spielzeugkiste (entsteht anders, z. B. Schneebälle im Schnee). */
+  hidden?: boolean;
   /** Abweichungen von DEFAULT_TOY_PARAMS. */
   params?: Partial<ToyParams>;
 }
@@ -352,6 +355,34 @@ export const TOYS = [
     height: 40,
     behaviors: ['draggable', 'fling', 'handheld', 'flashlight'],
     params: { bounce: 0.2, rollFriction: 8 },
+  },
+  // --- Schnee (nicht in der Kiste: entsteht durch Tippen auf die Schneedecke) ---
+  {
+    id: 'snowball',
+    width: 70,
+    height: 66,
+    tags: ['snow'],
+    hidden: true,
+    behaviors: ['draggable', 'fling', 'snowmerge'],
+    params: { bounce: 0.1, rollFriction: 8 },
+  },
+  {
+    id: 'snowball2',
+    width: 100,
+    height: 150,
+    tags: ['snow'],
+    hidden: true,
+    behaviors: ['draggable', 'snowmerge'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    id: 'snowman',
+    width: 150,
+    height: 270,
+    tags: ['snow'],
+    hidden: true,
+    behaviors: ['draggable', 'snowmerge', 'wobble'],
+    params: { bounce: 0, rollFriction: 20 },
   },
 ] as const satisfies readonly ToyDef[];
 

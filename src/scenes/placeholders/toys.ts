@@ -389,6 +389,47 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0xe63946);
     g.fillRoundedRect(24, 6, 12, 6, 2); // Schalter
   },
+
+  snowball: (g) => {
+    g.fillStyle(0xffffff);
+    g.fillCircle(35, 34, 32);
+    g.fillStyle(0xdde7f3);
+    g.fillEllipse(40, 50, 44, 18);
+  },
+
+  snowball2: (g) => {
+    g.fillStyle(0xffffff);
+    g.fillCircle(50, 102, 46);
+    g.fillCircle(50, 38, 34);
+    g.fillStyle(0xdde7f3);
+    g.fillEllipse(56, 126, 60, 22);
+    g.fillEllipse(54, 54, 40, 14);
+  },
+
+  snowman: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.fillStyle(0xffffff);
+    g.fillCircle(75, 212, 56);
+    g.fillCircle(75, 128, 42);
+    g.fillCircle(75, 64, 32);
+    g.fillStyle(0xdde7f3);
+    g.fillEllipse(82, 240, 76, 24);
+    // Knöpfe, Augen, Mund
+    g.fillStyle(0x2b2d42);
+    [112, 132, 152].forEach((y) => g.fillCircle(75, y, 5));
+    g.fillCircle(63, 58, 5);
+    g.fillCircle(87, 58, 5);
+    [60, 68, 76, 84, 92].forEach((x, i) => g.fillCircle(x, 78 + Math.abs(i - 2) * -2 + 2, 2.5));
+    // Möhrennase
+    g.fillStyle(0xf77f00);
+    g.fillPoints([v(75, 62), v(75, 72), v(104, 68)], true);
+    // Mütze
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(46, 26, 58, 12, 5);
+    g.fillRoundedRect(54, 2, 42, 28, 8);
+    g.fillStyle(0xffffff);
+    g.fillCircle(96, 6, 7);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

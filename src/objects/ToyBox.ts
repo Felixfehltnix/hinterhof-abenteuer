@@ -34,7 +34,7 @@ export class ToyBox {
     this.body.setData('onTap', () => (this.tray.isOpen ? this.close() : this.open()));
 
     this.tray = new Tray(scene, {
-      items: TOYS.map((t) => ({ id: t.id, texture: t.id })),
+      items: TOYS.filter((t) => !('hidden' in t && t.hidden)).map((t) => ({ id: t.id, texture: t.id })),
       pull: (id, pointer) => this.pull(id as ToyId, pointer),
     });
   }

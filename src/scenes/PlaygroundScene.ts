@@ -18,6 +18,7 @@ import { Kid } from '../objects/Kid';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
+import { DayCycle } from '../world/DayCycle';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
 
 /** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
@@ -35,6 +36,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private gate!: GardenGate;
   /** Blumen und Sandkuchen */
   garden!: Garden;
+  /** Tageszeiten, Himmel, Einfärbung */
+  dayCycle!: DayCycle;
   private readonly worldStates = new Map<string, WorldState>();
   private savedWorld: Record<string, unknown> = {};
 
@@ -58,6 +61,7 @@ export class PlaygroundScene extends Phaser.Scene {
     }
 
     this.garden = new Garden(this);
+    this.dayCycle = new DayCycle(this);
 
     this.setupInput();
     new AutoSave(this, () => this.snapshot());
@@ -262,29 +266,9 @@ export class PlaygroundScene extends Phaser.Scene {
 
   // --- Hintergrund (Platzhalter) --------------------------------------------
 
+  /** Zaun und Wiese. Himmel, Sonne, Mond und Wolken zeichnet der DayCycle. */
   private drawBackground(): void {
     const g = this.add.graphics().setDepth(-1000);
-
-    // Himmel
-    g.fillGradientStyle(0x7ec8ff, 0x7ec8ff, 0xd6f0ff, 0xd6f0ff, 1);
-    g.fillRect(0, 0, GAME_WIDTH, GROUND_TOP);
-
-    // Sonne
-    g.fillStyle(0xffe066);
-    g.fillCircle(1720, 140, 80);
-
-    // Wolken
-    g.fillStyle(0xf4faff);
-    for (const [x, y] of [
-      [300, 150],
-      [900, 110],
-      [1350, 220],
-    ]) {
-      g.fillCircle(x, y, 45);
-      g.fillCircle(x + 50, y - 20, 55);
-      g.fillCircle(x + 110, y, 45);
-      g.fillRect(x, y, 110, 45);
-    }
 
     // Zaun im Hinterhof
     g.fillStyle(0xc98b5a);

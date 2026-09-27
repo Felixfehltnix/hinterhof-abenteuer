@@ -10,8 +10,14 @@ export const GROUND_MAX_Y = GAME_HEIGHT - 20;
 // Ab wie vielen Pixeln Fingerbewegung ein Tippen zum Ziehen wird.
 export const DRAG_THRESHOLD = 12;
 
-// Tiefe für Objekte, die gerade gezogen werden (immer ganz vorne).
-export const DEPTH_DRAGGING = 10_000;
+// Tiefe für Objekte, die gerade gezogen werden (vor allem anderen auf der Wiese,
+// aber unter der Tageszeit-Einfärbung, damit sie nachts nicht herausleuchten).
+export const DEPTH_DRAGGING = 6_500;
+
+// Einfärbung der ganzen Szene nach Tageszeit/Wetter (Multiplizieren).
+export const DEPTH_TINT = 7_000;
+// Mond und Sterne leuchten über der Einfärbung.
+export const DEPTH_SKY_LIGHTS = 7_100;
 
 // Mindestgröße der Touch-Fläche (px). Kleine Spielzeuge bekommen einen unsichtbaren Rand.
 export const MIN_TOUCH_SIZE = 140;

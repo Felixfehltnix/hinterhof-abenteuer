@@ -11,6 +11,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Feste Auflösung 1920×1080, Querformat. Alle Koordinaten in diesem System.
 - Position eines Objekts = Fußpunkt (Origin 0.5, 1).
 - Tiefe = y-Koordinate (weiter unten = weiter vorne). Gezogene Objekte: `DEPTH_DRAGGING`.
+- Tageszeit (`src/world/DayCycle.ts`): Die ganze Szene wird über ein Rechteck mit
+  Multiplizieren-Blend auf `DEPTH_TINT` eingefärbt. Alles, was leuchten soll (Lichter, Mond,
+  Sterne), liegt darüber (`DEPTH_LIGHTS`, `DEPTH_SKY_LIGHTS`), alles andere darunter –
+  auch gezogene Objekte (`DEPTH_DRAGGING` < `DEPTH_TINT`). Himmel, Sonne, Mond und Wolken
+  zeichnet der DayCycle, die Szene nur Zaun und Wiese.
 - Inhalte (Spielgeräte, Gegenstände, Figuren) stehen als Daten in `src/data/`.
   Neues Zeug zuerst dort anlegen, Verhalten in `src/objects/`.
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,

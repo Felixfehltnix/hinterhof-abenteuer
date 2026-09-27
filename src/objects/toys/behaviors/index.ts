@@ -7,12 +7,17 @@ import { float } from './float';
 import { goal } from './goal';
 import { holdable } from './holdable';
 import { honk } from './honk';
+import { hopper } from './hopper';
+import { hula } from './hula';
 import { hoop } from './hoop';
 import { kite } from './kite';
 import { pins } from './pins';
 import { plane } from './plane';
+import { pool } from './pool';
 import { pop } from './pop';
 import { rideable } from './rideable';
+import { seesaw } from './seesaw';
+import { trampoline } from './trampoline';
 import { fling } from './fling';
 import { glide } from './glide';
 import { kick } from './kick';
@@ -43,4 +48,9 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   pins,
   rideable,
   honk,
+  trampoline,
+  seesaw,
+  hopper,
+  hula,
+  pool,
 };

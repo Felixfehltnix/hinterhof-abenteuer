@@ -2,7 +2,16 @@ import Phaser from 'phaser';
 import { DEPTH_DRAGGING, GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../config';
 import type { CharacterDef } from '../data/characters';
 
-export type KidMode = 'idle' | 'dragging' | 'swinging' | 'sliding' | 'riding' | 'leaving';
+export type KidMode =
+  | 'idle'
+  | 'dragging'
+  | 'swinging'
+  | 'sliding'
+  | 'riding'
+  | 'bouncing'
+  | 'seesawing'
+  | 'bathing'
+  | 'leaving';
 
 /** Alles, worauf ein Kind "sitzen" kann (z. B. die Schaukel). */
 export interface Seat {
@@ -17,6 +26,8 @@ export class Kid extends Phaser.GameObjects.Image {
   exitPoint?: { x: number; y: number };
   /** Was das Kind gerade in der Hand hält (Ballon, Drachen, …). */
   holding?: Phaser.GameObjects.GameObject;
+  /** Hula-Hoop-Reifen, der gerade um die Hüfte kreist. */
+  hula?: Phaser.GameObjects.GameObject;
 
   constructor(scene: Phaser.Scene, def: CharacterDef, x: number, y: number) {
     super(scene, x, y, `kid-${def.id}`);
@@ -26,10 +37,15 @@ export class Kid extends Phaser.GameObjects.Image {
     scene.add.existing(this);
 
     this.setInteractive({ draggable: true, useHandCursor: true });
-    this.setData('onTap', () => this.hop());
+    // Ereignisse 'tapped' und 'grabbed', damit z. B. ein Hula-Hoop-Reifen reagieren kann.
+    this.setData('onTap', () => {
+      this.emit('tapped');
+      this.hop();
+    });
   }
 
   handleDragStart(): void {
+    this.emit('grabbed');
     this.scene.tweens.killTweensOf(this);
     this.seatedOn?.unseat(this);
     this.mode = 'dragging';

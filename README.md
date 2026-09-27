@@ -67,6 +67,11 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind auf Bobbycar / Laufrad / Roller ziehen | sitzt auf; Fahrzeug ziehen = fahren; Kind wegziehen = absteigen |
 | Bobbycar antippen | hupt |
 | Spielzeug oder Kind in die Schubkarre | wird mitgeschoben |
+| Kind aufs Trampolin | hüpft von selbst, Trampolin antippen = Salto |
+| Ein / zwei Kinder auf die Wippe | eine Seite geht runter / es wippt |
+| Kind auf den Hüpfball | hüpft über die Wiese |
+| Hula-Hoop auf ein Kind ziehen | kreist um die Hüfte, Antippen hört auf |
+| Kinder / Spielzeug ins Planschbecken | planschen / schwimmen |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

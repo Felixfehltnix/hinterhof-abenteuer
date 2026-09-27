@@ -56,6 +56,9 @@ der Schnur), `float` (schwebt am Himmel), `holdable` (Kind hält es an der Schnu
 Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst großzügig.
 `rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße in `src/data/vehicles.ts`),
 `honk` (Antippen = Hupe; sendet `scene.events.emit('sound', { kind })` für den späteren Sound).
+`trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
+Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind, hört auf
+bei `kid.emit('tapped'|'grabbed')`.
 Weitere Hooks: `onToyDropped` (Spielzeug auf Spielzeug, z. B. Schubkarre), `onRemove`
 (vor dem Wegräumen: Kinder absteigen lassen, Ladung ausschütten).
 Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).

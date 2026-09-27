@@ -61,6 +61,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind aus der Leiste ziehen | kommt auf die Wiese und hüpft vor Freude |
 | Kind aufs Tor ziehen | winkt und geht nach Hause |
 
+Die Wiese merkt sich alles (lokal auf dem Gerät). Zum Zurücksetzen im Browser:
+`localStorage.removeItem('hinterhof-abenteuer/wiese')` in der Konsole, auf Android: App-Daten löschen.
+
 ## Projektstruktur
 
 ```

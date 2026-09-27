@@ -59,6 +59,7 @@ export class Swing extends Equipment implements Seat {
     this.rider = kid;
     kid.mode = 'swinging';
     kid.seatedOn = this;
+    kid.exitPoint = { x: this.def.x + 190, y: this.def.y + 60 };
 
     const tweens = this.scene.tweens;
     tweens.killTweensOf(this.ropes);
@@ -84,6 +85,7 @@ export class Swing extends Equipment implements Seat {
     if (this.rider !== kid) return;
     this.rider = undefined;
     kid.seatedOn = undefined;
+    kid.exitPoint = undefined;
     kid.mode = 'idle';
     kid.setRotation(0);
 
@@ -130,6 +132,7 @@ export class Slide extends Equipment {
   override use(kid: Kid): void {
     this.busy = true;
     kid.mode = 'sliding';
+    kid.exitPoint = { x: this.bottom.x + 90, y: this.bottom.y + 30 };
     kid.disableInteractive();
     kid.setDepth(this.def.y + 1);
 
@@ -162,6 +165,7 @@ export class Slide extends Equipment {
       ],
       onComplete: () => {
         kid.mode = 'idle';
+        kid.exitPoint = undefined;
         kid.setInteractive();
         kid.setDepth(kid.y);
         this.busy = false;

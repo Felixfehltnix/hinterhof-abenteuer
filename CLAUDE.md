@@ -15,7 +15,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Neues Zeug zuerst dort anlegen, Verhalten in `src/objects/`.
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,
   `accepts()`/`use()`/`update()` überschreiben, in `createEquipment()` eintragen.
-- Tippen: `obj.setData('onTap', fn)`. Die Szene ruft das auf, wenn nicht gezogen wurde.
+- Tippen: `obj.setData('onTap', fn)`. Die Szene ruft `fn(pointer)` auf, wenn nicht gezogen wurde.
 - Grafiken: Platzhalter entstehen in `BootScene` (Spielzeuge: `src/scenes/placeholders/toys.ts`). Echte PNGs kommen nach `public/assets/`
   und werden in `BootScene.preload()` unter demselben Texture-Key geladen.
 - Code-Kommentare auf Deutsch, Bezeichner auf Englisch.
@@ -27,6 +27,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Platzhalter in `src/scenes/placeholders/kids.ts`.
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
+
+## Töne (vorbereitet)
+Noch gibt es keinen Ton. Alles, was klingen soll, sendet `scene.events.emit('sound', { kind, pitch?, x })`.
+Bisher: `honk`, `drum` (pitch 0), `xylophone` (pitch 0–7), `sprinkler-on`/`-off`, `click`, `peekaboo`.
+Eine spätere Tonausgabe muss nur auf `'sound'` hören.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
@@ -63,6 +68,8 @@ bei `kid.emit('tapped'|'grabbed')`.
 Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
+`drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
+`handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel, Tiefe `DEPTH_LIGHTS`).
 Weitere Hooks: `onToyDropped` (Spielzeug auf Spielzeug, z. B. Schubkarre), `onRemove`
 (vor dem Wegräumen: Kinder absteigen lassen, Ladung ausschütten).
 Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).

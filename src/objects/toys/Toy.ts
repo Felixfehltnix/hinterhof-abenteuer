@@ -46,7 +46,7 @@ export class Toy extends Phaser.GameObjects.Image {
     });
 
     this.behaviors = def.behaviors.map((id) => BEHAVIORS[id](this));
-    this.setData('onTap', () => this.behaviors.forEach((b) => b.onTap?.()));
+    this.setData('onTap', (pointer?: Phaser.Input.Pointer) => this.behaviors.forEach((b) => b.onTap?.(pointer)));
     this.once(Phaser.GameObjects.Events.DESTROY, () => this.behaviors.forEach((b) => b.onDestroy?.()));
   }
 

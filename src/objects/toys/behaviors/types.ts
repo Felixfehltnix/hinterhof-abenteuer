@@ -1,3 +1,4 @@
+import type Phaser from 'phaser';
 import type { Kid } from '../../Kid';
 import type { Toy } from '../Toy';
 
@@ -18,7 +19,8 @@ export interface Release {
  * für alle seine Bausteine in der Reihenfolge aus dem Katalog auf.
  */
 export interface ToyBehavior {
-  onTap?(): void;
+  /** Antippen. pointer: wo getippt wurde (z. B. welche Xylophon-Platte). */
+  onTap?(pointer?: Phaser.Input.Pointer): void;
   onDragStart?(): void;
   /** Während des Ziehens, nachdem das Spielzeug an den Finger gesetzt wurde. */
   onDrag?(x: number, y: number): void;

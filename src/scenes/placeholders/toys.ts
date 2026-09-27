@@ -333,6 +333,62 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0xe63946);
     g.fillRoundedRect(20, 6, 40, 12, 6);
   },
+
+  drum: (g) => {
+    g.fillStyle(0xe63946);
+    g.fillRect(8, 22, 94, 64);
+    g.fillStyle(0xffd166);
+    for (let x = 8; x < 102; x += 18) g.fillTriangle(x, 26, x + 18, 26, x + 9, 82);
+    g.fillStyle(0xf1faee);
+    g.fillEllipse(55, 22, 94, 26);
+    g.lineStyle(4, 0x6d4c41);
+    g.lineBetween(20, 14, 2, 0); // Schlegel
+    g.lineBetween(90, 14, 108, 0);
+    g.fillStyle(0xe63946);
+    g.fillEllipse(55, 86, 94, 22);
+  },
+
+  xylophone: (g) => {
+    g.fillStyle(0x6d4c41);
+    g.fillRoundedRect(8, 30, 284, 16, 6);
+    g.fillRoundedRect(8, 74, 284, 16, 6);
+    g.fillRect(24, 88, 8, 22);
+    g.fillRect(268, 88, 8, 22);
+    const colors = [0xe63946, 0xf77f00, 0xffd166, 0x06d6a0, 0x118ab2, 0x4d96ff, 0x9b5de5, 0xf15bb5];
+    colors.forEach((c, i) => {
+      const h = 90 - i * 5;
+      g.fillStyle(c);
+      g.fillRoundedRect(20 + i * 34, 60 - h / 2, 28, h, 6);
+      g.fillStyle(0xffffff, 0.8);
+      g.fillCircle(34 + i * 34, 60 - h / 2 + 8, 3);
+      g.fillCircle(34 + i * 34, 60 + h / 2 - 8, 3);
+    });
+  },
+
+  tent: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.fillStyle(0xf77f00);
+    g.fillPoints([v(125, 0), v(250, 180), v(0, 180)], true);
+    g.fillStyle(0xffd166);
+    g.fillPoints([v(125, 0), v(170, 180), v(125, 180)], true);
+    g.fillStyle(0x3d2314);
+    g.fillPoints([v(125, 70), v(165, 180), v(85, 180)], true); // Eingang
+    g.fillStyle(0xe63946);
+    g.fillTriangle(125, 0, 125, -1, 145, 10);
+    g.lineStyle(3, 0x6d4c41);
+    g.lineBetween(125, 0, 125, 12);
+  },
+
+  flashlight: (g) => {
+    g.fillStyle(0x264653);
+    g.fillRoundedRect(0, 10, 60, 22, 8);
+    g.fillStyle(0x2a9d8f);
+    g.fillRoundedRect(56, 2, 34, 36, 8);
+    g.fillStyle(0xfff3b0);
+    g.fillRoundedRect(82, 8, 8, 24, 3);
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(24, 6, 12, 6, 2); // Schalter
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

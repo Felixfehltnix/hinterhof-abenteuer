@@ -243,6 +243,22 @@ export class BootScene extends Phaser.Scene {
       }),
     );
 
+    this.makeTexture('note', 30, 42, (g) => {
+      g.fillStyle(0xffffff);
+      g.fillEllipse(10, 34, 20, 14);
+      g.fillRect(16, 4, 5, 32);
+      g.fillTriangle(21, 4, 30, 12, 21, 18);
+    });
+
+    // Lichtkegel der Taschenlampe (wird additiv über die Szene geblendet)
+    this.makeTexture('lightcone', 340, 200, (g) => {
+      for (let i = 10; i >= 1; i--) {
+        const r = i / 10;
+        g.fillStyle(0xfff3b0, 0.06);
+        g.fillTriangle(0, 100, 340 * r, 100 - 100 * r, 340 * r, 100 + 100 * r);
+      }
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

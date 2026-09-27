@@ -11,6 +11,7 @@ export type KidMode =
   | 'bouncing'
   | 'seesawing'
   | 'bathing'
+  | 'hiding'
   | 'leaving';
 
 /** Alles, worauf ein Kind "sitzen" kann (z. B. die Schaukel). */

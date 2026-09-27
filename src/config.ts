@@ -19,5 +19,8 @@ export const MIN_TOUCH_SIZE = 140;
 // Leisten (Spielzeugkiste, Gartentor) liegen über der Wiese, aber unter gezogenen Objekten.
 export const DEPTH_TRAY = 9_000;
 
+// Lichter (Taschenlampe, Lichterkette) leuchten über der Nacht-Abdunklung (#12).
+export const DEPTH_LIGHTS = 7_500;
+
 // Höchstens so viele Spielzeuge und Kinder gleichzeitig auf der Wiese (Tablet-Leistung).
 export const MAX_OBJECTS = 40;

@@ -34,7 +34,12 @@ export type BehaviorId =
   | 'fillable'
   | 'mold'
   | 'water'
-  | 'sprinkler';
+  | 'sprinkler'
+  | 'drum'
+  | 'xylophone'
+  | 'tent'
+  | 'handheld'
+  | 'flashlight';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball';
@@ -315,6 +320,38 @@ export const TOYS = [
     height: 60,
     behaviors: ['draggable', 'sprinkler'],
     params: { bounce: 0.1, rollFriction: 15 },
+  },
+  {
+    // Antippen: wackelt, Schallringe. (Ton-Ereignis 'drum')
+    id: 'drum',
+    width: 110,
+    height: 100,
+    behaviors: ['draggable', 'fling', 'drum'],
+    params: { bounce: 0.2, rollFriction: 10 },
+  },
+  {
+    // 8 Platten einzeln antippen, Noten fliegen. (Ton-Ereignis 'xylophone', pitch 0–7)
+    id: 'xylophone',
+    width: 300,
+    height: 110,
+    behaviors: ['draggable', 'xylophone'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Kinder hineinziehen, antippen: Kuckuck!, nochmal: raus.
+    id: 'tent',
+    width: 250,
+    height: 180,
+    behaviors: ['draggable', 'tent'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Antippen: an/aus mit Lichtkegel. Auf ein Kind ziehen: Es hält sie.
+    id: 'flashlight',
+    width: 90,
+    height: 40,
+    behaviors: ['draggable', 'fling', 'handheld', 'flashlight'],
+    params: { bounce: 0.2, rollFriction: 8 },
   },
 ] as const satisfies readonly ToyDef[];
 

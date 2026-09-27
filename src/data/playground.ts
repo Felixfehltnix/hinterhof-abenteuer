@@ -30,3 +30,6 @@ export const PLACED_TOYS: PlacedToy[] = [
   { toy: 'ball', x: 900, y: 930 },
   { toy: 'bucket', x: 1180, y: 985 },
 ];
+
+// Die Spielzeugkiste steht fest unten links (Fußpunkt).
+export const TOY_BOX = { x: 150, y: 1050 };

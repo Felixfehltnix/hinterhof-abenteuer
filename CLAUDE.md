@@ -26,7 +26,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
    z. B. `bounce`, `gravity`, `airDrag`, `spin`).
 2. Platzhalter-Zeichnung unter derselben id in `src/scenes/placeholders/toys.ts`
    (fehlt sie, meldet `tsc` einen Fehler).
-3. Soll es beim Start auf der Wiese liegen: Eintrag in `PLACED_TOYS` in `src/data/playground.ts`.
+3. Es erscheint automatisch in der Spielzeugkiste. Soll es beim Start schon auf der Wiese liegen: Eintrag in `PLACED_TOYS` in `src/data/playground.ts`.
 
 Szenencode bleibt unberührt. Vorhandene Bausteine (`src/objects/toys/behaviors/`):
 `draggable` (ziehen, landet auf der Wiese), `fling` (schnell loslassen = werfen),
@@ -40,3 +40,5 @@ Bodenlinie + Höhe, Bildränder sind eine Bande), nicht über eigene Tweens auf 
 ## Zielgruppe
 Kleine Kinder: große Touch-Flächen, sofortiges Feedback, nichts, was man kaputt machen
 kann, keine Menüs, keine Werbung, keine Netzwerkzugriffe.
+Ausnahme Inventare: erlaubt, wenn sie Teil der Spielwelt sind (Spielzeugkiste, Gartentor)
+und ganz ohne Text auskommen. Dafür gibt es die Leiste `src/objects/Tray.ts`.

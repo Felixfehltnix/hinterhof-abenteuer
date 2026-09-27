@@ -15,3 +15,9 @@ export const DEPTH_DRAGGING = 10_000;
 
 // Mindestgröße der Touch-Fläche (px). Kleine Spielzeuge bekommen einen unsichtbaren Rand.
 export const MIN_TOUCH_SIZE = 140;
+
+// Leisten (Spielzeugkiste, Gartentor) liegen über der Wiese, aber unter gezogenen Objekten.
+export const DEPTH_TRAY = 9_000;
+
+// Höchstens so viele Spielzeuge und Kinder gleichzeitig auf der Wiese (Tablet-Leistung).
+export const MAX_OBJECTS = 40;

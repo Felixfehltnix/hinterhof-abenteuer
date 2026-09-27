@@ -6,11 +6,13 @@ import { cans } from './cans';
 import { float } from './float';
 import { goal } from './goal';
 import { holdable } from './holdable';
+import { honk } from './honk';
 import { hoop } from './hoop';
 import { kite } from './kite';
 import { pins } from './pins';
 import { plane } from './plane';
 import { pop } from './pop';
+import { rideable } from './rideable';
 import { fling } from './fling';
 import { glide } from './glide';
 import { kick } from './kick';
@@ -39,4 +41,6 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   goal,
   cans,
   pins,
+  rideable,
+  honk,
 };

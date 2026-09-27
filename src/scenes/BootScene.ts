@@ -167,6 +167,16 @@ export class BootScene extends Phaser.Scene {
       }
     });
 
+    this.makeTexture('wheel', 44, 44, (g) => {
+      g.fillStyle(0x2b2d42);
+      g.fillCircle(22, 22, 22);
+      g.fillStyle(0xadb5bd);
+      g.fillCircle(22, 22, 10);
+      g.lineStyle(4, 0xadb5bd);
+      g.lineBetween(22, 4, 22, 40);
+      g.lineBetween(4, 22, 40, 22);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

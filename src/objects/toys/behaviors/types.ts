@@ -25,6 +25,10 @@ export interface ToyBehavior {
   onDragEnd?(release: Release): void;
   /** Ein Kind wurde auf dem Spielzeug losgelassen. true = angenommen. */
   onKidDropped?(kid: Kid): boolean;
+  /** Ein anderes Spielzeug wurde auf diesem losgelassen (z. B. in die Schubkarre). true = angenommen. */
+  onToyDropped?(other: Toy): boolean;
+  /** Das Spielzeug wird gerade weggeräumt (Kind absteigen lassen, Ladung ausschütten, …). */
+  onRemove?(): void;
   /** Das Spielzeug verschwindet (weggeräumt, geplatzt): eigene Objekte aufräumen. */
   onDestroy?(): void;
   /** Jeden Frame, deltaMs = Zeit seit dem letzten Frame. */

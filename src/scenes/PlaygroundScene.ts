@@ -108,7 +108,7 @@ export class PlaygroundScene extends Phaser.Scene {
 
   /** Spielzeug zählt nicht mehr zur Wiese (z. B. weil es gerade weggeräumt wird). */
   forgetToy(toy: Toy): void {
-    this.toys.delete(toy);
+    if (this.toys.delete(toy)) toy.notifyRemoved();
   }
 
   /** Alle Spielzeuge, die gerade auf der Wiese sind. */
@@ -124,8 +124,25 @@ export class PlaygroundScene extends Phaser.Scene {
 
   /** Ein gezogenes Spielzeug wurde losgelassen: wegräumen oder auf die Wiese. */
   releaseToy(toy: Toy, pointer: Phaser.Input.Pointer): void {
-    if (this.toyBox.accepts(pointer.x, pointer.y)) this.toyBox.putAway(toy);
-    else toy.handleDragEnd(pointer);
+    if (this.toyBox.accepts(pointer.x, pointer.y)) {
+      this.toyBox.putAway(toy);
+      return;
+    }
+    // Auf ein anderes Spielzeug fallen gelassen, das es aufnimmt (z. B. Schubkarre)?
+    for (const other of this.toys) {
+      if (other !== toy && this.dropZone(other).contains(pointer.x, pointer.y) && other.offerToy(toy)) {
+        toy.handleDragEnd(pointer);
+        toy.physics.stop();
+        return;
+      }
+    }
+    toy.handleDragEnd(pointer);
+  }
+
+  /** Großzügige Fläche, auf der man etwas auf einem Spielzeug fallen lassen kann. */
+  private dropZone(toy: Toy): Phaser.Geom.Rectangle {
+    const b = toy.getBounds();
+    return new Phaser.Geom.Rectangle(b.x - 40, b.y - 60, b.width + 80, b.height + 100);
   }
 
   // --- Kinder auf der Wiese -----------------------------------------------
@@ -164,8 +181,10 @@ export class PlaygroundScene extends Phaser.Scene {
     }
     // Auf ein Spielzeug gezogen, das Kinder annimmt (z. B. Drachen, Ballon festhalten)?
     for (const toy of this.toys) {
-      if (toy.getBounds().contains(pointer.x, pointer.y) && toy.offerKid(kid)) {
-        kid.settle();
+      const zone = this.dropZone(toy);
+      if ((zone.contains(pointer.x, pointer.y) || zone.contains(kid.x, kid.y)) && toy.offerKid(kid)) {
+        // Hält das Kind nur etwas fest (Ballon), steht es auf der Wiese; sitzt es auf einem Fahrzeug, nicht.
+        if (kid.mode === 'idle') kid.settle();
         return;
       }
     }

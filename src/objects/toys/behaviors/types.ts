@@ -10,6 +10,10 @@ export interface Release {
   handled?: boolean;
   /** Optional: auf dieser Bodenlinie (Tiefe) landen statt senkrecht unter dem Loslasspunkt. */
   groundY?: number;
+  /** Bewegung in die Tiefe (px/s, − = nach hinten zum Zaun). */
+  vdepth?: number;
+  /** Wurde auf der Wiese losgelassen (nicht in der Luft)? Dann geht Wischen teils in die Tiefe. */
+  readonly onGround: boolean;
   /** Geschwindigkeit des Fingers kurz vor dem Loslassen (px/s). */
   readonly pointerVelocity: { readonly x: number; readonly y: number };
 }

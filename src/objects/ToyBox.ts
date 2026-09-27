@@ -109,6 +109,8 @@ export class ToyBox {
       return null;
     }
     toy.handleDragStart();
+    // Frisch aus der Kiste: keine „Aufhebe-Linie“, in der Luft losgelassen landet es hinten.
+    toy.pickupGroundY = undefined;
     return {
       move: (p) => toy.handleDrag(p, p.x, p.y + offsetY),
       release: (p) => this.scene.releaseToy(toy, p),

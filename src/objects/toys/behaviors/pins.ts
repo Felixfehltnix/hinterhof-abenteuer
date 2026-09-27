@@ -22,6 +22,6 @@ export const pins: BehaviorFactory = (toy) =>
       const ph = ball.physics;
       const groundY = ph.active ? ph.groundY : ball.y;
       const r = ball.displayWidth / 2 + 30;
-      return ph.z < 100 && Math.abs(groundY - t.y) < 80 && Math.abs(ball.x - t.x) < 110 + r;
+      return ph.z < 100 && Math.abs(groundY - t.y) < 95 && Math.abs(ball.x - t.x) < 110 + r;
     },
   });

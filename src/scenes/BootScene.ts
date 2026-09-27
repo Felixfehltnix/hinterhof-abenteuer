@@ -299,6 +299,30 @@ export class BootScene extends Phaser.Scene {
       g.fillCircle(18, 18, 7);
     });
 
+    this.makeTexture('raindrop', 4, 22, (g) => {
+      g.fillStyle(0xcfe8ff);
+      g.fillRoundedRect(0, 0, 4, 22, 2);
+    });
+
+    this.makeTexture('puddle', 220, 64, (g) => {
+      g.fillStyle(0x6fa8dc, 0.85);
+      g.fillEllipse(110, 32, 220, 64);
+      g.fillStyle(0xa9d6f5, 0.9);
+      g.fillEllipse(96, 26, 150, 34);
+      g.fillStyle(0xffffff, 0.6);
+      g.fillEllipse(70, 20, 50, 8);
+    });
+
+    this.makeTexture('rainbow', 1000, 500, (g) => {
+      const colors = [0xff595e, 0xff924c, 0xffca3a, 0x8ac926, 0x1982c4, 0x4267ac, 0x6a4c93];
+      colors.forEach((c, i) => {
+        g.lineStyle(26, c, 0.8);
+        g.beginPath();
+        g.arc(500, 500, 480 - i * 26, Math.PI, 0, false);
+        g.strokePath();
+      });
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

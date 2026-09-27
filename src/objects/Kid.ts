@@ -91,6 +91,21 @@ export class Kid extends Phaser.GameObjects.Image {
     };
   }
 
+  /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */
+  kick(dir: number): void {
+    if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;
+    this.scene.tweens.add({
+      targets: this,
+      angle: -dir * 10,
+      duration: 110,
+      yoyo: true,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        this.setAngle(0);
+      },
+    });
+  }
+
   /** Winkt zum Abschied (wackelt hin und her). */
   wave(onDone: () => void): void {
     this.scene.tweens.add({

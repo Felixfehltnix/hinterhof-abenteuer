@@ -4,6 +4,8 @@ import type { Toy } from '../Toy';
 export interface Release {
   vx: number;
   vy: number;
+  /** Optional: auf dieser Bodenlinie (Tiefe) landen statt senkrecht unter dem Loslasspunkt. */
+  groundY?: number;
   /** Geschwindigkeit des Fingers kurz vor dem Loslassen (px/s). */
   readonly pointerVelocity: { readonly x: number; readonly y: number };
 }

@@ -6,6 +6,8 @@ import type { ToyParams } from '../../data/toys';
 const MIN_BOUNCE_SPEED = 120;
 // Unter dieser Rollgeschwindigkeit (px/s) bleibt ein Spielzeug liegen.
 const MIN_ROLL_SPEED = 8;
+// Ab dieser waagerechten Geschwindigkeit (px/s) wirkt der volle Auftrieb (Frisbee).
+const LIFT_FULL_SPEED = 700;
 
 /**
  * Einfache 2,5D-Bewegung für Spielzeuge: Das Spielzeug hat eine Bodenlinie (groundY,
@@ -18,6 +20,8 @@ export class ToyPhysics {
   z = 0;
   groundY = 0;
   active = false;
+  /** Wird bei jedem Aufprall auf dem Boden aufgerufen. */
+  readonly landListeners: (() => void)[] = [];
 
   constructor(
     private readonly obj: Phaser.GameObjects.Image,
@@ -27,11 +31,13 @@ export class ToyPhysics {
   /**
    * Setzt das Spielzeug in Bewegung. Geschwindigkeit in px/s auf dem Bildschirm
    * (vy < 0 = nach oben). Liegt es gerade still, zählt die aktuelle Position als Start.
+   * groundY: optional eine andere Bodenlinie (Tiefe), auf der es landen soll.
    */
-  launch(vx: number, vy: number): void {
-    if (!this.active) {
-      this.groundY = Phaser.Math.Clamp(this.obj.y, GROUND_MIN_Y, GROUND_MAX_Y);
-      this.z = Math.max(0, this.groundY - this.obj.y);
+  launch(vx: number, vy: number, groundY?: number): void {
+    if (!this.active || groundY !== undefined) {
+      this.groundY = Phaser.Math.Clamp(groundY ?? this.obj.y, GROUND_MIN_Y, GROUND_MAX_Y);
+      // Mit vorgegebener Bodenlinie immer kurz fallen, damit ein Aufprall ausgelöst wird.
+      this.z = Math.max(groundY !== undefined ? 1 : 0, this.groundY - this.obj.y);
       this.obj.setDepth(this.groundY);
     }
     this.vx = vx;
@@ -53,7 +59,9 @@ export class ToyPhysics {
 
     const inAir = this.z > 0 || this.vz > 0;
     if (inAir) {
-      this.vz -= p.gravity * dt;
+      // Auftrieb: schnelle, flache Dinge (Frisbee) fallen langsamer.
+      const lift = p.lift * Math.min(1, Math.abs(this.vx) / LIFT_FULL_SPEED);
+      this.vz -= p.gravity * (1 - lift) * dt;
       this.vx *= Math.exp(-p.airDrag * dt);
     }
     this.z += this.vz * dt;
@@ -61,10 +69,12 @@ export class ToyPhysics {
 
     // Boden
     if (this.z <= 0) {
+      const impact = inAir;
       this.z = 0;
       if (this.vz < -MIN_BOUNCE_SPEED) this.vz = -this.vz * p.bounce;
       else this.vz = 0;
       if (this.vz === 0) this.vx *= Math.exp(-p.rollFriction * dt);
+      if (impact) this.landListeners.forEach((fn) => fn());
     }
 
     // Bande links und rechts

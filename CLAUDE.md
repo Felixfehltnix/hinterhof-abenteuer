@@ -46,12 +46,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 
 Szenencode bleibt unberührt. Vorhandene Bausteine (`src/objects/toys/behaviors/`):
 `draggable` (ziehen, landet auf der Wiese), `fling` (schnell loslassen = werfen),
-`kick` (Antippen = Schuss im Bogen), `wobble` (Antippen = wackeln).
+`kick` (Antippen = Schuss im Bogen), `wobble` (Antippen = wackeln),
+`glide` (gleitet mit `params.lift`, z. B. Frisbee), `kidKick` (auf ein Kind fallen lassen = Kind kickt).
 
 Neuer Baustein: Datei in `src/objects/toys/behaviors/` mit einer `BehaviorFactory`
 (Hooks `onTap`, `onDragStart`, `onDragEnd`, `update`), in `behaviors/index.ts` eintragen,
 `BehaviorId` in `toys.ts` erweitern. Bewegung läuft über `toy.physics` (`ToyPhysics`:
 Bodenlinie + Höhe, Bildränder sind eine Bande), nicht über eigene Tweens auf x/y.
+Aufpralle: `toy.physics.landListeners`. Szene-Abfragen (z. B. Kinder) über `toy.scene as PlaygroundScene`.
 
 ## Zielgruppe
 Kleine Kinder: große Touch-Flächen, sofortiges Feedback, nichts, was man kaputt machen

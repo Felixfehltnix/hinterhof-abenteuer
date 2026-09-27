@@ -64,7 +64,7 @@ export class Toy extends Phaser.GameObjects.Image {
     const release: Release = { vx: 0, vy: 0, pointerVelocity: this.pointerVelocity(pointer.upTime) };
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
     // Auch ohne Wurf: fällt aus der Luft zurück auf die Wiese.
-    this.physics.launch(release.vx, release.vy);
+    this.physics.launch(release.vx, release.vy, release.groundY);
   }
 
   /** Position fürs Speichern: ein fliegendes Spielzeug liegt schon dort, wo es landen wird. */

@@ -1,7 +1,9 @@
 import type { BehaviorId } from '../../../data/toys';
 import { draggable } from './draggable';
 import { fling } from './fling';
+import { glide } from './glide';
 import { kick } from './kick';
+import { kidKick } from './kidKick';
 import { wobble } from './wobble';
 import type { BehaviorFactory } from './types';
 
@@ -13,4 +15,6 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   fling,
   kick,
   wobble,
+  glide,
+  kidKick,
 };

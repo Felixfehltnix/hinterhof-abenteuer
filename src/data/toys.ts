@@ -40,7 +40,8 @@ export type BehaviorId =
   | 'tent'
   | 'handheld'
   | 'flashlight'
-  | 'snowmerge';
+  | 'snowmerge'
+  | 'whirlpool';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball' | 'snow';
@@ -364,6 +365,14 @@ export const TOYS = [
     height: 40,
     behaviors: ['draggable', 'fling', 'handheld', 'flashlight'],
     params: { bounce: 0.2, rollFriction: 8 },
+  },
+  {
+    // Bis zu 6 Kinder, die beim Hineinsetzen der Reihe nach durchzählen. Antippen: nochmal zählen.
+    id: 'whirlpool',
+    width: 360,
+    height: 130,
+    behaviors: ['draggable', 'whirlpool'],
+    params: { bounce: 0, rollFriction: 20 },
   },
   // --- Schnee (nicht in der Kiste: entsteht durch Tippen auf die Schneedecke) ---
   {

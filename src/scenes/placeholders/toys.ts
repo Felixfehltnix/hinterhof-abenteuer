@@ -390,6 +390,18 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillRoundedRect(24, 6, 12, 6, 2); // Schalter
   },
 
+  whirlpool: (g) => {
+    // Runder Pool: Rand, sprudelndes Wasser, ein paar Blasen
+    g.fillStyle(0xf1faee);
+    g.fillEllipse(180, 70, 356, 116);
+    g.fillStyle(0x2a9d8f);
+    g.fillEllipse(180, 64, 316, 90);
+    g.fillStyle(0x48cae4);
+    g.fillEllipse(180, 62, 300, 80);
+    g.fillStyle(0xffffff, 0.6);
+    for (let i = 0; i < 9; i++) g.fillCircle(60 + i * 30, 55 + (i % 3) * 8, 5 + (i % 2) * 3);
+  },
+
   snowball: (g) => {
     g.fillStyle(0xffffff);
     g.fillCircle(35, 34, 32);

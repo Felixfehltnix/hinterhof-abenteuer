@@ -79,6 +79,7 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Trommel / Xylophon-Platten antippen | Schallringe / Noten fliegen |
 | Kind ins Zelt ziehen, Zelt antippen | Kind verschwindet, guckt heraus, kommt heraus |
 | Taschenlampe antippen / aufs Kind ziehen | Licht an und aus / Kind hält sie |
+| Kinder in den Whirlpool ziehen / Whirlpool antippen | Kinder zählen reihum mit (bis 6) / neu zählen |
 | Über die freie Wiese wischen | die Welt scrollt nach links und rechts (3 Bildschirme breit) |
 | Kind oder Spielzeug an den Bildschirmrand ziehen | die Welt scrollt mit |
 | Sonne bzw. Mond antippen | nächste Tageszeit: Morgen → Mittag → Abend → Nacht |

@@ -202,6 +202,24 @@ export class BootScene extends Phaser.Scene {
       g.fillPoints([...half(160, 50, 158, 48), ...half(160, 46, 138, 35, true)], true);
     });
 
+    // Vorderer Rand des Whirlpools (über den Kindern, Wasser halbdurchsichtig)
+    this.makeTexture('whirlpool-front', 360, 130, (g) => {
+      const half = (cx: number, cy: number, rx: number, ry: number, reverse = false) => {
+        const pts: Phaser.Math.Vector2[] = [];
+        for (let i = 0; i <= 28; i++) {
+          const a = (i / 28) * Math.PI;
+          pts.push(new Phaser.Math.Vector2(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry));
+        }
+        return reverse ? pts.reverse() : pts;
+      };
+      g.fillStyle(0x48cae4, 0.55);
+      g.fillPoints(half(180, 62, 150, 40), true);
+      g.fillStyle(0xf1faee);
+      g.fillPoints([...half(180, 70, 178, 58), ...half(180, 64, 158, 45, true)], true);
+      g.fillStyle(0x2a9d8f);
+      g.fillPoints([...half(180, 70, 178, 58), ...half(180, 70, 178, 50, true)], true);
+    });
+
     this.makeTexture('drop', 10, 14, (g) => {
       g.fillStyle(0x4cc9f0);
       g.fillCircle(5, 9, 5);

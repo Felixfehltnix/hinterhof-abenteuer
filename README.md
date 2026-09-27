@@ -54,6 +54,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Eimer / Baum antippen | wackelt |
 | Spielzeug schnell ziehen und loslassen | wird geworfen, prallt an den Bildrändern ab |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
+| Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
+| Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |
+| Spielzeug auf Kiste oder Leiste ziehen | wird weggeräumt |
 
 ## Projektstruktur
 

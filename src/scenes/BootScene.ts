@@ -102,6 +102,25 @@ export class BootScene extends Phaser.Scene {
       g.fillCircle(170, 200, 12);
     });
 
+    this.makeTexture('toybox', 210, 140, (g) => {
+      g.fillStyle(0xc0392b);
+      g.fillRoundedRect(0, 0, 210, 140, 16);
+      g.fillStyle(0xe74c3c);
+      g.fillRoundedRect(10, 10, 190, 120, 12);
+      g.fillStyle(0xffd166);
+      g.fillRect(0, 60, 210, 20);
+      // Stern vorne drauf
+      g.fillStyle(0xffffff);
+      g.fillPoints(starPoints(105, 70, 34, 15), true);
+    });
+
+    this.makeTexture('toybox-lid', 220, 36, (g) => {
+      g.fillStyle(0xa93226);
+      g.fillRoundedRect(0, 0, 220, 36, 12);
+      g.fillStyle(0xffd166);
+      g.fillRoundedRect(95, 22, 30, 14, 4);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');
@@ -119,4 +138,14 @@ export class BootScene extends Phaser.Scene {
     g.generateTexture(key, width, height);
     g.destroy();
   }
+}
+
+function starPoints(cx: number, cy: number, outer: number, inner: number): Phaser.Math.Vector2[] {
+  const points: Phaser.Math.Vector2[] = [];
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    points.push(new Phaser.Math.Vector2(cx + Math.cos(a) * r, cy + Math.sin(a) * r));
+  }
+  return points;
 }

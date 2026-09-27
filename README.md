@@ -76,6 +76,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Förmchen im Sandkasten antippen | Sandkuchen (antippen = zerbröselt) |
 | Gießkanne über die Wiese ziehen | Blumen wachsen, Kinder darunter lachen |
 | Rasensprenger antippen | Fontäne an/aus, Kinder in der Nähe hüpfen |
+| Trommel / Xylophon-Platten antippen | Schallringe / Noten fliegen |
+| Kind ins Zelt ziehen, Zelt antippen | Kind verschwindet, guckt heraus, kommt heraus |
+| Taschenlampe antippen / aufs Kind ziehen | Licht an und aus / Kind hält sie |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

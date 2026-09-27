@@ -1,12 +1,14 @@
 import type { BehaviorId } from '../../../data/toys';
 import { dig } from './dig';
 import { draggable } from './draggable';
+import { drum } from './drum';
 import { fillable } from './fillable';
 import { boomerang } from './boomerang';
 import { bubbles } from './bubbles';
 import { cans } from './cans';
 import { float } from './float';
 import { goal } from './goal';
+import { handheld } from './handheld';
 import { holdable } from './holdable';
 import { honk } from './honk';
 import { hopper } from './hopper';
@@ -21,8 +23,11 @@ import { pop } from './pop';
 import { rideable } from './rideable';
 import { seesaw } from './seesaw';
 import { sprinkler } from './sprinkler';
+import { tent } from './tent';
 import { trampoline } from './trampoline';
 import { water } from './water';
+import { xylophone } from './xylophone';
+import { flashlight } from './flashlight';
 import { fling } from './fling';
 import { glide } from './glide';
 import { kick } from './kick';
@@ -63,4 +68,9 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   mold,
   water,
   sprinkler,
+  drum,
+  xylophone,
+  tent,
+  handheld,
+  flashlight,
 };

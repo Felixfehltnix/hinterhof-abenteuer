@@ -39,7 +39,7 @@ export class ToySeats {
     kid.seatedOn = undefined;
     kid.exitPoint = undefined;
     kid.mode = 'idle';
-    kid.setAngle(0).setFlipX(false);
+    kid.setAngle(0).setFlipX(false).setVisible(true);
   }
 
   /** Kinder, die inzwischen woanders sind (weggezogen, nach Hause), austragen. */

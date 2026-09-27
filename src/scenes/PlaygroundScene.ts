@@ -256,7 +256,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.input.on('gameobjectup', (pointer: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
       if (pointer.getDistance() >= DRAG_THRESHOLD) return;
       const onTap: unknown = obj.getData('onTap');
-      if (typeof onTap === 'function') onTap();
+      if (typeof onTap === 'function') onTap(pointer);
     });
   }
 

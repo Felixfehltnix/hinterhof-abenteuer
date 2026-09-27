@@ -148,6 +148,23 @@ export class Kid extends Phaser.GameObjects.Image {
     });
   }
 
+  /** Gähnt (nachts): langsam strecken und wieder zusammensinken. */
+  yawn(): void {
+    if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;
+    this.scene.tweens.add({
+      targets: this,
+      scaleY: 1.07,
+      angle: -4,
+      duration: 700,
+      hold: 350,
+      yoyo: true,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        this.setAngle(0).setScale(1);
+      },
+    });
+  }
+
   /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */
   kick(dir: number): void {
     if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;

@@ -259,6 +259,46 @@ export class BootScene extends Phaser.Scene {
       }
     });
 
+    this.makeTexture('sun', 180, 180, (g) => {
+      g.fillStyle(0xffffff, 0.25);
+      g.fillCircle(90, 90, 90);
+      g.fillStyle(0xffffff);
+      g.fillCircle(90, 90, 70);
+    });
+
+    this.makeTexture('moon', 150, 150, (g) => {
+      g.fillStyle(0xfff8dc, 0.18);
+      g.fillCircle(75, 75, 75);
+      g.fillStyle(0xfff3c4);
+      g.fillCircle(75, 75, 55);
+      g.fillStyle(0xe9dca4);
+      g.fillCircle(55, 62, 11);
+      g.fillCircle(88, 92, 8);
+      g.fillCircle(92, 55, 6);
+    });
+
+    this.makeTexture('cloud', 240, 120, (g) => {
+      g.fillStyle(0xf4faff);
+      g.fillCircle(60, 70, 45);
+      g.fillCircle(115, 50, 55);
+      g.fillCircle(175, 70, 45);
+      g.fillRect(60, 70, 115, 45);
+    });
+
+    // Kleiner Funkelstern (Sterne nachts, Tau morgens)
+    this.makeTexture('twinkle', 20, 20, (g) => {
+      g.fillStyle(0xffffff);
+      g.fillPoints(starPoints(10, 10, 10, 3.5), true);
+    });
+
+    // Glühbirne der Lichterkette (weiß, wird eingefärbt und additiv geblendet)
+    this.makeTexture('bulb', 36, 36, (g) => {
+      g.fillStyle(0xffffff, 0.25);
+      g.fillCircle(18, 18, 18);
+      g.fillStyle(0xffffff, 0.9);
+      g.fillCircle(18, 18, 7);
+    });
+
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');

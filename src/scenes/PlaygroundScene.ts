@@ -111,6 +111,11 @@ export class PlaygroundScene extends Phaser.Scene {
     this.toys.delete(toy);
   }
 
+  /** Alle Spielzeuge, die gerade auf der Wiese sind. */
+  toysOnMeadow(): Toy[] {
+    return [...this.toys];
+  }
+
   /** Spielzeug verschwindet ohne Animation (z. B. geplatzter Ballon). */
   removeToy(toy: Toy): void {
     this.forgetToy(toy);

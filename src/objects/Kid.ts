@@ -99,6 +99,23 @@ export class Kid extends Phaser.GameObjects.Image {
     return { x: this.x + 45 * s, y: this.y - 70 * s };
   }
 
+  /** Jubel-Hüpfer (z. B. bei einem Tor): höher als der normale Hüpfer. */
+  cheer(): void {
+    if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;
+    this.scene.tweens.add({
+      targets: this,
+      y: this.y - 110,
+      scaleY: 1.08,
+      angle: { from: -6, to: 6 },
+      duration: 220,
+      yoyo: true,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        this.setAngle(0);
+      },
+    });
+  }
+
   /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */
   kick(dir: number): void {
     if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;

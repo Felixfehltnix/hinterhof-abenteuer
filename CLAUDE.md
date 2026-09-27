@@ -51,6 +51,9 @@ Szenencode bleibt unberührt. Vorhandene Bausteine (`src/objects/toys/behaviors/
 `plane` (Papierflieger mit Looping), `boomerang` (kommt zurück), `kite` (steigt beim Ziehen an
 der Schnur), `float` (schwebt am Himmel), `holdable` (Kind hält es an der Schnur, `params.holdHeight`),
 `pop` (Antippen = platzt mit Konfetti), `bubbles` (Antippen = Seifenblasen).
+`hoop` (Basketballkorb mit Zielhilfe), `goal` (Fußballtor, Kinder jubeln), `cans`/`pins`
+(Dosen/Kegel purzeln, Antippen baut neu auf; gemeinsame Logik in `toys/knockdown.ts`).
+Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst großzügig.
 Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).
 Wind: `src/world/environment.ts` (`environment.wind`), Spielzeuge reagieren mit `params.windFactor`.
 

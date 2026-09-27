@@ -16,9 +16,26 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,
   `accepts()`/`use()`/`update()` überschreiben, in `createEquipment()` eintragen.
 - Tippen: `obj.setData('onTap', fn)`. Die Szene ruft das auf, wenn nicht gezogen wurde.
-- Grafiken: Platzhalter entstehen in `BootScene`. Echte PNGs kommen nach `public/assets/`
+- Grafiken: Platzhalter entstehen in `BootScene` (Spielzeuge: `src/scenes/placeholders/toys.ts`). Echte PNGs kommen nach `public/assets/`
   und werden in `BootScene.preload()` unter demselben Texture-Key geladen.
 - Code-Kommentare auf Deutsch, Bezeichner auf Englisch.
+
+## So fügt man ein Spielzeug hinzu
+1. Eintrag in `TOYS` in `src/data/toys.ts`: `id` (zugleich Texture-Key), `width`/`height`,
+   `behaviors` (Bausteine) und optional `params` (Abweichungen von `DEFAULT_TOY_PARAMS`,
+   z. B. `bounce`, `gravity`, `airDrag`, `spin`).
+2. Platzhalter-Zeichnung unter derselben id in `src/scenes/placeholders/toys.ts`
+   (fehlt sie, meldet `tsc` einen Fehler).
+3. Soll es beim Start auf der Wiese liegen: Eintrag in `PLACED_TOYS` in `src/data/playground.ts`.
+
+Szenencode bleibt unberührt. Vorhandene Bausteine (`src/objects/toys/behaviors/`):
+`draggable` (ziehen, landet auf der Wiese), `fling` (schnell loslassen = werfen),
+`kick` (Antippen = Schuss im Bogen), `wobble` (Antippen = wackeln).
+
+Neuer Baustein: Datei in `src/objects/toys/behaviors/` mit einer `BehaviorFactory`
+(Hooks `onTap`, `onDragStart`, `onDragEnd`, `update`), in `behaviors/index.ts` eintragen,
+`BehaviorId` in `toys.ts` erweitern. Bewegung läuft über `toy.physics` (`ToyPhysics`:
+Bodenlinie + Höhe, Bildränder sind eine Bande), nicht über eigene Tweens auf x/y.
 
 ## Zielgruppe
 Kleine Kinder: große Touch-Flächen, sofortiges Feedback, nichts, was man kaputt machen

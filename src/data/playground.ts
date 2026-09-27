@@ -1,3 +1,5 @@
+import type { ToyId } from './toys';
+
 // Die Spielwiese im Hinterhof – komplett im Code definiert.
 // Koordinaten beziehen sich auf 1920×1080. x/y ist jeweils der Fußpunkt (unten Mitte).
 
@@ -17,16 +19,14 @@ export const EQUIPMENT: EquipmentDef[] = [
   { id: 'sandkasten', kind: 'sandbox', x: 1080, y: 1010 },
 ];
 
-export type PropKind = 'ball' | 'bucket';
-
-export interface PropDef {
-  id: string;
-  kind: PropKind;
+// Spielzeuge, die beim Start auf der Wiese liegen. Die Typen stehen in toys.ts.
+export interface PlacedToy {
+  toy: ToyId;
   x: number;
   y: number;
 }
 
-export const PROPS: PropDef[] = [
-  { id: 'ball', kind: 'ball', x: 900, y: 930 },
-  { id: 'eimer', kind: 'bucket', x: 1180, y: 985 },
+export const PLACED_TOYS: PlacedToy[] = [
+  { toy: 'ball', x: 900, y: 930 },
+  { toy: 'bucket', x: 1180, y: 985 },
 ];

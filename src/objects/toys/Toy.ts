@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, MIN_TOUCH_SIZE } from '../../config';
 import { DEFAULT_TOY_PARAMS, type ToyDef, type ToyParams } from '../../data/toys';
 import { BEHAVIORS, type Release, type ToyBehavior } from './behaviors';
+import type { Kid } from '../Kid';
 import { ToyPhysics } from './ToyPhysics';
 
 // Nur die Fingerbewegung der letzten Millisekunden zählt für die Wurfgeschwindigkeit.
@@ -19,6 +20,10 @@ export class Toy extends Phaser.GameObjects.Image {
   readonly physics: ToyPhysics;
   private readonly behaviors: ToyBehavior[];
   private track: { x: number; y: number; t: number }[] = [];
+  /** Wird gerade von einem Finger gezogen. */
+  isDragging = false;
+  /** Das Kind, das es gerade an der Schnur hält (holdable). */
+  heldBy?: Kid;
 
   constructor(scene: Phaser.Scene, def: ToyDef, x: number, y: number) {
     super(scene, x, y, def.id);
@@ -42,6 +47,7 @@ export class Toy extends Phaser.GameObjects.Image {
 
     this.behaviors = def.behaviors.map((id) => BEHAVIORS[id](this));
     this.setData('onTap', () => this.behaviors.forEach((b) => b.onTap?.()));
+    this.once(Phaser.GameObjects.Events.DESTROY, () => this.behaviors.forEach((b) => b.onDestroy?.()));
   }
 
   handleDragStart(): void {
@@ -49,6 +55,7 @@ export class Toy extends Phaser.GameObjects.Image {
     this.physics.stop();
     if (!this.params.spin) this.setRotation(0);
     this.track = [];
+    this.isDragging = true;
     this.behaviors.forEach((b) => b.onDragStart?.());
   }
 
@@ -58,13 +65,20 @@ export class Toy extends Phaser.GameObjects.Image {
     const now = pointer.moveTime;
     this.track.push({ x, y, t: now });
     while (this.track.length > 2 && now - this.track[0].t > VELOCITY_WINDOW_MS) this.track.shift();
+    this.behaviors.forEach((b) => b.onDrag?.(x, y));
   }
 
   handleDragEnd(pointer: Phaser.Input.Pointer): void {
     const release: Release = { vx: 0, vy: 0, pointerVelocity: this.pointerVelocity(pointer.upTime) };
+    this.isDragging = false;
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
     // Auch ohne Wurf: fällt aus der Luft zurück auf die Wiese.
-    this.physics.launch(release.vx, release.vy, release.groundY);
+    if (!release.handled) this.physics.launch(release.vx, release.vy, release.groundY);
+  }
+
+  /** Ein Kind wurde auf diesem Spielzeug losgelassen. true = ein Baustein hat es angenommen. */
+  offerKid(kid: Kid): boolean {
+    return this.behaviors.some((b) => b.onKidDropped?.(kid) ?? false);
   }
 
   /** Position fürs Speichern: ein fliegendes Spielzeug liegt schon dort, wo es landen wird. */

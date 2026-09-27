@@ -47,7 +47,12 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 Szenencode bleibt unberührt. Vorhandene Bausteine (`src/objects/toys/behaviors/`):
 `draggable` (ziehen, landet auf der Wiese), `fling` (schnell loslassen = werfen),
 `kick` (Antippen = Schuss im Bogen), `wobble` (Antippen = wackeln),
-`glide` (gleitet mit `params.lift`, z. B. Frisbee), `kidKick` (auf ein Kind fallen lassen = Kind kickt).
+`glide` (gleitet mit `params.lift`, z. B. Frisbee), `kidKick` (auf ein Kind fallen lassen = Kind kickt),
+`plane` (Papierflieger mit Looping), `boomerang` (kommt zurück), `kite` (steigt beim Ziehen an
+der Schnur), `float` (schwebt am Himmel), `holdable` (Kind hält es an der Schnur, `params.holdHeight`),
+`pop` (Antippen = platzt mit Konfetti), `bubbles` (Antippen = Seifenblasen).
+Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).
+Wind: `src/world/environment.ts` (`environment.wind`), Spielzeuge reagieren mit `params.windFactor`.
 
 Neuer Baustein: Datei in `src/objects/toys/behaviors/` mit einer `BehaviorFactory`
 (Hooks `onTap`, `onDragStart`, `onDragEnd`, `update`), in `behaviors/index.ts` eintragen,

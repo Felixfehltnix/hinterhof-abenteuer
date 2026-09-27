@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../../config';
 import type { ToyParams } from '../../data/toys';
+import { environment } from '../../world/environment';
 
 // Unter dieser Aufprallgeschwindigkeit (px/s) springt nichts mehr hoch.
 const MIN_BOUNCE_SPEED = 120;
@@ -63,6 +64,7 @@ export class ToyPhysics {
       const lift = p.lift * Math.min(1, Math.abs(this.vx) / LIFT_FULL_SPEED);
       this.vz -= p.gravity * (1 - lift) * dt;
       this.vx *= Math.exp(-p.airDrag * dt);
+      this.vx += environment.wind * p.windFactor * dt;
     }
     this.z += this.vz * dt;
     let x = obj.x + this.vx * dt;

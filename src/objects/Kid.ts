@@ -15,6 +15,8 @@ export class Kid extends Phaser.GameObjects.Image {
   seatedOn?: Seat;
   /** Wo das Kind steht, wenn eine laufende Aktion (Schaukeln, Rutschen) abbricht. */
   exitPoint?: { x: number; y: number };
+  /** Was das Kind gerade in der Hand hält (Ballon, Drachen, …). */
+  holding?: Phaser.GameObjects.GameObject;
 
   constructor(scene: Phaser.Scene, def: CharacterDef, x: number, y: number) {
     super(scene, x, y, `kid-${def.id}`);
@@ -89,6 +91,12 @@ export class Kid extends Phaser.GameObjects.Image {
       x: Phaser.Math.Clamp(p.x, 60, GAME_WIDTH - 60),
       y: Phaser.Math.Clamp(p.y, GROUND_MIN_Y, GROUND_MAX_Y),
     };
+  }
+
+  /** Wo die rechte Hand ist (für Schnüre von Ballon, Drachen, …). */
+  handPoint(): { x: number; y: number } {
+    const s = this.def.size * this.scaleY;
+    return { x: this.x + 45 * s, y: this.y - 70 * s };
   }
 
   /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */

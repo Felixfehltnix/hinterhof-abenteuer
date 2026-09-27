@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../../../config';
+import { GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../../../config';
 import { VEHICLES, type VehicleDef } from '../../../data/vehicles';
 import type { Kid, Seat } from '../../Kid';
 import type { Toy } from '../Toy';
@@ -115,7 +115,7 @@ export const rideable: BehaviorFactory = (toy) => {
       if (rider) {
         const kid = rider;
         seat.unseat(kid);
-        kid.setPosition(Phaser.Math.Clamp(toy.x + 110, 60, GAME_WIDTH - 60), Phaser.Math.Clamp(toy.y + 10, GROUND_MIN_Y, GROUND_MAX_Y));
+        kid.setPosition(Phaser.Math.Clamp(toy.x + 110, 60, WORLD_WIDTH - 60), Phaser.Math.Clamp(toy.y + 10, GROUND_MIN_Y, GROUND_MAX_Y));
         kid.setDepth(kid.y);
         kid.hop();
       }

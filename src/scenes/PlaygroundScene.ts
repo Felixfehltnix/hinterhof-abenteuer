@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import {
   DRAG_THRESHOLD,
   GAME_HEIGHT,
-  GAME_WIDTH,
+  WORLD_WIDTH,
   GROUND_MAX_Y,
   GROUND_MIN_Y,
   GROUND_TOP,
@@ -20,6 +20,7 @@ import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
+import { CameraControl } from '../world/CameraControl';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
 
 /** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
@@ -41,6 +42,8 @@ export class PlaygroundScene extends Phaser.Scene {
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
   weather!: Weather;
+  /** Kamera über der breiten Wiese (Wischen zum Scrollen) */
+  cameraControl!: CameraControl;
   private readonly worldStates = new Map<string, WorldState>();
   private savedWorld: Record<string, unknown> = {};
 
@@ -66,6 +69,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.garden = new Garden(this);
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
+    this.cameraControl = new CameraControl(this);
 
     this.setupInput();
     new AutoSave(this, () => this.snapshot());
@@ -96,7 +100,7 @@ export class PlaygroundScene extends Phaser.Scene {
   }
 
   private restore(save: SaveData): void {
-    const x = (v: number) => Phaser.Math.Clamp(v, 60, GAME_WIDTH - 60);
+    const x = (v: number) => Phaser.Math.Clamp(v, 60, WORLD_WIDTH - 60);
     const y = (v: number) => Phaser.Math.Clamp(v, GROUND_MIN_Y, GROUND_MAX_Y);
     for (const k of save.kids) {
       const def = CHARACTERS.find((c) => c.id === k.id);
@@ -142,7 +146,13 @@ export class PlaygroundScene extends Phaser.Scene {
   }
 
   /** Ein gezogenes Spielzeug wurde losgelassen: wegräumen oder auf die Wiese. */
+  /** Zeiger in Weltkoordinaten (die Wiese ist breiter als der Bildschirm und scrollt). */
+  worldPoint(pointer: Phaser.Input.Pointer): Phaser.Math.Vector2 {
+    return this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+  }
+
   releaseToy(toy: Toy, pointer: Phaser.Input.Pointer): void {
+    // Die Kiste steht fest auf dem Bildschirm: Bildschirm-Koordinaten.
     if (this.toyBox.accepts(pointer.x, pointer.y)) {
       this.toyBox.putAway(toy);
       return;
@@ -151,7 +161,8 @@ export class PlaygroundScene extends Phaser.Scene {
     for (const other of this.toys) {
       const zone = other !== toy ? this.dropZone(other) : undefined;
       // Großzügig: Finger oder Mitte des Spielzeugs über dem anderen Spielzeug
-      const over = zone && (zone.contains(pointer.x, pointer.y) || zone.contains(toy.x, toy.y - toy.displayHeight / 2));
+      const w = this.worldPoint(pointer);
+      const over = zone && (zone.contains(w.x, w.y) || zone.contains(toy.x, toy.y - toy.displayHeight / 2));
       if (over && other.offerToy(toy)) {
         // Das Spielzeug kann dabei verschwunden sein (z. B. Schneebälle verschmelzen).
         if (toy.active) {
@@ -200,14 +211,15 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Ein gezogenes Kind wurde losgelassen: nach Hause, auf ein Spielgerät oder auf die Wiese. */
   releaseKid(kid: Kid, pointer: Phaser.Input.Pointer, arriving = false): void {
     kid.endDrag();
-    if (this.gate.accepts(pointer.x, pointer.y)) {
+    if (this.gate.accepts(pointer)) {
       this.gate.sendHome(kid);
       return;
     }
     // Auf ein Spielzeug gezogen, das Kinder annimmt (z. B. Drachen, Ballon festhalten)?
     for (const toy of this.toys) {
       const zone = this.dropZone(toy);
-      if ((zone.contains(pointer.x, pointer.y) || zone.contains(kid.x, kid.y)) && toy.offerKid(kid)) {
+      const w = this.worldPoint(pointer);
+      if ((zone.contains(w.x, w.y) || zone.contains(kid.x, kid.y)) && toy.offerKid(kid)) {
         // Hält das Kind nur etwas fest (Ballon), steht es auf der Wiese; sitzt es auf einem Fahrzeug, nicht.
         if (kid.mode === 'idle') kid.settle();
         return;
@@ -268,7 +280,8 @@ export class PlaygroundScene extends Phaser.Scene {
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
       if (over.length === 0 && pointer.getDistance() < DRAG_THRESHOLD) {
         this.closeInventories();
-        this.weather.onFreeTap(pointer.x, pointer.y);
+        const w = this.worldPoint(pointer);
+        this.weather.onFreeTap(w.x, w.y);
       }
     });
 
@@ -282,26 +295,26 @@ export class PlaygroundScene extends Phaser.Scene {
 
   // --- Hintergrund (Platzhalter) --------------------------------------------
 
-  /** Zaun und Wiese. Himmel, Sonne, Mond und Wolken zeichnet der DayCycle. */
+  /** Zaun und Wiese über die ganze Weltbreite. Himmel, Sonne, Mond und Wolken zeichnet der DayCycle. */
   private drawBackground(): void {
     const g = this.add.graphics().setDepth(-1000);
 
     // Zaun im Hinterhof
     g.fillStyle(0xc98b5a);
-    g.fillRect(0, GROUND_TOP - 120, GAME_WIDTH, 120);
+    g.fillRect(0, GROUND_TOP - 120, WORLD_WIDTH, 120);
     g.lineStyle(4, 0xa56f45);
-    for (let x = 0; x < GAME_WIDTH; x += 60) g.lineBetween(x, GROUND_TOP - 120, x, GROUND_TOP);
+    for (let x = 0; x < WORLD_WIDTH; x += 60) g.lineBetween(x, GROUND_TOP - 120, x, GROUND_TOP);
 
     // Wiese
     g.fillStyle(0x7cc96a);
-    g.fillRect(0, GROUND_TOP, GAME_WIDTH, GAME_HEIGHT - GROUND_TOP);
+    g.fillRect(0, GROUND_TOP, WORLD_WIDTH, GAME_HEIGHT - GROUND_TOP);
     g.fillStyle(0x6ab85a);
-    g.fillRect(0, GROUND_TOP, GAME_WIDTH, 28);
+    g.fillRect(0, GROUND_TOP, WORLD_WIDTH, 28);
 
     // Blümchen (deterministisch verteilt)
     const colors = [0xffffff, 0xffd6e0, 0xfff3b0];
-    for (let i = 0; i < 45; i++) {
-      const x = (i * 197 + 40) % GAME_WIDTH;
+    for (let i = 0; i < 45 * 3; i++) {
+      const x = (i * 197 + 40) % WORLD_WIDTH;
       const y = GROUND_TOP + 50 + ((i * 89) % (GAME_HEIGHT - GROUND_TOP - 70));
       g.fillStyle(colors[i % colors.length]);
       g.fillCircle(x, y, 6);

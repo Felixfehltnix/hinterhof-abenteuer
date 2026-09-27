@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, GROUND_TOP } from '../config';
+import { DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, GROUND_TOP, WORLD_WIDTH } from '../config';
 import { getToyDef } from '../data/toys';
 import type { Kid } from '../objects/Kid';
 import type { Toy } from '../objects/toys/Toy';
@@ -26,7 +26,7 @@ export class Snow {
   constructor(private readonly scene: PlaygroundScene) {
     // Schneedecke über der Wiese (unter allen Objekten)
     this.blanket = scene.add
-      .rectangle(0, GROUND_TOP, GAME_WIDTH, GAME_HEIGHT - GROUND_TOP, 0xf5f9ff)
+      .rectangle(0, GROUND_TOP, WORLD_WIDTH, GAME_HEIGHT - GROUND_TOP, 0xf5f9ff)
       .setOrigin(0)
       .setDepth(-984)
       .setAlpha(0);
@@ -42,7 +42,7 @@ export class Snow {
       alpha: { min: 0.7, max: 1 },
       emitting: false,
     });
-    this.flakes.setDepth(DEPTH_TINT - 15);
+    this.flakes.setDepth(DEPTH_TINT - 15).setScrollFactor(0);
   }
 
   get coverAmount(): number {

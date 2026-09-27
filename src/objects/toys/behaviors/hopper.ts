@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../../../config';
+import { WORLD_WIDTH } from '../../../config';
 import { ToySeats } from '../seats';
 import type { BehaviorFactory } from './types';
 
 const SPEED = 110; // px/s
 const HOP_HEIGHT = 35;
 const HOP_TIME = 450;
-const EDGE = 120; // so weit vom Bildrand dreht es um
+const EDGE = 120; // so weit vom Weltrand dreht es um
 
 /** Hüpfball: Ein Kind darauf hüpft in kleinen Sprüngen über die Wiese hin und her. */
 export const hopper: BehaviorFactory = (toy) => {
@@ -43,9 +43,9 @@ export const hopper: BehaviorFactory = (toy) => {
         if (Math.random() < 0.4) dir = -dir;
       }
       let x = toy.x + dir * SPEED * (delta / 1000);
-      if (x < EDGE || x > GAME_WIDTH - EDGE) {
+      if (x < EDGE || x > WORLD_WIDTH - EDGE) {
         dir = x < EDGE ? 1 : -1;
-        x = Phaser.Math.Clamp(x, EDGE, GAME_WIDTH - EDGE);
+        x = Phaser.Math.Clamp(x, EDGE, WORLD_WIDTH - EDGE);
       }
       const p = (now % HOP_TIME) / HOP_TIME;
       const h = 4 * p * (1 - p) * HOP_HEIGHT;

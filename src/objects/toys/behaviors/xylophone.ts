@@ -12,7 +12,8 @@ export const xylophone: BehaviorFactory = (toy) => ({
   onTap: (pointer) => {
     const scene = toy.scene;
     const left = toy.x - toy.displayWidth / 2;
-    const localX = pointer ? (pointer.x - left) / toy.scaleX : toy.width / 2;
+    const wx = pointer ? scene.cameras.main.getWorldPoint(pointer.x, pointer.y).x : toy.x;
+    const localX = pointer ? (wx - left) / toy.scaleX : toy.width / 2;
     const bar = Phaser.Math.Clamp(Math.floor((localX - BAR_LEFT) / BAR_STEP), 0, BARS - 1);
     scene.events.emit('sound', { kind: 'xylophone', pitch: bar, x: toy.x });
 

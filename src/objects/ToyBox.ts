@@ -18,11 +18,13 @@ export class ToyBox {
     x: number,
     y: number,
   ) {
-    this.body = scene.add.image(x, y, 'toybox').setOrigin(0.5, 1).setDepth(y);
+    // Die Kiste steht fest auf dem Bildschirm und scrollt nicht mit der Wiese.
+    this.body = scene.add.image(x, y, 'toybox').setOrigin(0.5, 1).setDepth(y).setScrollFactor(0);
     this.lid = scene.add
       .image(x - this.body.width / 2 - 5, y - this.body.height + 4, 'toybox-lid')
       .setOrigin(0, 1)
-      .setDepth(y + 1);
+      .setDepth(y + 1)
+      .setScrollFactor(0);
 
     // Große Touch-Fläche: Kiste samt Deckel und etwas Rand.
     const pad = 30;
@@ -58,7 +60,7 @@ export class ToyBox {
     this.scene.tweens.add({ targets: this.lid, angle: 0, duration: 250, ease: 'Bounce.easeOut' });
   }
 
-  /** Würde ein an (x, y) losgelassenes Spielzeug hier weggeräumt? */
+  /** Würde ein an (x, y) losgelassenes Spielzeug hier weggeräumt? (Bildschirm-Koordinaten) */
   accepts(x: number, y: number): boolean {
     if (this.tray.contains(x, y)) return true;
     const b = this.body.getBounds();
@@ -103,7 +105,9 @@ export class ToyBox {
     const def = getToyDef(id);
     // Der Finger hält das Spielzeug in der Mitte.
     const offsetY = def.height / 2;
-    const toy = this.scene.spawnToy(def, pointer.x, pointer.y + offsetY);
+    // Aus der (festen) Leiste gezogen, aber in der Welt erzeugt.
+    const w = this.scene.worldPoint(pointer);
+    const toy = this.scene.spawnToy(def, w.x, w.y + offsetY);
     if (!toy) {
       this.refuse();
       return null;
@@ -112,7 +116,10 @@ export class ToyBox {
     // Frisch aus der Kiste: keine „Aufhebe-Linie“, in der Luft losgelassen landet es hinten.
     toy.pickupGroundY = undefined;
     return {
-      move: (p) => toy.handleDrag(p, p.x, p.y + offsetY),
+      move: (p) => {
+        const pw = this.scene.worldPoint(p);
+        toy.handleDrag(p, pw.x, pw.y + offsetY);
+      },
       release: (p) => this.scene.releaseToy(toy, p),
     };
   }

@@ -27,6 +27,8 @@ export interface ToyBehavior {
   onKidDropped?(kid: Kid): boolean;
   /** Ein anderes Spielzeug wurde auf diesem losgelassen (z. B. in die Schubkarre). true = angenommen. */
   onToyDropped?(other: Toy): boolean;
+  /** Etwas wird hineingegeben (z. B. Sand von der Schaufel in den Eimer). */
+  onReceive?(kind: string, amount: number): void;
   /** Das Spielzeug wird gerade weggeräumt (Kind absteigen lassen, Ladung ausschütten, …). */
   onRemove?(): void;
   /** Das Spielzeug verschwindet (weggeräumt, geplatzt): eigene Objekte aufräumen. */

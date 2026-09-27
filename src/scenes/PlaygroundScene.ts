@@ -11,7 +11,8 @@ import {
 import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
 import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
 import { getToyDef, TOYS, type ToyDef } from '../data/toys';
-import { createEquipment, type Equipment } from '../objects/Equipment';
+import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
+import { Garden } from '../objects/Garden';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { ToyBox } from '../objects/ToyBox';
@@ -32,6 +33,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private readonly toys = new Set<Toy>();
   private toyBox!: ToyBox;
   private gate!: GardenGate;
+  /** Blumen und Sandkuchen */
+  garden!: Garden;
   private readonly worldStates = new Map<string, WorldState>();
   private savedWorld: Record<string, unknown> = {};
 
@@ -53,6 +56,8 @@ export class PlaygroundScene extends Phaser.Scene {
       PLACED_KIDS.forEach((k) => this.spawnKid(getCharacterDef(k.kid), k.x, k.y));
       PLACED_TOYS.forEach((t) => this.spawnToy(getToyDef(t.toy), t.x, t.y));
     }
+
+    this.garden = new Garden(this);
 
     this.setupInput();
     new AutoSave(this, () => this.snapshot());
@@ -94,6 +99,7 @@ export class PlaygroundScene extends Phaser.Scene {
       if (def) this.spawnToy(def, x(t.x), y(t.y));
     }
     this.savedWorld = save.world;
+    for (const [key, state] of this.worldStates) if (key in this.savedWorld) state.load(this.savedWorld[key]);
   }
 
   // --- Spielzeuge auf der Wiese -------------------------------------------
@@ -109,6 +115,11 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Spielzeug zählt nicht mehr zur Wiese (z. B. weil es gerade weggeräumt wird). */
   forgetToy(toy: Toy): void {
     if (this.toys.delete(toy)) toy.notifyRemoved();
+  }
+
+  /** Liegt (x, y) in einem Sandkasten? */
+  isInSandbox(x: number, y: number): boolean {
+    return this.equipment.some((e) => e instanceof Sandbox && e.contains(x, y));
   }
 
   /** Alle Spielzeuge, die gerade auf der Wiese sind. */

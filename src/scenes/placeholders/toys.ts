@@ -292,6 +292,47 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillEllipse(110, 38, 60, 10);
     g.fillEllipse(200, 52, 40, 8);
   },
+
+  shovel: (g) => {
+    g.fillStyle(0xfb8500);
+    g.fillRoundedRect(20, 0, 10, 72, 4); // Stiel
+    g.fillRoundedRect(8, 0, 34, 12, 6); // Griff
+    g.fillStyle(0x219ebc);
+    g.fillRoundedRect(4, 68, 42, 40, { tl: 6, tr: 6, bl: 20, br: 20 }); // Schaufelblatt
+    g.fillTriangle(8, 100, 42, 100, 25, 120);
+  },
+
+  sandmold: (g) => {
+    g.fillStyle(0x9b5de5);
+    for (let i = 0; i < 6; i++) g.fillCircle(10 + i * 11.2, 14, 9); // gewellter Rand
+    g.fillPoints(
+      [new Phaser.Math.Vector2(4, 14), new Phaser.Math.Vector2(72, 14), new Phaser.Math.Vector2(60, 50), new Phaser.Math.Vector2(16, 50)],
+      true,
+    );
+    g.fillStyle(0xffffff, 0.35);
+    g.fillRect(20, 22, 8, 22);
+  },
+
+  wateringcan: (g) => {
+    g.lineStyle(9, 0x2a9d8f);
+    g.lineBetween(84, 58, 116, 26); // Tülle
+    g.beginPath();
+    g.arc(46, 22, 22, Math.PI, 0, false); // Henkel
+    g.strokePath();
+    g.fillStyle(0x2a9d8f);
+    g.fillRoundedRect(14, 28, 70, 62, 12);
+    g.fillStyle(0x21867a);
+    g.fillRect(110, 20, 10, 12); // Brause
+  },
+
+  sprinkler: (g) => {
+    g.fillStyle(0x6c757d);
+    g.fillEllipse(40, 52, 76, 16);
+    g.fillStyle(0xffd166);
+    g.fillRoundedRect(32, 10, 16, 44, 6);
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(20, 6, 40, 12, 6);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

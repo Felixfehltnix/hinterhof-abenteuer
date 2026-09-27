@@ -132,6 +132,21 @@ export class Kid extends Phaser.GameObjects.Image {
     });
   }
 
+  /** Schüttelt sich lachend (z. B. unter der Gießkanne). */
+  giggle(): void {
+    if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;
+    this.scene.tweens.add({
+      targets: this,
+      angle: { from: -8, to: 8 },
+      duration: 60,
+      yoyo: true,
+      repeat: 5,
+      onComplete: () => {
+        this.setAngle(0);
+      },
+    });
+  }
+
   /** Kickt etwas weg: kurz nach hinten lehnen und das Bein schwingen. */
   kick(dir: number): void {
     if (this.mode !== 'idle' || this.scene.tweens.isTweening(this)) return;

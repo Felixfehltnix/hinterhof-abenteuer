@@ -86,6 +86,11 @@ export class Toy extends Phaser.GameObjects.Image {
     return this.behaviors.some((b) => b.onToyDropped?.(other) ?? false);
   }
 
+  /** Etwas hineingeben (z. B. Sand in den Eimer). */
+  receive(kind: string, amount: number): void {
+    this.behaviors.forEach((b) => b.onReceive?.(kind, amount));
+  }
+
   /** Wird von der Szene aufgerufen, bevor das Spielzeug verschwindet. */
   notifyRemoved(): void {
     this.behaviors.forEach((b) => b.onRemove?.());

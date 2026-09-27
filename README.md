@@ -53,6 +53,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Ball antippen | Ball fliegt im Bogen weg und rollt aus |
 | Eimer / Baum antippen | wackelt |
 | Spielzeug schnell ziehen und loslassen | wird geworfen, prallt an den Bildrändern ab |
+| Fußball / Basketball / Wasserball antippen | flacher Schuss / hoher Bogen / schwebt lange |
+| Frisbee werfen | gleitet weit und sinkt sanft |
+| Ball auf ein Kind fallen lassen | das Kind kickt ihn weg |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

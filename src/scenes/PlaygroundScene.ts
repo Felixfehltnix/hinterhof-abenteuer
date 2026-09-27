@@ -128,6 +128,11 @@ export class PlaygroundScene extends Phaser.Scene {
     return kid;
   }
 
+  /** Alle Kinder, die gerade auf der Wiese sind. */
+  kidsOnMeadow(): Kid[] {
+    return [...this.kids];
+  }
+
   hasKid(id: CharacterId): boolean {
     for (const kid of this.kids) if (kid.def.id === id) return true;
     return false;

@@ -22,7 +22,9 @@ export type BehaviorId =
   | 'hoop'
   | 'goal'
   | 'cans'
-  | 'pins';
+  | 'pins'
+  | 'rideable'
+  | 'honk';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball';
@@ -199,6 +201,38 @@ export const TOYS = [
     height: 34,
     behaviors: ['draggable', 'pins'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Kind darauf ziehen: sitzt. Ziehen: fährt. Antippen: hupt.
+    id: 'bobbycar',
+    width: 180,
+    height: 100,
+    behaviors: ['draggable', 'rideable', 'honk'],
+    params: { bounce: 0.1, rollFriction: 1.8 },
+  },
+  {
+    // Wie Bobbycar, das Kind macht Laufbewegungen.
+    id: 'balancebike',
+    width: 190,
+    height: 110,
+    behaviors: ['draggable', 'rideable', 'wobble'],
+    params: { bounce: 0.1, rollFriction: 1.8 },
+  },
+  {
+    // Wie Bobbycar, das Kind steht und stößt sich ab.
+    id: 'scooter',
+    width: 150,
+    height: 150,
+    behaviors: ['draggable', 'rideable', 'wobble'],
+    params: { bounce: 0.1, rollFriction: 1.5 },
+  },
+  {
+    // Spielzeug oder Kind hineinlegen und samt Inhalt schieben.
+    id: 'wheelbarrow',
+    width: 200,
+    height: 110,
+    behaviors: ['draggable', 'rideable', 'wobble'],
+    params: { bounce: 0.1, rollFriction: 2.5 },
   },
 ] as const satisfies readonly ToyDef[];
 

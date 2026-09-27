@@ -64,6 +64,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Ball in den Basketballkorb werfen | Netz wackelt, Sterne sprühen |
 | Ball ins Fußballtor schießen | Netz beult sich, alle Kinder jubeln |
 | Ball auf Dosen / Kegel | purzeln um, Antippen stellt sie wieder auf |
+| Kind auf Bobbycar / Laufrad / Roller ziehen | sitzt auf; Fahrzeug ziehen = fahren; Kind wegziehen = absteigen |
+| Bobbycar antippen | hupt |
+| Spielzeug oder Kind in die Schubkarre | wird mitgeschoben |
 | Irgendwas in den Himmel ziehen und loslassen | fällt zurück auf die Wiese |
 | Spielzeugkiste (unten links) antippen | Leiste mit allen Spielzeugen geht auf |
 | Spielzeug aus der Leiste nach oben ziehen | neues Spielzeug auf der Wiese |

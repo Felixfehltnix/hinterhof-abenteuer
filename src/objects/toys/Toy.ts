@@ -81,6 +81,16 @@ export class Toy extends Phaser.GameObjects.Image {
     return this.behaviors.some((b) => b.onKidDropped?.(kid) ?? false);
   }
 
+  /** Ein anderes Spielzeug wurde hierauf losgelassen. true = ein Baustein hat es angenommen. */
+  offerToy(other: Toy): boolean {
+    return this.behaviors.some((b) => b.onToyDropped?.(other) ?? false);
+  }
+
+  /** Wird von der Szene aufgerufen, bevor das Spielzeug verschwindet. */
+  notifyRemoved(): void {
+    this.behaviors.forEach((b) => b.onRemove?.());
+  }
+
   /** Position fürs Speichern: ein fliegendes Spielzeug liegt schon dort, wo es landen wird. */
   restPosition(): { x: number; y: number } {
     const y = this.physics.active ? this.physics.groundY : this.y;

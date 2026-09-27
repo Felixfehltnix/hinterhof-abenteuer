@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { DEPTH_DRAGGING, GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../config';
 import type { CharacterDef } from '../data/characters';
 
-export type KidMode = 'idle' | 'dragging' | 'swinging' | 'sliding' | 'leaving';
+export type KidMode = 'idle' | 'dragging' | 'swinging' | 'sliding' | 'riding' | 'leaving';
 
 /** Alles, worauf ein Kind "sitzen" kann (z. B. die Schaukel). */
 export interface Seat {

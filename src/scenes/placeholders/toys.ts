@@ -199,6 +199,48 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillCircle(120, 16, 3);
     g.fillCircle(184, 16, 3);
   },
+
+  // Fahrzeuge ohne Räder (die zeichnet rideable als eigene, drehbare Bilder).
+  bobbycar: (g) => {
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(8, 34, 164, 48, 22);
+    g.fillRoundedRect(8, 12, 44, 40, 12); // Rückenlehne
+    g.fillStyle(0xffffff);
+    g.fillCircle(160, 56, 8); // Scheinwerfer
+    g.lineStyle(6, 0x2b2d42);
+    g.lineBetween(128, 36, 138, 10); // Lenksäule
+    g.lineBetween(126, 10, 150, 10); // Lenkrad
+  },
+
+  balancebike: (g) => {
+    g.lineStyle(9, 0x06d6a0);
+    g.lineBetween(35, 83, 95, 50); // Rahmen hinten
+    g.lineBetween(95, 50, 155, 83); // Gabel
+    g.lineBetween(145, 60, 150, 12); // Lenkstange
+    g.lineStyle(7, 0x2b2d42);
+    g.lineBetween(135, 12, 168, 12); // Lenker
+    g.fillStyle(0x2b2d42);
+    g.fillRoundedRect(68, 36, 50, 14, 7); // Sattel
+  },
+
+  scooter: (g) => {
+    g.fillStyle(0x4d96ff);
+    g.fillRoundedRect(18, 118, 110, 16, 7); // Trittbrett
+    g.fillRect(114, 18, 10, 104); // Lenksäule
+    g.fillStyle(0x2b2d42);
+    g.fillRoundedRect(98, 10, 44, 12, 6); // Lenker
+  },
+
+  wheelbarrow: (g) => {
+    const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
+    g.lineStyle(8, 0x8d6e63);
+    g.lineBetween(0, 40, 175, 86); // Griffe/Holm
+    g.lineBetween(50, 70, 44, 110); // Stütze
+    g.fillStyle(0x2a9d8f);
+    g.fillPoints([v(22, 22), v(178, 22), v(150, 80), v(52, 80)], true); // Wanne
+    g.fillStyle(0x21867a);
+    g.fillRect(22, 22, 156, 8);
+  },
 };
 
 function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {

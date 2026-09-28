@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import {
   DRAG_THRESHOLD,
+  EDGE_SCROLL_SPEED,
+  EDGE_SCROLL_ZONE,
+  GAME_WIDTH,
   GAME_HEIGHT,
   WORLD_WIDTH,
   GROUND_MAX_Y,
@@ -24,6 +27,9 @@ import { CameraControl } from '../world/CameraControl';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
 
 /** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
+/** Setzt ein gezogenes Objekt an (x, y) in Weltkoordinaten. */
+export type DragMove = (pointer: Phaser.Input.Pointer, x: number, y: number) => void;
+
 export interface WorldState {
   save(): unknown;
   /** Bekommt den gespeicherten Wert – kann alles sein, selbst prüfen! */
@@ -45,6 +51,10 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Kamera über der breiten Wiese (Wischen zum Scrollen) */
   cameraControl!: CameraControl;
   private readonly worldStates = new Map<string, WorldState>();
+  /** Gerade gezogene Objekte je Finger (für das Scrollen am Bildschirmrand). */
+  private readonly drags = new Map<number, { pointer: Phaser.Input.Pointer; ox: number; oy: number; move: DragMove }>();
+  /** Der Finger, der gerade das Scrollen am Rand steuert. */
+  private edgePointer?: number;
   private savedWorld: Record<string, unknown> = {};
 
   constructor() {
@@ -75,8 +85,61 @@ export class PlaygroundScene extends Phaser.Scene {
     new AutoSave(this, () => this.snapshot());
   }
 
-  update(): void {
+  update(_time: number, delta: number): void {
     this.equipment.forEach((e) => e.update());
+    this.updateEdgeScroll(delta);
+  }
+
+  // --- Gezogene Objekte folgen dem Finger (auch beim Scrollen) ---------------
+
+  /** Beginnt, ein Objekt mit einem Finger zu ziehen (Versatz zum Finger bleibt erhalten). */
+  beginDrag(pointer: Phaser.Input.Pointer, obj: { x: number; y: number }, move: DragMove): void {
+    const w = this.worldPoint(pointer);
+    this.drags.set(pointer.id, { pointer, ox: obj.x - w.x, oy: obj.y - w.y, move });
+  }
+
+  /** Setzt das gezogene Objekt unter den Finger (in Weltkoordinaten). */
+  followDrag(pointer: Phaser.Input.Pointer): void {
+    const d = this.drags.get(pointer.id);
+    if (!d) return;
+    const w = this.worldPoint(pointer);
+    d.move(pointer, w.x + d.ox, w.y + d.oy);
+  }
+
+  endDrag(pointer: Phaser.Input.Pointer): void {
+    this.drags.delete(pointer.id);
+    if (this.edgePointer === pointer.id) this.edgePointer = undefined;
+  }
+
+  /**
+   * Hält ein Finger ein Objekt nahe am linken/rechten Rand, scrollt die Welt – je näher,
+   * desto schneller. Bei mehreren Fingern steuert der, der zuerst am Rand war. Alle gezogenen
+   * Objekte werden danach neu unter ihren Finger gesetzt (Phaser meldet ohne Fingerbewegung nichts).
+   */
+  private updateEdgeScroll(delta: number): void {
+    if (this.drags.size === 0) return;
+    const edgeSpeed = (d: { pointer: Phaser.Input.Pointer }) => {
+      const x = d.pointer.x;
+      if (x < EDGE_SCROLL_ZONE) return -EDGE_SCROLL_SPEED * (1 - Math.max(0, x) / EDGE_SCROLL_ZONE);
+      if (x > GAME_WIDTH - EDGE_SCROLL_ZONE) return EDGE_SCROLL_SPEED * (1 - Math.max(0, GAME_WIDTH - x) / EDGE_SCROLL_ZONE);
+      return 0;
+    };
+    let steering = this.edgePointer !== undefined ? this.drags.get(this.edgePointer) : undefined;
+    if (!steering || edgeSpeed(steering) === 0) {
+      this.edgePointer = undefined;
+      for (const [id, d] of this.drags) {
+        if (edgeSpeed(d) !== 0) {
+          this.edgePointer = id;
+          steering = d;
+          break;
+        }
+      }
+    }
+    if (this.edgePointer === undefined || !steering) return;
+    const before = this.cameraControl.scrollX;
+    this.cameraControl.scrollBy(edgeSpeed(steering) * (delta / 1000));
+    if (this.cameraControl.scrollX === before) return; // Weltende
+    for (const d of this.drags.values()) this.followDrag(d.pointer);
   }
 
   // --- Speichern ----------------------------------------------------------
@@ -252,23 +315,17 @@ export class PlaygroundScene extends Phaser.Scene {
   private setupInput(): void {
     this.input.dragDistanceThreshold = DRAG_THRESHOLD;
 
-    this.input.on('dragstart', (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-      if (obj instanceof Toy) {
-        obj.handleDragStart();
-        return;
-      }
-      if (obj instanceof Kid) obj.handleDragStart();
+    this.input.on('dragstart', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
+      if (!(obj instanceof Toy) && !(obj instanceof Kid)) return;
+      obj.handleDragStart();
+      this.beginDrag(p, obj, (pp, x, y) => obj.handleDrag(pp, x, y));
     });
 
-    this.input.on(
-      'drag',
-      (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
-        if (obj instanceof Toy) obj.handleDrag(p, dragX, dragY);
-        else if (obj instanceof Kid) obj.handleDrag(p, dragX, dragY);
-      },
-    );
+    // Position selbst aus Finger + Versatz berechnen (gleich wie beim Scrollen am Rand).
+    this.input.on('drag', (p: Phaser.Input.Pointer) => this.followDrag(p));
 
     this.input.on('dragend', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
+      this.endDrag(p);
       if (obj instanceof Toy) {
         this.releaseToy(obj, p);
         return;

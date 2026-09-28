@@ -141,12 +141,14 @@ export class GardenGate {
     const offsetY = kid.height / 2;
     kid.handleDragStart();
     kid.handleDrag(pointer, w.x, w.y + offsetY);
+    // Die Szene führt es nach, auch beim Scrollen am Bildschirmrand.
+    this.scene.beginDrag(pointer, kid, (p, x, y) => kid.handleDrag(p, x, y));
     return {
-      move: (p) => {
-        const pw = this.scene.worldPoint(p);
-        kid.handleDrag(p, pw.x, pw.y + offsetY);
+      move: (p) => this.scene.followDrag(p),
+      release: (p) => {
+        this.scene.endDrag(p);
+        this.scene.releaseKid(kid, p, true);
       },
-      release: (p) => this.scene.releaseKid(kid, p, true),
     };
   }
 

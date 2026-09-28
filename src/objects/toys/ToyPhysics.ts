@@ -41,6 +41,9 @@ export class ToyPhysics {
    * vdepth: Bewegung in die Tiefe (px/s, − = nach hinten zum Zaun).
    */
   launch(vx: number, vy: number, groundY?: number, vdepth = 0): void {
+    // Am Welt- oder Bildschirmrand losgelassen: sofort zurück hinter die Bande.
+    const half = this.obj.displayWidth / 2;
+    this.obj.x = Phaser.Math.Clamp(this.obj.x, half, WORLD_WIDTH - half);
     if (!this.active || groundY !== undefined) {
       this.groundY = Phaser.Math.Clamp(groundY ?? this.obj.y, GROUND_MIN_Y, GROUND_MAX_Y);
       // Mit vorgegebener Bodenlinie immer kurz fallen, damit ein Aufprall ausgelöst wird.

@@ -18,6 +18,7 @@ import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
 import { Garden } from '../objects/Garden';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
+import { LightLayer } from '../world/LightLayer';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
@@ -53,6 +54,8 @@ export class PlaygroundScene extends Phaser.Scene {
   cameraControl!: CameraControl;
   /** Tonausgabe (hört auf 'sound'-Ereignisse) */
   audio!: SoundSystem;
+  /** Lichter über der Nacht, die trotzdem von allem davor verdeckt werden */
+  lightLayer!: LightLayer;
   private readonly worldStates = new Map<string, WorldState>();
   /** Gerade gezogene Objekte je Finger (für das Scrollen am Bildschirmrand). */
   private readonly drags = new Map<number, { pointer: Phaser.Input.Pointer; ox: number; oy: number; move: DragMove }>();
@@ -66,6 +69,8 @@ export class PlaygroundScene extends Phaser.Scene {
 
   create(): void {
     this.drawBackground();
+    // Zuerst: Spielzeuge (Taschenlampe) melden sich schon beim Wiederherstellen an.
+    this.lightLayer = new LightLayer(this);
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);

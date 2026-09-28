@@ -20,6 +20,7 @@ export type Activity =
   | 'seesaw'
   | 'bathe'
   | 'walk'
+  | 'sit'
   | 'hidden';
 
 /** Zusatzwerte, die ein Spielgerät mitgeben kann (z. B. Sprunghöhe, oben/unten). */
@@ -69,6 +70,7 @@ export const ACTIVITY_POSE: Record<Activity, PoseName> = {
   seesaw: 'seesawSit',
   bathe: 'bathe',
   walk: 'stand',
+  sit: 'sit',
   hidden: 'stand',
 };
 
@@ -214,6 +216,9 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
     }
     case 'walk':
       return stride(c.travel, 16, 24, 16);
+    case 'sit':
+      // Sitzt und schaut sich um (Spielhaus)
+      return merge(breathe(c, 0.7), { head: { angle: c.look } });
     case 'hidden':
       return {};
   }

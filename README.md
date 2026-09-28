@@ -89,7 +89,10 @@ Querformat, Vollbild und „Bildschirm bleibt an“ stehen in `AndroidManifest.x
 | --- | --- |
 | Kind antippen | Freudensprung |
 | Kind auf die Schaukel ziehen | Kind schaukelt, bis man es wieder runterzieht |
-| Kind auf die Rutsche ziehen | klettert hoch und rutscht runter |
+| Kind aufs Kletter-Spielhaus ziehen | klettert an den Sprossen hoch und sitzt oben auf dem Podest |
+| Kind unten ans große Loch des Spielhauses ziehen | krabbelt hinein (durch die Löcher zu sehen) |
+| Kind oben im Spielhaus antippen | rutscht die Rutsche hinunter |
+| Spielhaus antippen, wenn Kinder drin sind | ein Kind guckt durchs Loch oder winkt aus dem Bogen |
 | Ball antippen | Ball fliegt im Bogen weg und rollt aus |
 | Eimer / Baum antippen | wackelt |
 | Spielzeug schnell ziehen und loslassen | wird geworfen, prallt an den Bildrändern ab |
@@ -148,7 +151,7 @@ Die Wiese merkt sich alles (lokal auf dem Gerät). Zum Zurücksetzen im Browser:
 src/
   config.ts            Auflösung, Boden-Höhe, Konstanten
   data/                Spielgeräte, Spielzeug-Katalog (toys.ts), Figuren, Kinder-Rig und Posen (poses.ts)
-  objects/             Verhalten: Kid, Equipment (Schaukel, Rutsche, …)
+  objects/             Verhalten: Kid, Equipment (Schaukel, Spielhaus, …)
   objects/toys/        Spielzeug, Wurf-Physik und Verhaltensbausteine
   scenes/BootScene     Grafiken laden bzw. Platzhalter erzeugen
   scenes/placeholders/ Platzhalter-Zeichnungen der Spielzeuge und Kinder-Teile
@@ -215,5 +218,7 @@ Vorlage können die Platzhalter unter denselben Keys ersetzen:
 Bei echten Häusern müssen die Fenster (für das Licht nachts) und Schornsteine (Rauch bei Schnee) in
 `HOUSE_SPECS` (`src/scenes/placeholders/backdrop.ts`) zur Grafik passen, beim Baum die Tipp-Flächen in `BIG_TREE`.
 
-Bei Schaukel und Rutsche hängen Seil- bzw. Rutschpunkte an der Grafik
-(siehe `Swing`/`Slide` in `src/objects/Equipment.ts`) und müssen ggf. angepasst werden.
+Bei der Schaukel hängen die Seilpunkte an der Grafik (siehe `Swing` in `src/objects/Equipment.ts`).
+Beim Kletter-Spielhaus (`playhouse-back`, `playhouse-front` mit durchsichtigen Löchern, Bogen und
+Sprossen-Schlitzen, `playhouse-slide`) stehen alle Maße in `PH` (`src/scenes/placeholders/playhouse.ts`)
+und müssen zur Grafik passen.

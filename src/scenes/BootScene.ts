@@ -26,6 +26,16 @@ import {
   TRUNK_SIZE,
   VINE_CURTAIN_SIZE,
 } from './placeholders/garden';
+import {
+  archOutline,
+  drawPlayhouseBack,
+  drawPlayhouseFront,
+  drawPlayhouseSlide,
+  HOUSE_AREA,
+  PH,
+  rungSlots,
+  SLIDE_AREA,
+} from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -86,25 +96,7 @@ export class BootScene extends Phaser.Scene {
       g.fillTriangle(61, 66, 95, 66, 78, 84);
     });
 
-    this.makeTexture('slide', 400, 420, (g) => {
-      // Leiter
-      g.lineStyle(12, 0x8d6e63);
-      g.lineBetween(55, 60, 55, 420);
-      g.lineBetween(105, 60, 105, 420);
-      g.lineStyle(8, 0xa1887f);
-      for (let y = 100; y < 420; y += 45) g.lineBetween(55, y, 105, y);
-      // Stütze
-      g.lineStyle(12, 0x8d6e63);
-      g.lineBetween(300, 250, 300, 420);
-      // Plattform
-      g.fillStyle(0xffb703);
-      g.fillRoundedRect(40, 45, 130, 22, 6);
-      // Rutschfläche
-      g.lineStyle(38, 0xfb5607);
-      g.lineBetween(160, 62, 385, 392);
-      g.lineStyle(8, 0xffd166);
-      g.lineBetween(160, 45, 390, 375);
-    });
+    this.makePlayhouse();
 
     this.makeTexture('swing-frame', 360, 420, (g) => {
       g.lineStyle(16, 0x6d4c41);
@@ -389,6 +381,39 @@ export class BootScene extends Phaser.Scene {
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');
+  }
+
+  /**
+   * Kletter-Spielhaus (#65): Rückseite, Vorderseite mit ausgestanzten Löchern, Bogen und Sprossen
+   * (Kinder und Bälle drinnen sieht man hindurch), Rutsche.
+   */
+  private makePlayhouse(): void {
+    const { x, y, w, h } = HOUSE_AREA;
+    this.makeTexture('playhouse-back', w, h, drawPlayhouseBack);
+    this.makeTexture('playhouse-slide', SLIDE_AREA.w, SLIDE_AREA.h, drawPlayhouseSlide);
+    if (this.textures.exists('playhouse-front')) return; // echte Grafik (mit durchsichtigen Löchern)
+    this.makeTexture('playhouse-front-solid', w, h, drawPlayhouseFront);
+    const canvas = this.textures.createCanvas('playhouse-front', w, h);
+    if (!canvas) return;
+    const ctx = canvas.context;
+    ctx.drawImage(this.textures.get('playhouse-front-solid').getSourceImage() as CanvasImageSource, 0, 0);
+    ctx.globalCompositeOperation = 'destination-out';
+    for (const hole of [PH.bigHole, ...PH.holes]) {
+      ctx.beginPath();
+      ctx.arc(hole.x - x, hole.y - y, hole.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const cut = (pts: Phaser.Math.Vector2[]) => {
+      ctx.beginPath();
+      pts.forEach((p, i) => (i ? ctx.lineTo(p.x - x, p.y - y) : ctx.moveTo(p.x - x, p.y - y)));
+      ctx.closePath();
+      ctx.fill();
+    };
+    cut(archOutline());
+    rungSlots().forEach(cut);
+    ctx.globalCompositeOperation = 'source-over';
+    canvas.refresh();
+    this.textures.remove('playhouse-front-solid');
   }
 
   /** Hintergrund wie der echte Hinterhof (#63): Häuser, Bäume, Büsche, Zaun- und Wiesen-Kacheln. */

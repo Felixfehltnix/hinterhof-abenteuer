@@ -56,6 +56,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Neues Zeug zuerst dort anlegen, Verhalten in `src/objects/`.
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,
   `accepts()`/`use()`/`update()` überschreiben, in `createEquipment()` eintragen.
+  Feste Spielgeräte: Baum, Schaukel, Sandkasten und das **Kletter-Spielhaus** (`PlayHouse`, #65, ersetzt die
+  alte Rutsche): bis zu 3 Kinder im Modus `playing` (oben auf dem Podest oder drinnen), Maße in `PH`
+  (`src/scenes/placeholders/playhouse.ts`). Rückseite, Kinder/Bälle drinnen und Vorderseite mit ausgestanzten
+  Löchern liegen nach Tiefe übereinander, die Rutsche davor. Ein `Seat` kann mit `tap(kid)` auf Antippen
+  des Kindes reagieren (dann hüpft es nicht), z. B. oben antippen = rutschen.
 - Tippen: `obj.setData('onTap', fn)`. Die Szene ruft `fn(pointer)` auf, wenn nicht gezogen wurde.
 - **Vorrang beim Antippen/Ziehen** (`touchRank` in `PlaygroundScene`): Kinder und kleine Spielzeuge
   gehen vor großen Spielgeräten (`large: true` im Katalog, z. B. Korb, Tor, Pool, Fahrzeuge) und vor

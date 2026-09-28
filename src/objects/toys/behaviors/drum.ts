@@ -1,8 +1,8 @@
 import type { BehaviorFactory } from './types';
 
-/** Trommel: Antippen → wackelt, Schallringe breiten sich aus. Sendet ein Ton-Ereignis. */
-export const drum: BehaviorFactory = (toy) => ({
-  onTap: () => {
+/** Trommel: Antippen → wackelt, Schallringe breiten sich aus. Hält sie ein Kind: Kind antippen = trommeln. */
+export const drum: BehaviorFactory = (toy) => {
+  const beat = () => {
     const scene = toy.scene;
     scene.events.emit('sound', { kind: 'drum', pitch: 0, x: toy.x });
     scene.tweens.killTweensOf(toy);
@@ -22,5 +22,15 @@ export const drum: BehaviorFactory = (toy) => ({
         onComplete: () => ring.destroy(),
       });
     }
-  },
-});
+  };
+  return {
+    onTap: beat,
+    onUse: (kid) => {
+      // Zwei Schläge, abwechselnd mit beiden Händen
+      kid.act('drum');
+      beat();
+      toy.scene.time.delayedCall(260, beat);
+      return true;
+    },
+  };
+};

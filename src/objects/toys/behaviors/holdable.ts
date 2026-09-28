@@ -1,6 +1,7 @@
 import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
 import type { Kid } from '../../Kid';
 import { windStrength } from '../../../world/environment';
+import { takeFromHand, takeInHand } from '../hand';
 import { drawString } from '../string';
 import type { BehaviorFactory } from './types';
 
@@ -12,32 +13,36 @@ import type { BehaviorFactory } from './types';
 export const holdable: BehaviorFactory = (toy) => {
   let line: Phaser.GameObjects.Graphics | undefined;
   const phase = Math.random() * 10;
+  // Für das Kind: Arm mit der Schnur schräg nach oben (Kid.applyPose)
+  toy.setData('holdPose', 'string');
 
   const attach = (kid: Kid): boolean => {
-    if (kid.holding || kid.mode === 'leaving' || toy.heldBy) return false;
-    toy.heldBy = kid;
-    kid.holding = toy;
-    toy.physics.stop();
+    if (!takeInHand(kid, toy)) return false;
     line ??= toy.scene.add.graphics();
     return true;
   };
 
   const detach = () => {
-    const kid = toy.heldBy;
-    if (!kid) return;
-    if (kid.holding === toy) kid.holding = undefined;
-    toy.heldBy = undefined;
+    if (!toy.heldBy) return;
+    takeFromHand(toy, false);
     line?.clear();
     toy.setAngle(0);
   };
 
   return {
     onDragStart: detach,
+    // Loslassen (tauschen): Schwebendes schwebt weiter, der Rest fällt.
+    onLetGo: () => {
+      if (!toy.heldBy) return;
+      detach();
+      if (!toy.def.behaviors.includes('float')) toy.physics.launch(0, 0);
+    },
     onDragEnd: (release) => {
+      if (release.fromHand) return;
       const scene = toy.scene as PlaygroundScene;
       const cx = toy.x;
       const cy = toy.y - toy.displayHeight / 2;
-      const kid = scene.kidsOnMeadow().find((k) => !k.holding && k.getBounds().contains(cx, cy));
+      const kid = scene.kidsOnMeadow().find((k) => k.visible && k.getBounds().contains(cx, cy));
       if (kid && attach(kid)) release.handled = true;
     },
     onKidDropped: attach,

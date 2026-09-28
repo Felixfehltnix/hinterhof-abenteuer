@@ -10,6 +10,8 @@ import { ToyPhysics } from './ToyPhysics';
 const VELOCITY_WINDOW_MS = 100;
 // Hat der Finger vor dem Loslassen so lange stillgehalten, wird nicht geworfen.
 const VELOCITY_STALE_MS = 60;
+// So schnell wirft ein Kind etwas aus der Hand (wie ein kräftiger Wisch schräg nach oben, px/s).
+const THROW_SPEED = { x: 1100, y: -600 };
 
 // Die Zeichen-Methoden von Phaser.GameObjects.Image, die Toy für die Drehung um die Mitte umhüllt.
 const IMAGE_RENDER = Phaser.GameObjects.Image.prototype as unknown as {
@@ -64,7 +66,13 @@ export class Toy extends Phaser.GameObjects.Image {
     });
 
     this.behaviors = def.behaviors.map((id) => BEHAVIORS[id](this));
-    this.setData('onTap', (pointer?: Phaser.Input.Pointer) => this.behaviors.forEach((b) => b.onTap?.(pointer)));
+    this.setData('onTap', (pointer?: Phaser.Input.Pointer) => {
+      // In der Hand eines Kindes: Antippen des Spielzeugs wirkt wie Antippen des Kindes
+      // (Kinder tippen oft genau auf das, was das Kind hochhält). Ohne eigene Aktion bleibt es beim
+      // normalen Antippen (z. B. Taschenlampe an/aus).
+      if (this.heldBy && this.behaviors.some((b) => b.onUse) && this.useBy(this.heldBy)) return;
+      this.behaviors.forEach((b) => b.onTap?.(pointer));
+    });
     this.once(Phaser.GameObjects.Events.DESTROY, () => this.behaviors.forEach((b) => b.onDestroy?.()));
   }
 
@@ -92,16 +100,38 @@ export class Toy extends Phaser.GameObjects.Image {
   handleDragEnd(pointer: Phaser.Input.Pointer): void {
     // In der Luft losgelassen (über der Wiese): fällt auf die Linie zurück, wo es aufgehoben wurde.
     const onGround = this.y >= GROUND_MIN_Y;
-    const release: Release = {
-      vx: 0,
-      vy: 0,
-      onGround,
-      groundY: onGround ? undefined : this.pickupGroundY,
-      pointerVelocity: this.pointerVelocity(pointer.upTime),
-    };
     this.isDragging = false;
+    this.launchWith({ onGround, groundY: onGround ? undefined : this.pickupGroundY, pointerVelocity: this.pointerVelocity(pointer.upTime) });
+  }
+
+  /** Wie Loslassen: Die Bausteine entscheiden über Wurf, Landung oder eigene Bewegung. */
+  private launchWith(r: Omit<Release, 'vx' | 'vy'>): void {
+    const release: Release = { vx: 0, vy: 0, ...r };
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
     if (!release.handled) this.physics.launch(release.vx, release.vy, release.groundY, release.vdepth ?? 0);
+  }
+
+  // --- In der Hand eines Kindes (Baustein handheld/holdable) ---------------
+
+  /** Zusätzliche Neigung, solange ein Kind es hält (z. B. Gießkanne kippen). */
+  handTilt = 0;
+
+  /** Das haltende Kind wurde angetippt. true = eine Aktion lief (sonst hüpft das Kind). */
+  useBy(kid: Kid): boolean {
+    let used = false;
+    for (const b of this.behaviors) used = (b.onUse?.(kid) ?? false) || used;
+    return used;
+  }
+
+  /** Das Kind lässt es los; drop = vor die Füße fallen lassen. */
+  letGo(drop = true): void {
+    this.behaviors.forEach((b) => b.onLetGo?.(drop));
+  }
+
+  /** Das haltende Kind wirft es in Blickrichtung (dir = 1 rechts, −1 links), es landet auf groundY. */
+  throwFromHand(dir: number, groundY: number): void {
+    this.letGo(false);
+    this.launchWith({ onGround: false, fromHand: true, groundY, pointerVelocity: { x: dir * THROW_SPEED.x, y: THROW_SPEED.y } });
   }
 
   /** Ein Kind wurde auf diesem Spielzeug losgelassen. true = ein Baustein hat es angenommen. */

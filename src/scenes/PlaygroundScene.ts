@@ -166,7 +166,7 @@ export class PlaygroundScene extends Phaser.Scene {
     return {
       version: SAVE_VERSION,
       kids: [...this.kids].map((k) => ({ id: k.def.id, ...pos(k.restPosition()) })),
-      toys: [...this.toys].map((t) => ({ id: t.def.id, ...pos(t.restPosition()) })),
+      toys: [...this.toys].map((t) => ({ id: t.def.id, ...pos(t.restPosition()), ...(t.heldBy ? { heldBy: t.heldBy.def.id } : {}) })),
       world,
     };
   }
@@ -180,7 +180,10 @@ export class PlaygroundScene extends Phaser.Scene {
     }
     for (const t of save.toys) {
       const def = TOYS.find((d) => d.id === t.id);
-      if (def) this.spawnToy(def, x(t.x), y(t.y));
+      const toy = def && this.spawnToy(def, x(t.x), y(t.y));
+      // Wer etwas in der Hand hatte, hält es wieder
+      const holder = t.heldBy && [...this.kids].find((k) => k.def.id === t.heldBy);
+      if (toy && holder) toy.offerKid(holder);
     }
     this.savedWorld = save.world;
     for (const [key, state] of this.worldStates) if (key in this.savedWorld) state.load(this.savedWorld[key]);

@@ -3,8 +3,21 @@
 //
 // Neues Spielzeug: Eintrag hier + Platzhalter-Zeichnung in scenes/placeholders/toys.ts.
 // Die id ist gleichzeitig der Texture-Key (echte Grafik: assets/…png unter derselben id laden).
+import type { HoldPose } from './poses';
 
 /** Verhaltensbausteine, siehe src/objects/toys/behaviors/. */
+/**
+ * Halten in der Hand: Armhaltung (`HOLD_POSES` in poses.ts) und wo das Spielzeug relativ zur
+ * rechten Hand sitzt – dx/dy bis zu seinem Fußpunkt (Kind schaut nach rechts; gespiegelt
+ * automatisch), angle = Neigung in Grad.
+ */
+export interface HoldDef {
+  pose: HoldPose;
+  dx: number;
+  dy: number;
+  angle?: number;
+}
+
 export type BehaviorId =
   | 'draggable'
   | 'fling'
@@ -108,6 +121,8 @@ export interface ToyDef {
    * liegen, haben beim Antippen und Ziehen Vorrang.
    */
   large?: boolean;
+  /** Wie ein Kind es in der Hand hält (nur mit Baustein `handheld`). */
+  hold?: HoldDef;
   /** Abweichungen von DEFAULT_TOY_PARAMS. */
   params?: Partial<ToyParams>;
 }
@@ -125,7 +140,8 @@ export const TOYS = [
     id: 'bucket',
     width: 90,
     height: 90,
-    behaviors: ['draggable', 'fling', 'wobble', 'fillable'],
+    hold: { pose: 'hang', dx: 4, dy: 84 },
+    behaviors: ['draggable', 'fling', 'wobble', 'fillable', 'handheld'],
     params: { bounce: 0.15, rollFriction: 10 },
   },
   {
@@ -160,7 +176,8 @@ export const TOYS = [
     id: 'frisbee',
     width: 110,
     height: 34,
-    behaviors: ['draggable', 'fling', 'glide', 'wobble'],
+    hold: { pose: 'forward', dx: 30, dy: 20 },
+    behaviors: ['draggable', 'fling', 'glide', 'wobble', 'handheld'],
     params: { bounce: 0.15, rollFriction: 6, gravity: 2600, lift: 0.85, airDrag: 0.3, throwFactor: 1.2, depthShare: 0.85 },
   },
   {
@@ -168,7 +185,8 @@ export const TOYS = [
     id: 'paperplane',
     width: 100,
     height: 50,
-    behaviors: ['draggable', 'fling', 'plane'],
+    hold: { pose: 'up', dx: 10, dy: 30 },
+    behaviors: ['draggable', 'fling', 'plane', 'handheld'],
     params: { gravity: 1800, lift: 0.9, airDrag: 0.35, bounce: 0.1, rollFriction: 8, windFactor: 0.8, throwFactor: 0.9 },
   },
   {
@@ -176,7 +194,8 @@ export const TOYS = [
     id: 'boomerang',
     width: 100,
     height: 100,
-    behaviors: ['draggable', 'fling', 'boomerang', 'wobble'],
+    hold: { pose: 'up', dx: 34, dy: 16, angle: -20 },
+    behaviors: ['draggable', 'fling', 'boomerang', 'wobble', 'handheld'],
     params: { gravity: 2400, airDrag: 0, bounce: 0.2, rollFriction: 8, spin: true },
   },
   {
@@ -200,7 +219,8 @@ export const TOYS = [
     id: 'bubblewand',
     width: 60,
     height: 120,
-    behaviors: ['draggable', 'fling', 'bubbles'],
+    hold: { pose: 'up', dx: 4, dy: 20, angle: -12 },
+    behaviors: ['draggable', 'fling', 'bubbles', 'handheld'],
     params: { bounce: 0.2, rollFriction: 8 },
   },
   {
@@ -304,7 +324,8 @@ export const TOYS = [
     id: 'hulahoop',
     width: 130,
     height: 40,
-    behaviors: ['draggable', 'fling', 'hula'],
+    hold: { pose: 'hang', dx: 8, dy: 30, angle: 75 },
+    behaviors: ['draggable', 'fling', 'hula', 'handheld'],
     params: { bounce: 0.3, rollFriction: 6 },
   },
   {
@@ -321,7 +342,8 @@ export const TOYS = [
     id: 'shovel',
     width: 50,
     height: 120,
-    behaviors: ['draggable', 'fling', 'dig'],
+    hold: { pose: 'diagonal', dx: -2, dy: 78, angle: 32 },
+    behaviors: ['draggable', 'fling', 'dig', 'handheld'],
     params: { bounce: 0.2, rollFriction: 10 },
   },
   {
@@ -329,7 +351,8 @@ export const TOYS = [
     id: 'sandmold',
     width: 76,
     height: 50,
-    behaviors: ['draggable', 'fling', 'mold'],
+    hold: { pose: 'forward', dx: 14, dy: 30 },
+    behaviors: ['draggable', 'fling', 'mold', 'handheld'],
     params: { bounce: 0.2, rollFriction: 10 },
   },
   {
@@ -337,7 +360,8 @@ export const TOYS = [
     id: 'wateringcan',
     width: 120,
     height: 90,
-    behaviors: ['draggable', 'water'],
+    hold: { pose: 'hang', dx: 20, dy: 80 },
+    behaviors: ['draggable', 'water', 'handheld'],
     params: { bounce: 0.1, rollFriction: 15 },
   },
   {
@@ -353,7 +377,8 @@ export const TOYS = [
     id: 'drum',
     width: 110,
     height: 100,
-    behaviors: ['draggable', 'fling', 'drum'],
+    hold: { pose: 'both', dx: 0, dy: 70 },
+    behaviors: ['draggable', 'fling', 'drum', 'handheld'],
     params: { bounce: 0.2, rollFriction: 10 },
   },
   {
@@ -379,7 +404,8 @@ export const TOYS = [
     id: 'flashlight',
     width: 90,
     height: 40,
-    behaviors: ['draggable', 'fling', 'handheld', 'flashlight'],
+    hold: { pose: 'forward', dx: 12, dy: 20 },
+    behaviors: ['draggable', 'fling', 'flashlight', 'handheld'],
     params: { bounce: 0.2, rollFriction: 8 },
   },
   {

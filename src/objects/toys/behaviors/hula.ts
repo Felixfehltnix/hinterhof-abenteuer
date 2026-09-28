@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
-import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
 import type { Kid } from '../../Kid';
 import type { BehaviorFactory } from './types';
 
 const SPIN = 9; // Umdrehungen pro … (Winkelgeschwindigkeit in rad/s)
 
 /**
- * Hula-Hoop: Auf ein Kind ziehen → kreist um die Hüfte, bis man Kind oder Reifen antippt oder wegzieht.
- * Beim Kreisen liegt die hintere Hälfte hinter dem Kind, die vordere davor.
+ * Hula-Hoop: Auf ein Kind ziehen → das Kind hält ihn (handheld). Kind antippen → kreist um die
+ * Hüfte, bis man Kind oder Reifen antippt oder wegzieht. Beim Kreisen liegt die hintere Hälfte
+ * hinter dem Kind, die vordere davor.
  */
 export const hula: BehaviorFactory = (toy) => {
   let kid: Kid | undefined;
@@ -46,18 +46,15 @@ export const hula: BehaviorFactory = (toy) => {
   };
 
   return {
-    // Antippen von Kind oder Reifen hält ihn an.
+    // Antippen des Reifens hält ihn an.
     onTap: () => detach(true),
     onDragStart: () => detach(false),
-    onDragEnd: (release) => {
-      const cx = toy.x;
-      const cy = toy.y - toy.displayHeight / 2;
-      const target = (toy.scene as PlaygroundScene)
-        .kidsOnMeadow()
-        .find((k) => k.mode === 'idle' && !k.hula && k.getBounds().contains(cx, cy));
-      if (target && attach(target)) release.handled = true;
+    // Aufs Kind gezogen hält das Kind den Reifen (handheld). Kind antippen = los geht's.
+    onUse: (k) => {
+      if (k.mode !== 'idle') return false;
+      toy.letGo(false);
+      return attach(k);
     },
-    onKidDropped: attach,
     update: () => {
       if (!kid) return;
       if (!kid.active || kid.mode !== 'idle') {

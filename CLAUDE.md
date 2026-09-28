@@ -23,9 +23,12 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Position eines Objekts = Fußpunkt (Origin 0.5, 1).
 - Tiefe = y-Koordinate (weiter unten = weiter vorne). Gezogene Objekte: `DEPTH_DRAGGING`.
 - Tageszeit (`src/world/DayCycle.ts`): Die ganze Szene wird über ein Rechteck mit
-  Multiplizieren-Blend auf `DEPTH_TINT` eingefärbt. Alles, was leuchten soll (Lichter, Mond,
-  Sterne), liegt darüber (`DEPTH_LIGHTS`, `DEPTH_SKY_LIGHTS`), alles andere darunter –
-  auch gezogene Objekte (`DEPTH_DRAGGING` < `DEPTH_TINT`). Himmel, Sonne, Mond und Wolken
+  Multiplizieren-Blend auf `DEPTH_TINT` eingefärbt, alles liegt darunter – auch gezogene
+  Objekte (`DEPTH_DRAGGING` < `DEPTH_TINT`). Was leuchten soll (Mond, Sterne, Lichterkette,
+  Taschenlampe), meldet sich bei der **Lichtebene** an (`scene.lightLayer.add({ objects, depth, active })`,
+  `src/world/LightLayer.ts`): Sie zeichnet die Lichter über der Einfärbung (`DEPTH_LIGHTS`) und
+  radiert pixelgenau aus, was auf der Welt davor steht (Tiefe größer als `depth()`). Lichter nie
+  direkt auf `DEPTH_LIGHTS` legen, sonst scheinen sie durch Kinder hindurch (#52). Himmel, Sonne, Mond und Wolken
   zeichnet der DayCycle, die Szene nur Zaun und Wiese.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
@@ -127,7 +130,7 @@ Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/o
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
 `drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
-`handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel, Tiefe `DEPTH_LIGHTS`).
+`handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
 `whirlpool`: bis zu 6 Kinder (Modus `bathing`), jedes Kind zählt reihum mit Hüpfer und
 Zahlenblase (`sound` `count` mit `value` und `voice`); Antippen = neu zählen, ein 7. Kind landet daneben.
 Die Ziffern in der Blase sind die bewusste Ausnahme von „kein Text“ (Issue #37).

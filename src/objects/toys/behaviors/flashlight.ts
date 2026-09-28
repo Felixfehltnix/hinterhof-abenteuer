@@ -1,10 +1,22 @@
-import { DEPTH_LIGHTS } from '../../../config';
+import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
+import type { LightSource } from '../../../world/LightLayer';
 import type { BehaviorFactory } from './types';
 
-/** Taschenlampe: Antippen = an/aus. Der Lichtkegel leuchtet in Blickrichtung (auch nachts über der Dunkelheit). */
+/**
+ * Taschenlampe: Antippen = an/aus. Der Lichtkegel leuchtet in Blickrichtung, auch nachts über der
+ * Dunkelheit (Lichtebene). Kinder und Dinge, die vor dem haltenden Kind stehen, verdecken ihn.
+ */
 export const flashlight: BehaviorFactory = (toy) => {
   let on = false;
-  const cone = toy.scene.add.image(toy.x, toy.y, 'lightcone').setBlendMode('ADD').setVisible(false).setDepth(DEPTH_LIGHTS);
+  const scene = toy.scene as PlaygroundScene;
+  const cone = scene.add.image(toy.x, toy.y, 'lightcone').setBlendMode('ADD').setVisible(false);
+  const light: LightSource = {
+    objects: [cone],
+    // Gehalten: auf der Tiefe des Kindes (leuchtet vor ihm), sonst knapp vor der Lampe
+    depth: () => (toy.heldBy ? toy.heldBy.depth : toy.depth + 0.5),
+    active: () => cone.visible,
+  };
+  scene.lightLayer.add(light);
 
   return {
     onTap: () => {
@@ -21,6 +33,9 @@ export const flashlight: BehaviorFactory = (toy) => {
         .setPosition(toy.x + (dir * toy.displayWidth) / 2 - dir * 4, toy.y - toy.displayHeight / 2)
         .setAngle(dir * 10);
     },
-    onDestroy: () => cone.destroy(),
+    onDestroy: () => {
+      scene.lightLayer.remove(light);
+      cone.destroy();
+    },
   };
 };

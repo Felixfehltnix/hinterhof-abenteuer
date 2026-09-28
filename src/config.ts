@@ -25,8 +25,6 @@ export const DEPTH_DRAGGING = 6_500;
 
 // Einfärbung der ganzen Szene nach Tageszeit/Wetter (Multiplizieren).
 export const DEPTH_TINT = 7_000;
-// Mond und Sterne leuchten über der Einfärbung.
-export const DEPTH_SKY_LIGHTS = 7_100;
 
 // Mindestgröße der Touch-Fläche (px). Kleine Spielzeuge bekommen einen unsichtbaren Rand.
 export const MIN_TOUCH_SIZE = 140;
@@ -34,7 +32,8 @@ export const MIN_TOUCH_SIZE = 140;
 // Leisten (Spielzeugkiste, Gartentor) liegen über der Wiese, aber unter gezogenen Objekten.
 export const DEPTH_TRAY = 9_000;
 
-// Lichter (Taschenlampe, Lichterkette) leuchten über der Nacht-Abdunklung (#12).
+// Lichtebene (src/world/LightLayer.ts): Mond, Sterne, Lichterkette und Taschenlampe leuchten über
+// der Nacht-Abdunklung (#12), werden aber von allem davor verdeckt (#52).
 export const DEPTH_LIGHTS = 7_500;
 
 // Höchstens so viele Spielzeuge und Kinder gleichzeitig auf der Wiese (Tablet-Leistung).

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTH_LIGHTS, DEPTH_SKY_LIGHTS, DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../config';
+import { DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../config';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 import { environment, type TimeOfDay } from './environment';
 
@@ -7,6 +7,10 @@ const ORDER: TimeOfDay[] = ['morning', 'noon', 'evening', 'night'];
 const TRANSITION_MS = 2000;
 /** Wolken bewegen sich beim Scrollen mit diesem Anteil mit (0 = fest, 1 = wie die Wiese). */
 export const CLOUD_PARALLAX = 0.2;
+// Tiefe der Lichterkette am Zaun: Alles auf der Wiese davor verdeckt sie.
+const WIRE_DEPTH = -995;
+// Mond und Sterne: hinter allem auf der Welt.
+const SKY_LIGHT_DEPTH = -1060;
 
 /** Wie die Welt zu einer Tageszeit aussieht. Zwischen zwei Looks wird weich überblendet. */
 interface Look {
@@ -126,6 +130,8 @@ export class DayCycle {
   private readonly stars: Phaser.GameObjects.Image[] = [];
   private readonly dew: Phaser.GameObjects.Image[] = [];
   private readonly bulbs: Phaser.GameObjects.Image[] = [];
+  /** Leuchtender Mond auf der Lichtebene (der Mond selbst bleibt darunter zum Antippen). */
+  private readonly moonGlow: Phaser.GameObjects.Image;
   private readonly wire: Phaser.GameObjects.Graphics;
   private readonly tint: Phaser.GameObjects.Rectangle;
 
@@ -140,13 +146,22 @@ export class DayCycle {
     // Himmel, Sonne, Mond, Sterne und Einfärbung stehen fest; Tau und Lichterkette gehören zur Welt.
     this.sky = scene.add.graphics().setDepth(-1100).setScrollFactor(0);
 
-    // Sterne (nachts) und Mond leuchten über der Einfärbung
+    // Sterne (nachts) und Mond leuchten über der Einfärbung, aber hinter allem auf der Welt
+    // (ein Ballon vor dem Mond verdeckt ihn): Sie werden über die Lichtebene gezeichnet.
     for (let i = 0; i < 45; i++) {
       const x = (i * 331 + 70) % GAME_WIDTH;
       const y = 30 + ((i * 97) % 420);
-      this.stars.push(scene.add.image(x, y, 'twinkle').setDepth(DEPTH_SKY_LIGHTS).setScale(0.5 + (i % 3) * 0.25).setScrollFactor(0));
+      this.stars.push(scene.add.image(x, y, 'twinkle').setScale(0.5 + (i % 3) * 0.25).setScrollFactor(0));
     }
-    this.moon = scene.add.image(1560, 170, 'moon').setDepth(DEPTH_SKY_LIGHTS).setScrollFactor(0);
+    // Der Mond zum Antippen liegt am Himmel (vor den Wolken, damit Antippen ihn trifft),
+    // sein Leuchten auf der Lichtebene.
+    this.moon = scene.add.image(1560, 170, 'moon').setDepth(-1030).setScrollFactor(0);
+    this.moonGlow = scene.add.image(this.moon.x, this.moon.y, 'moon').setScrollFactor(0);
+    scene.lightLayer.add({
+      objects: [this.moonGlow, ...this.stars],
+      depth: () => SKY_LIGHT_DEPTH,
+      active: () => this.moonGlow.alpha > 0 || this.current.starsAlpha > 0,
+    });
     this.sun = scene.add.image(1720, 140, 'sun').setDepth(-1050).setScrollFactor(0);
     for (const body of [this.sun, this.moon]) {
       body.setInteractive({ hitArea: new Phaser.Geom.Circle(body.width / 2, body.height / 2, 130), hitAreaCallback: Phaser.Geom.Circle.Contains, useHandCursor: true });
@@ -170,7 +185,7 @@ export class DayCycle {
     }
 
     // Lichterkette am Zaun
-    this.wire = scene.add.graphics().setDepth(-995);
+    this.wire = scene.add.graphics().setDepth(WIRE_DEPTH);
     const colors = [0xff5d8f, 0xffd166, 0x06d6a0, 0x4cc9f0, 0xc77dff];
     const top = GROUND_TOP - 112;
     const points: Phaser.Math.Vector2[] = [];
@@ -186,10 +201,15 @@ export class DayCycle {
         scene.add
           .image(p.x, p.y + 10, 'bulb')
           .setTint(colors[i % colors.length])
-          .setBlendMode(Phaser.BlendModes.ADD)
-          .setDepth(DEPTH_LIGHTS),
+          .setBlendMode(Phaser.BlendModes.ADD),
       );
     }
+    // Die Birnen leuchten über der Nacht, aber alles vor dem Zaun verdeckt sie.
+    scene.lightLayer.add({
+      objects: this.bulbs,
+      depth: () => WIRE_DEPTH,
+      active: () => this.current.lightsAlpha > 0,
+    });
 
     this.tint = scene.add
       .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
@@ -265,7 +285,9 @@ export class DayCycle {
     this.sky.fillRect(0, 0, GAME_WIDTH, GROUND_TOP);
 
     this.sun.setPosition(look.sunX, look.sunY).setTint(look.sunColor).setAlpha(look.sunAlpha);
+    // Der Mond am Himmel ist unter der Einfärbung nur schwach, das Leuchten kommt von der Lichtebene.
     this.moon.setAlpha(look.moonAlpha);
+    this.moonGlow.setAlpha(look.moonAlpha);
     this.stars.forEach((s, i) => s.setAlpha(look.starsAlpha * (0.6 + 0.4 * Math.sin(t * 2 + i * 1.7))));
     this.dew.forEach((d, i) => d.setAlpha(look.dewAlpha * Math.max(0, Math.sin(t * 3 + i * 2.3))));
     this.wire.setAlpha(Math.min(1, look.lightsAlpha * 1.5));

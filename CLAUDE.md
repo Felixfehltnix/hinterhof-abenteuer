@@ -123,8 +123,8 @@ Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst
 `rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße in `src/data/vehicles.ts`),
 `honk` (Antippen = Hupe; Ton über `scene.events.emit('sound', { kind: 'honk' })`).
 `trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
-Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind, hört auf
-bei `kid.emit('tapped'|'grabbed')`.
+Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind (hintere Hälfte hinter,
+vordere vor dem Kind, per `setCrop`), hört auf bei `kid.emit('tapped'|'grabbed')`.
 `dig` (Schaufel), `fillable` (Eimer füllt sich), `mold` (Sandkuchen), `water` (Gießkanne,
 Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).

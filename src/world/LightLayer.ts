@@ -7,7 +7,7 @@ export interface LightSource {
   readonly objects: Phaser.GameObjects.GameObject[];
   /**
    * Tiefe des Lichts: Alles auf der Welt mit größerer Tiefe (weiter vorne) verdeckt es.
-   * Z. B. Zaun-Tiefe für die Lichterkette, Tiefe des haltenden Kindes für die Taschenlampe.
+   * Z. B. Tiefe der Pergola für die Lichterkette, Tiefe des haltenden Kindes für die Taschenlampe.
    */
   depth(): number;
   /** Leuchtet gerade etwas? Sonst wird die Quelle übersprungen. */
@@ -69,8 +69,6 @@ export class LightLayer {
     const cam = this.scene.cameras.main;
     const view = cam.worldView;
     const rt = this.rt;
-    rt.clear();
-    rt.beginDraw();
 
     // Wo überhaupt Licht ist (Weltkoordinaten) – nur dort muss etwas ausradiert werden
     const lights = new Set<Phaser.GameObjects.GameObject>(active.flatMap((s) => s.objects));
@@ -80,6 +78,14 @@ export class LightLayer {
       const b = worldBounds(o, cam);
       if (Phaser.Geom.Intersects.RectangleToRectangle(b, view)) lit.push(b);
     }
+    // Kein Licht im Bild (z. B. Lichterkette weit weg gescrollt): nichts zu tun
+    if (!lit.length) {
+      rt.setVisible(false);
+      return;
+    }
+    rt.clear();
+    rt.beginDraw();
+
     // Alles auf der Welt, was ein Licht verdecken kann, von hinten nach vorn
     const occluders = (this.scene.children.list as Drawable[])
       .filter((o) => this.canOcclude(o, lights, lit))

@@ -217,6 +217,24 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.lineBetween(126, 10, 150, 10); // Lenkrad
   },
 
+  ridecar: (g) => {
+    // Niedriger roter Körper, gelber Sitz mit Lehne, gelbes Lenkrad (ohne Logo)
+    g.fillStyle(0xd62828);
+    g.fillRoundedRect(10, 42, 132, 36, 16);
+    g.fillRoundedRect(84, 30, 50, 30, 12); // Motorhaube
+    g.fillStyle(0xffc300);
+    g.fillRoundedRect(22, 30, 56, 16, 7); // Sitz
+    g.fillRoundedRect(16, 8, 18, 38, 8); // Lehne
+    g.lineStyle(6, 0xffc300);
+    g.lineBetween(112, 34, 118, 12); // Lenksäule
+    g.fillStyle(0xffc300);
+    g.fillEllipse(118, 10, 30, 10); // Lenkrad
+    g.fillStyle(0xffffff);
+    g.fillCircle(136, 50, 6); // Scheinwerfer
+    g.fillStyle(0xffc300);
+    g.fillRoundedRect(14, 64, 124, 8, 4); // gelber Streifen
+  },
+
   balancebike: (g) => {
     g.lineStyle(9, 0x06d6a0);
     g.lineBetween(35, 83, 95, 50); // Rahmen hinten

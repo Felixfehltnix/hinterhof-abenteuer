@@ -267,6 +267,15 @@ export const TOYS = [
     params: { bounce: 0.1, rollFriction: 1.8 },
   },
   {
+    // Kleines rot-gelbes Rutschfahrzeug aus Felix' Garten (#64): Kind sitzt und trippelt.
+    id: 'ridecar',
+    large: true,
+    width: 150,
+    height: 92,
+    behaviors: ['draggable', 'rideable', 'wobble'],
+    params: { bounce: 0.1, rollFriction: 1.8 },
+  },
+  {
     // Wie Bobbycar, das Kind macht Laufbewegungen.
     id: 'balancebike',
     large: true,

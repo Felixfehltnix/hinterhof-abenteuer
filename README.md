@@ -104,8 +104,9 @@ Querformat, Vollbild und „Bildschirm bleibt an“ stehen in `AndroidManifest.x
 | Ball in den Basketballkorb werfen | Netz wackelt, Sterne sprühen |
 | Ball ins Fußballtor schießen | Netz beult sich, alle Kinder jubeln |
 | Ball auf Dosen / Kegel | purzeln um, Antippen stellt sie wieder auf |
-| Kind auf Bobbycar / Laufrad / Roller ziehen | sitzt auf; Fahrzeug ziehen = fahren; Kind wegziehen = absteigen |
+| Kind auf Bobbycar / Rutschfahrzeug / Laufrad / Roller ziehen | sitzt auf; Fahrzeug ziehen = fahren; Kind wegziehen = absteigen |
 | Bobbycar antippen | hupt |
+| Lichterkette in Felix' Garten (ganz rechts) antippen | an / aus, tagsüber gedimmt |
 | Spielzeug oder Kind in die Schubkarre | wird mitgeschoben |
 | Kind aufs Trampolin | hüpft von selbst, Trampolin antippen = Salto |
 | Ein / zwei Kinder auf die Wippe | eine Seite geht runter / es wippt |
@@ -207,6 +208,9 @@ Vorlage können die Platzhalter unter denselben Keys ersetzen:
 | `pergola-<i>`, `pergola-snow-<i>` | Pergola-Balken mit Efeu (je Abschnitt aus `PERGOLAS`) | siehe `pergolaArea` |
 | `meadow-<i>` | Rasen, je eine Bildschirmbreite | 1920 × 380 |
 | `tree` | großer Laubbaum links (Spielgerät, wackelt beim Antippen) | 560 × 660 |
+| `felix-pergola`, `felix-pergola-snow`, `felix-vine` | Felix' Pergola mit wildem Wein, Schnee darauf, herabhängende Ranken | siehe `src/scenes/placeholders/garden.ts` |
+| `felix-grill`, `felix-railing`, `felix-shed`, `felix-shed-snow` | Gasgrill, Holzbrüstung, schwarzer Schuppen | ebenda |
+| `felix-trunk`, `felix-gate`, `felix-lights` | Baumstamm, grünes Gartentor, Lichterkette mit Retro-Birnen | ebenda |
 
 Bei echten Häusern müssen die Fenster (für das Licht nachts) und Schornsteine (Rauch bei Schnee) in
 `HOUSE_SPECS` (`src/scenes/placeholders/backdrop.ts`) zur Grafik passen, beim Baum die Tipp-Flächen in `BIG_TREE`.

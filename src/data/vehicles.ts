@@ -1,18 +1,23 @@
 // Maße der Fahrzeuge relativ zum Fußpunkt (Fahrzeug schaut nach rechts).
 // Passend zu den Platzhalter-Grafiken – bei echten Grafiken hier anpassen.
 
-export type RideStyle = 'sit' | 'run' | 'push' | 'cart';
+export type RideStyle = 'sit' | 'toddle' | 'run' | 'push' | 'cart';
 
 export interface VehicleDef {
-  /** Wie das Kind fährt: sitzen und wippen, laufen, stehen und abstoßen, in der Karre sitzen. */
+  /**
+   * Wie das Kind fährt: sitzen und wippen, sitzen und mit kleinen Schritten trippeln, laufen,
+   * stehen und abstoßen, in der Karre sitzen.
+   */
   style: RideStyle;
   /**
    * Stehende Fahrstile (run, push): Fußpunkt des Kindes. Sitzende (sit, cart): wo die Hüfte
    * aufsitzt – die Beine hängen dann je nach Pose darunter bzw. nach vorn.
    */
   seat: { dx: number; dy: number };
-  /** Radmitten und Radius. */
-  wheels: { dx: number; dy: number; r: number }[];
+  /** Radmitten und Radius. behind: Rad auf der anderen Seite (hinter Fahrzeug und Kind). */
+  wheels: { dx: number; dy: number; r: number; behind?: boolean }[];
+  /** Textur der Räder (Standard: schwarze Räder `wheel`). */
+  wheelTexture?: string;
   /** Ladefläche für Spielzeug (nur Schubkarre). */
   cargo?: { dx: number; dy: number };
   /** Antippen hupt (nur Bobbycar). */
@@ -28,6 +33,18 @@ export const VEHICLES: Record<string, VehicleDef> = {
       { dx: 55, dy: -22, r: 22 },
     ],
     honk: true,
+  },
+  // Kleines rot-gelbes Rutschfahrzeug (Felix' Garten, #64): vier gelbe Räder, das Kind trippelt.
+  ridecar: {
+    style: 'toddle',
+    seat: { dx: -20, dy: -46 },
+    wheelTexture: 'wheel-yellow',
+    wheels: [
+      { dx: -38, dy: -22, r: 13, behind: true },
+      { dx: 54, dy: -22, r: 13, behind: true },
+      { dx: -46, dy: -16, r: 16 },
+      { dx: 44, dy: -16, r: 16 },
+    ],
   },
   balancebike: {
     style: 'run',

@@ -18,6 +18,7 @@ import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { LightLayer } from '../world/LightLayer';
 import { Backdrop } from '../world/Backdrop';
+import { FelixGarden } from '../world/FelixGarden';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
@@ -53,6 +54,8 @@ export class PlaygroundScene extends Phaser.Scene {
   cameraControl!: CameraControl;
   /** Tonausgabe (hört auf 'sound'-Ereignisse) */
   audio!: SoundSystem;
+  /** Felix' Garten mit Lichterkette und Gartentor (#64) */
+  felixGarden!: FelixGarden;
   /** Lichter über der Nacht, die trotzdem von allem davor verdeckt werden */
   lightLayer!: LightLayer;
   private readonly worldStates = new Map<string, WorldState>();
@@ -70,6 +73,7 @@ export class PlaygroundScene extends Phaser.Scene {
     // Zuerst: Hintergrund und Spielzeuge (Taschenlampe) melden sich schon beim Aufbau an.
     this.lightLayer = new LightLayer(this);
     new Backdrop(this);
+    this.felixGarden = new FelixGarden(this);
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
@@ -382,9 +386,11 @@ export class PlaygroundScene extends Phaser.Scene {
 /**
  * Vorrang beim Antippen: 0 = Kind oder kleines Spielzeug, 1 = großes Spielgerät,
  * 2 = feststehende Deko (`setData('scenery', true)`), −1 = alles andere (Leisten, Kiste, Tor, Wolken).
+ * Ein Kind auf einem Fahrzeug zählt wie das Fahrzeug: Wo sich beide überdecken, gewinnt das
+ * obere – so lässt sich auch ein kleines Fahrzeug unter dem Kind noch fahren.
  */
 function touchRank(obj: Phaser.GameObjects.GameObject): number {
-  if (obj instanceof Kid) return 0;
+  if (obj instanceof Kid) return obj.mode === 'riding' ? 1 : 0;
   if (obj instanceof Toy) return obj.def.large ? 1 : 0;
   if (obj.getData('scenery') === true) return 2;
   return -1;

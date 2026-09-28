@@ -7,8 +7,6 @@ const ORDER: TimeOfDay[] = ['morning', 'noon', 'evening', 'night'];
 const TRANSITION_MS = 2000;
 /** Wolken bewegen sich beim Scrollen mit diesem Anteil mit (0 = fest, 1 = wie die Wiese). */
 export const CLOUD_PARALLAX = 0.2;
-// Tiefe der Lichterkette am Zaun: Alles auf der Wiese davor verdeckt sie.
-const WIRE_DEPTH = -995;
 // Mond und Sterne: hinter allem auf der Welt.
 const SKY_LIGHT_DEPTH = -1060;
 
@@ -126,7 +124,7 @@ function mix(a: Look, b: Look, t: number): Look {
 
 /**
  * Tageszeiten: Sonne bzw. Mond antippen → nächste Tageszeit, weich über 2 s.
- * Zuständig für Himmel, Sonne, Mond, Sterne, Wolken, Tau, Lichterkette und die
+ * Zuständig für Himmel, Sonne, Mond, Sterne, Wolken, Tau und die
  * gemeinsame Einfärbung aller Objekte (damit auch echte Sprites automatisch passen).
  */
 export class DayCycle {
@@ -136,10 +134,8 @@ export class DayCycle {
   private readonly moon: Phaser.GameObjects.Image;
   private readonly stars: Phaser.GameObjects.Image[] = [];
   private readonly dew: Phaser.GameObjects.Image[] = [];
-  private readonly bulbs: Phaser.GameObjects.Image[] = [];
   /** Leuchtender Mond auf der Lichtebene (der Mond selbst bleibt darunter zum Antippen). */
   private readonly moonGlow: Phaser.GameObjects.Image;
-  private readonly wire: Phaser.GameObjects.Graphics;
   private readonly tint: Phaser.GameObjects.Rectangle;
 
   private target: TimeOfDay = 'noon';
@@ -152,7 +148,8 @@ export class DayCycle {
   private nextYawn = 0;
 
   constructor(private readonly scene: PlaygroundScene) {
-    // Himmel, Sonne, Mond, Sterne und Einfärbung stehen fest; Tau und Lichterkette gehören zur Welt.
+    // Himmel, Sonne, Mond, Sterne und Einfärbung stehen fest; der Tau gehört zur Welt.
+    // Die Lichterkette hängt in Felix' Garten (src/world/FelixGarden.ts, #64).
     this.sky = scene.add.graphics().setDepth(-1100).setScrollFactor(0);
 
     // Sterne (nachts) und Mond leuchten über der Einfärbung, aber hinter allem auf der Welt
@@ -192,33 +189,6 @@ export class DayCycle {
       const y = GROUND_TOP + 40 + ((i * 71) % (GAME_HEIGHT - GROUND_TOP - 60));
       this.dew.push(scene.add.image(x, y, 'twinkle').setDepth(-990).setScale(0.45));
     }
-
-    // Lichterkette am Zaun
-    this.wire = scene.add.graphics().setDepth(WIRE_DEPTH);
-    const colors = [0xff5d8f, 0xffd166, 0x06d6a0, 0x4cc9f0, 0xc77dff];
-    const top = GROUND_TOP - 112;
-    const points: Phaser.Math.Vector2[] = [];
-    for (let x = 20; x <= WORLD_WIDTH - 20; x += 16) {
-      const seg = ((x - 20) % 160) / 160; // durchhängend zwischen den Aufhängungen
-      points.push(new Phaser.Math.Vector2(x, top + Math.sin(seg * Math.PI) * 26));
-    }
-    this.wire.lineStyle(3, 0x2b2d42, 1);
-    this.wire.strokePoints(points);
-    for (let i = 0; i < 24 * 3; i++) {
-      const p = points[Math.min(points.length - 1, 5 + i * 5)];
-      this.bulbs.push(
-        scene.add
-          .image(p.x, p.y + 10, 'bulb')
-          .setTint(colors[i % colors.length])
-          .setBlendMode(Phaser.BlendModes.ADD),
-      );
-    }
-    // Die Birnen leuchten über der Nacht, aber alles vor dem Zaun verdeckt sie.
-    scene.lightLayer.add({
-      objects: this.bulbs,
-      depth: () => WIRE_DEPTH,
-      active: () => this.current.lightsAlpha > 0,
-    });
 
     this.tint = scene.add
       .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
@@ -311,8 +281,6 @@ export class DayCycle {
     this.moonGlow.setAlpha(look.moonAlpha);
     this.stars.forEach((s, i) => s.setAlpha(look.starsAlpha * (0.6 + 0.4 * Math.sin(t * 2 + i * 1.7))));
     this.dew.forEach((d, i) => d.setAlpha(look.dewAlpha * Math.max(0, Math.sin(t * 3 + i * 2.3))));
-    this.wire.setAlpha(Math.min(1, look.lightsAlpha * 1.5));
-    this.bulbs.forEach((b, i) => b.setAlpha(look.lightsAlpha * (0.75 + 0.25 * Math.sin(t * 2.5 + i))));
     this.clouds.forEach((c) => c.setTint(look.cloudTint));
     this.tint.setFillStyle(look.tint).setVisible(look.tint !== 0xffffff);
   }

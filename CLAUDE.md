@@ -46,8 +46,15 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 ## Kinder
 - Alle Kinder stehen in `src/data/characters.ts`, wer beim Start da ist in `PLACED_KIDS`
   (`src/data/playground.ts`). Die übrigen holt man durchs Gartentor.
-- Texturen: `kid-<id>` (ganze Figur) und `portrait-<id>` (Kopf fürs Tor),
-  Platzhalter in `src/scenes/placeholders/kids.ts`.
+- Ein Kind (`Kid`, ein `Container`) besteht aus Teilen an Gelenken: `body`, `head`, `arm-l/-r`,
+  `leg-l/-r`. Rig (Maße, Drehpunkte, Gelenke) und Posen in `src/data/poses.ts`,
+  `kid.setPose(name, ms)` blendet weich über (Posen: `stand`, `sit`, `sitLegsForward`, `armsUp`,
+  `wave`, `dangle`, `hold`). Position = Fußpunkt, Gelenke steuert nur das Kind selbst.
+  Kid bietet weiter an, was früher das Einzelbild konnte: `flipX`/`setFlipX`, `displayHeight`,
+  `getBounds()` (ganze Figurfläche, unabhängig von der Pose), `setTint`, `setVisible`, `setScale`, `angle`.
+  `handPoint()` folgt der Pose.
+- Texturen: `kid-<id>-head/-body/-arm/-leg` (Einzelteile, Format in der README) und
+  `portrait-<id>` (Kopf fürs Tor), Platzhalter in `src/scenes/placeholders/kids.ts`.
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
 

@@ -102,11 +102,11 @@ Die Wiese merkt sich alles (lokal auf dem Gerät). Zum Zurücksetzen im Browser:
 ```
 src/
   config.ts            Auflösung, Boden-Höhe, Konstanten
-  data/                Spielgeräte, Spielzeug-Katalog (toys.ts), Figuren (alles im Code)
+  data/                Spielgeräte, Spielzeug-Katalog (toys.ts), Figuren, Kinder-Rig und Posen (poses.ts)
   objects/             Verhalten: Kid, Equipment (Schaukel, Rutsche, …)
   objects/toys/        Spielzeug, Wurf-Physik und Verhaltensbausteine
   scenes/BootScene     Grafiken laden bzw. Platzhalter erzeugen
-  scenes/placeholders/ Platzhalter-Zeichnungen der Spielzeuge
+  scenes/placeholders/ Platzhalter-Zeichnungen der Spielzeuge und Kinder-Teile
   scenes/Playground    die Spielwiese
 public/assets/         hier kommen später die echten Grafiken hin
 ```
@@ -115,9 +115,31 @@ public/assets/         hier kommen später die echten Grafiken hin
 
 1. PNG mit transparentem Hintergrund nach `public/assets/` legen.
 2. In `BootScene.preload()` unter demselben Key laden, z. B.
-   `this.load.image('kid-kind-a', 'assets/kinder/kind-a.png')`. Für jedes Kind gibt es
-   zusätzlich ein Porträt (nur der Kopf) fürs Gartentor: `portrait-kind-a`.
+   `this.load.image('kid-kind-a-head', 'assets/kinder/kind-a/head.png')`.
 3. Fertig – der Platzhalter wird dann automatisch übersprungen.
+
+### Echte Figuren (Kinder aus Einzelteilen)
+
+Jedes Kind besteht aus beweglichen Teilen, damit es Arme heben, sitzen und winken kann.
+Pro Kind werden **5 Bilder** gebraucht (transparente PNGs, Figur schaut nach vorn, steht gerade,
+Arme hängen locker herab). Linker und rechter Arm bzw. Bein benutzen dasselbe Bild.
+
+| Texture-Key | Datei (Vorschlag) | Inhalt | Maße (Verhältnis) | Drehpunkt (Anteil von links / von oben) |
+| --- | --- | --- | --- | --- |
+| `kid-<id>-head` | `kinder/<id>/head.png` | Kopf mit Haaren, Hals endet unten | 144 × 156 | Hals: 0,5 / 0,795 |
+| `kid-<id>-body` | `kinder/<id>/body.png` | Rumpf mit Kleidung, ohne Arme/Beine | 80 × 92 | Hüfte: 0,5 / 1,0 (unten Mitte) |
+| `kid-<id>-arm` | `kinder/<id>/arm.png` | ein Arm mit Hand, senkrecht hängend | 22 × 70 | Schulter: 0,5 / 0,143 |
+| `kid-<id>-leg` | `kinder/<id>/leg.png` | ein Bein mit Schuh, senkrecht | 24 × 70 | Hüfte: 0,5 / 0,057 |
+| `portrait-<id>` | `kinder/<id>/portrait.png` | nur der Kopf fürs Gartentor | 130 × 130 | – |
+
+- Die Maße sind die der Standardfigur (140 × 264 px, Fußpunkt unten Mitte). Die Bilder dürfen
+  größer sein (z. B. 4-fach für scharfe Tablets), das **Seitenverhältnis** und die **Drehpunkte**
+  müssen aber stimmen – das Spiel skaliert jedes Teil auf seine Rig-Größe und die `size` des Kindes.
+- Wo die Gelenke in der stehenden Figur sitzen (Schultern, Hüften, Hals) und die Posen stehen in
+  `src/data/poses.ts` (`KID_RIG`, `POSES`). Teile sollten an den Gelenken etwas überlappen
+  (runde Schulter, Hüfte unter dem Rumpf), damit beim Drehen keine Lücken entstehen.
+- Zeichenreihenfolge von hinten nach vorn: Beine, Arme, Rumpf, Kopf.
+- Echte Fotos oder Grafiken echter Kinder kommen nur mit ausdrücklichem Okay ins Repo.
 
 Bei Schaukel und Rutsche hängen Seil- bzw. Rutschpunkte an der Grafik
 (siehe `Swing`/`Slide` in `src/objects/Equipment.ts`) und müssen ggf. angepasst werden.

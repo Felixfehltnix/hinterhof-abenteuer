@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
-import { drawKid, drawPortrait, KID_HEIGHT, KID_WIDTH, PORTRAIT_SIZE } from './placeholders/kids';
+import { drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
 import { TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -15,12 +15,16 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Hier später: this.load.image('kid-kind-a', 'assets/kinder/kind-a.png'); usw.
+    // Hier später: this.load.image('kid-kind-a-head', 'assets/kinder/kind-a/head.png'); usw.
+    // (Format der Einzelteile: README, Abschnitt „Echte Figuren“)
   }
 
   create(): void {
     CHARACTERS.forEach((c) => {
-      this.makeTexture(`kid-${c.id}`, KID_WIDTH * c.size, KID_HEIGHT * c.size, (g) => drawKid(g, c));
+      for (const part of ['head', 'body', 'arm', 'leg'] as const) {
+        const { width, height } = partSize(c, part);
+        this.makeTexture(`kid-${c.id}-${part}`, width, height, (g) => drawKidPart(g, c, part));
+      }
       this.makeTexture(`portrait-${c.id}`, PORTRAIT_SIZE, PORTRAIT_SIZE, (g) => drawPortrait(g, c));
     });
 

@@ -1,13 +1,16 @@
 import Phaser from 'phaser';
 import type { CharacterDef } from '../../data/characters';
+import { KID_RIG, type PartTexture } from '../../data/poses';
 
-// Platzhalter-Zeichnungen für die Kinder: ganze Figur (kid-<id>) und Porträt (portrait-<id>).
+// Platzhalter-Zeichnungen für die Kinder: Einzelteile (kid-<id>-head/-body/-arm/-leg, Maße und
+// Drehpunkte in src/data/poses.ts) und Porträt fürs Tor (portrait-<id>).
 
-export const KID_WIDTH = 140;
-// Oben etwas Platz für hohe Frisuren (Stacheln, Dutt).
-const TOP = 24;
-export const KID_HEIGHT = 240 + TOP;
 export const PORTRAIT_SIZE = 130;
+
+// Lage des Gesichtsmittelpunkts im Kopf-Bild (144 × 156): oben Platz für hohe Frisuren
+// (Stacheln, Dutt), unten für lange Haare.
+const FACE_X = 72;
+const FACE_Y = 86;
 
 type G = Phaser.GameObjects.Graphics;
 
@@ -65,23 +68,33 @@ export function drawHead(g: G, c: CharacterDef, cx: number, cy: number, s: numbe
   g.fillCircle(cx + k(24), cy + k(12), k(7));
 }
 
-/** Ganze Figur in der Fläche KID_WIDTH·size × KID_HEIGHT·size. */
-export function drawKid(g: G, c: CharacterDef): void {
+/** Größe eines Teils in Pixeln für dieses Kind. */
+export function partSize(c: CharacterDef, part: PartTexture): { width: number; height: number } {
+  const rig = Object.values(KID_RIG).find((r) => r.texture === part)!;
+  return { width: Math.ceil(rig.width * c.size), height: Math.ceil(rig.height * c.size) };
+}
+
+/** Ein Teil der Figur, gezeichnet in seine Bildfläche (Maße aus KID_RIG · size). */
+export function drawKidPart(g: G, c: CharacterDef, part: PartTexture): void {
   const s = c.size;
   const k = (v: number) => v * s;
-  const ky = (v: number) => (v + TOP) * s;
-  // Beine
-  g.fillStyle(c.pants);
-  g.fillRoundedRect(k(42), ky(170), k(24), k(70), k(8));
-  g.fillRoundedRect(k(74), ky(170), k(24), k(70), k(8));
-  // Arme
-  g.fillStyle(c.skin);
-  g.fillRoundedRect(k(14), ky(100), k(22), k(70), k(10));
-  g.fillRoundedRect(k(104), ky(100), k(22), k(70), k(10));
-  // Körper
-  g.fillStyle(c.shirt);
-  g.fillRoundedRect(k(30), ky(92), k(80), k(92), k(18));
-  drawHead(g, c, k(70), ky(62), s);
+  switch (part) {
+    case 'leg':
+      g.fillStyle(c.pants);
+      g.fillRoundedRect(0, 0, k(24), k(70), k(8));
+      break;
+    case 'arm':
+      g.fillStyle(c.skin);
+      g.fillRoundedRect(0, 0, k(22), k(70), k(10));
+      break;
+    case 'body':
+      g.fillStyle(c.shirt);
+      g.fillRoundedRect(0, 0, k(80), k(92), k(18));
+      break;
+    case 'head':
+      drawHead(g, c, k(FACE_X), k(FACE_Y), s);
+      break;
+  }
 }
 
 /** Porträt fürs Gartentor: nur der Kopf, alle gleich groß. */

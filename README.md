@@ -191,5 +191,25 @@ Arme hängen locker herab). Linker und rechter Arm bzw. Bein benutzen dasselbe B
   lacht die Figur eben nicht – alle Bewegungen gehen trotzdem.
 - Echte Fotos oder Grafiken echter Kinder kommen nur mit ausdrücklichem Okay ins Repo.
 
+### Echter Hintergrund (Hinterhof)
+
+Der Hintergrund besteht aus Einzelbildern, die in Ebenen mit Parallaxe stehen (Aufstellung in
+`src/data/backdrop.ts`). Fotos aus dem Hof kommen nicht ins Repo; gemalte Grafiken nach dieser
+Vorlage können die Platzhalter unter denselben Keys ersetzen:
+
+| Texture-Key | Inhalt | Maße |
+| --- | --- | --- |
+| `house-gable`, `house-row`, `house-solar`, `house-small` | Backsteinhäuser, Fuß unten Mitte | siehe `HOUSE_SPECS` |
+| `house-<art>-snow` | nur der Schnee auf Dach, Schornstein und Fensterbänken | wie das Haus |
+| `bg-cypress`, `bg-fir`, `bg-tree` | Säulenbaum, Tanne, Laubbaum hinter dem Zaun | 90 × 340, 260 × 480, 400 × 430 |
+| `bush-green`, `bush-dark`, `bush-red`, `bush-orange` | Büsche vor dem Zaun | 220 × 120 |
+| `fence-<i>`, `fence-snow-<i>` | Zaun mit Efeu und Bodendeckern, je eine Bildschirmbreite | 1920 × 196 |
+| `pergola-<i>`, `pergola-snow-<i>` | Pergola-Balken mit Efeu (je Abschnitt aus `PERGOLAS`) | siehe `pergolaArea` |
+| `meadow-<i>` | Rasen, je eine Bildschirmbreite | 1920 × 380 |
+| `tree` | großer Laubbaum links (Spielgerät, wackelt beim Antippen) | 560 × 660 |
+
+Bei echten Häusern müssen die Fenster (für das Licht nachts) und Schornsteine (Rauch bei Schnee) in
+`HOUSE_SPECS` (`src/scenes/placeholders/backdrop.ts`) zur Grafik passen, beim Baum die Tipp-Flächen in `BIG_TREE`.
+
 Bei Schaukel und Rutsche hängen Seil- bzw. Rutschpunkte an der Grafik
 (siehe `Swing`/`Slide` in `src/objects/Equipment.ts`) und müssen ggf. angepasst werden.

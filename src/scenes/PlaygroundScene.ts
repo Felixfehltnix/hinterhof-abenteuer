@@ -4,11 +4,9 @@ import {
   EDGE_SCROLL_SPEED,
   EDGE_SCROLL_ZONE,
   GAME_WIDTH,
-  GAME_HEIGHT,
   WORLD_WIDTH,
   GROUND_MAX_Y,
   GROUND_MIN_Y,
-  GROUND_TOP,
   MAX_OBJECTS,
 } from '../config';
 import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
@@ -19,6 +17,7 @@ import { Garden } from '../objects/Garden';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { LightLayer } from '../world/LightLayer';
+import { Backdrop } from '../world/Backdrop';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
@@ -68,9 +67,9 @@ export class PlaygroundScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.drawBackground();
-    // Zuerst: Spielzeuge (Taschenlampe) melden sich schon beim Wiederherstellen an.
+    // Zuerst: Hintergrund und Spielzeuge (Taschenlampe) melden sich schon beim Aufbau an.
     this.lightLayer = new LightLayer(this);
+    new Backdrop(this);
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
@@ -377,34 +376,6 @@ export class PlaygroundScene extends Phaser.Scene {
       const onTap: unknown = obj.getData('onTap');
       if (typeof onTap === 'function') onTap(pointer);
     });
-  }
-
-  // --- Hintergrund (Platzhalter) --------------------------------------------
-
-  /** Zaun und Wiese über die ganze Weltbreite. Himmel, Sonne, Mond und Wolken zeichnet der DayCycle. */
-  private drawBackground(): void {
-    const g = this.add.graphics().setDepth(-1000);
-
-    // Zaun im Hinterhof
-    g.fillStyle(0xc98b5a);
-    g.fillRect(0, GROUND_TOP - 120, WORLD_WIDTH, 120);
-    g.lineStyle(4, 0xa56f45);
-    for (let x = 0; x < WORLD_WIDTH; x += 60) g.lineBetween(x, GROUND_TOP - 120, x, GROUND_TOP);
-
-    // Wiese
-    g.fillStyle(0x7cc96a);
-    g.fillRect(0, GROUND_TOP, WORLD_WIDTH, GAME_HEIGHT - GROUND_TOP);
-    g.fillStyle(0x6ab85a);
-    g.fillRect(0, GROUND_TOP, WORLD_WIDTH, 28);
-
-    // Blümchen (deterministisch verteilt)
-    const colors = [0xffffff, 0xffd6e0, 0xfff3b0];
-    for (let i = 0; i < 45 * 3; i++) {
-      const x = (i * 197 + 40) % WORLD_WIDTH;
-      const y = GROUND_TOP + 50 + ((i * 89) % (GAME_HEIGHT - GROUND_TOP - 70));
-      g.fillStyle(colors[i % colors.length]);
-      g.fillCircle(x, y, 6);
-    }
   }
 }
 

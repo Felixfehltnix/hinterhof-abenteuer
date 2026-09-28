@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
+import { GAME_WIDTH, GROUND_TOP } from '../config';
+import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
 import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
+import { BACK_TREE_SIZE, BIG_TREE, BUSH_SIZE, drawBackTree, drawBigTree, drawBush, drawFence, drawFenceSnow, drawMeadow, drawPergola, drawPergolaSnow, drawSmoke, drawWindowGlow, FENCE_TILE_HEIGHT, FENCE_TILE_TOP, HOUSE_SPECS, houseKey, MEADOW_TILE_HEIGHT, pergolaArea, TILE_COUNT, WINDOW_GLOW_SIZE } from './placeholders/backdrop';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -102,20 +105,8 @@ export class BootScene extends Phaser.Scene {
       g.fillCircle(240, 60, 16);
     });
 
-    this.makeTexture('tree', 300, 460, (g) => {
-      g.fillStyle(0x795548);
-      g.fillRoundedRect(125, 220, 50, 240, 12);
-      g.fillStyle(0x2d6a4f);
-      g.fillCircle(150, 130, 110);
-      g.fillStyle(0x40916c);
-      g.fillCircle(90, 170, 80);
-      g.fillCircle(210, 170, 80);
-      g.fillCircle(150, 90, 80);
-      g.fillStyle(0xe63946);
-      g.fillCircle(110, 150, 12);
-      g.fillCircle(200, 120, 12);
-      g.fillCircle(170, 200, 12);
-    });
+    this.makeTexture('tree', BIG_TREE.width, BIG_TREE.height, drawBigTree);
+    this.makeBackdrop();
 
     this.makeTexture('toybox', 210, 140, (g) => {
       g.fillStyle(0xc0392b);
@@ -368,6 +359,35 @@ export class BootScene extends Phaser.Scene {
     TOYS.forEach((t) => this.makeTexture(t.id, t.width, t.height, TOY_PLACEHOLDERS[t.id]));
 
     this.scene.start('Playground');
+  }
+
+  /** Hintergrund wie der echte Hinterhof (#63): Häuser, Bäume, Büsche, Zaun- und Wiesen-Kacheln. */
+  private makeBackdrop(): void {
+    for (const [kind, spec] of Object.entries(HOUSE_SPECS) as [HouseKind, (typeof HOUSE_SPECS)[HouseKind]][]) {
+      const key = houseKey(kind);
+      this.makeTexture(key, spec.width, spec.height, spec.draw);
+      this.makeTexture(`${key}-snow`, spec.width, spec.height, spec.drawSnow);
+    }
+    for (const kind of ['fir', 'tree'] as BackTreeKind[]) {
+      const { width, height } = BACK_TREE_SIZE[kind];
+      this.makeTexture(`bg-${kind}`, width, height, (g) => drawBackTree(g, kind));
+    }
+    for (const kind of ['green', 'dark', 'red', 'orange'] as BushKind[]) {
+      this.makeTexture(`bush-${kind}`, BUSH_SIZE.width, BUSH_SIZE.height, (g) => drawBush(g, kind));
+    }
+    for (let i = 0; i < TILE_COUNT; i++) {
+      const ox = i * GAME_WIDTH;
+      this.makeTexture(`fence-${i}`, GAME_WIDTH, FENCE_TILE_HEIGHT, (g) => drawFence(g, ox, FENCE_TILE_TOP));
+      this.makeTexture(`fence-snow-${i}`, GAME_WIDTH, FENCE_TILE_HEIGHT, (g) => drawFenceSnow(g, ox, FENCE_TILE_TOP));
+      this.makeTexture(`meadow-${i}`, GAME_WIDTH, MEADOW_TILE_HEIGHT, (g) => drawMeadow(g, ox, GROUND_TOP));
+    }
+    PERGOLAS.forEach((_, i) => {
+      const { w, h } = pergolaArea(i);
+      this.makeTexture(`pergola-${i}`, w, h, (g) => drawPergola(g, i));
+      this.makeTexture(`pergola-snow-${i}`, w, h, (g) => drawPergolaSnow(g, i));
+    });
+    this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
+    this.makeTexture('smoke', 48, 48, drawSmoke);
   }
 
   private makeTexture(

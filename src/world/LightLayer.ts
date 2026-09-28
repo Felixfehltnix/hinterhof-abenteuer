@@ -77,8 +77,7 @@ export class LightLayer {
     const lit: Phaser.Geom.Rectangle[] = [];
     for (const o of lights as Set<Drawable>) {
       if (!o.visible) continue;
-      const b = (o as unknown as Phaser.GameObjects.Image).getBounds();
-      if (o.scrollFactorX !== 1) b.x += cam.scrollX; // fest am Himmel: Bildschirm → Welt
+      const b = worldBounds(o, cam);
       if (Phaser.Geom.Intersects.RectangleToRectangle(b, view)) lit.push(b);
     }
     // Alles auf der Welt, was ein Licht verdecken kann, von hinten nach vorn
@@ -86,10 +85,24 @@ export class LightLayer {
       .filter((o) => this.canOcclude(o, lights, lit))
       .sort((a, b) => a.depth - b.depth);
 
+    // Verdecker zwischen zwei Lichtern werden gesammelt und in einem Durchgang ausradiert
+    // (jedes Ausradieren beendet den Zeichendurchgang – einzeln wäre das bei vielen Dingen teuer).
+    const pending: Drawable[] = [];
+    const eraseQueued = () => {
+      if (!pending.length) return;
+      rt.endDraw();
+      // Die Textur-Kamera scrollt mit, so stehen alle Verdecker (auch mit Parallaxe) an ihrem Platz.
+      rt.camera.setScroll(cam.scrollX, cam.scrollY);
+      rt.erase(pending);
+      rt.camera.setScroll(0, 0);
+      rt.beginDraw();
+      pending.length = 0;
+    };
     let next = 0;
     const drawUpTo = (depth: number) => {
       // Alle Lichter, die hinter dieser Tiefe liegen, zuerst zeichnen
       while (next < active.length && active[next].depth() < depth) {
+        eraseQueued();
         for (const o of active[next].objects as (Drawable & Phaser.GameObjects.Components.BlendMode)[]) {
           if (!o.visible || !o.active) continue;
           const blend = o.blendMode;
@@ -102,26 +115,36 @@ export class LightLayer {
     };
     for (const o of occluders) {
       drawUpTo(o.depth);
-      if (next === 0) continue; // noch kein Licht dahinter
-      rt.endDraw();
-      rt.erase(o, o.x - cam.scrollX, o.y - cam.scrollY);
-      rt.beginDraw();
+      if (next > 0) pending.push(o); // sonst noch kein Licht dahinter
     }
     drawUpTo(Infinity);
+    eraseQueued();
     rt.endDraw();
   }
 
-  /** Steht es sichtbar auf der Welt und liegt über einem Licht? */
+  /**
+   * Steht es sichtbar auf der Welt und liegt über einem Licht? Was nicht mit der Welt scrollt
+   * (Himmel, Wolken, Leisten), verdeckt nichts – außer Hintergrund-Ebenen mit Parallaxe, die sich
+   * mit `setData('occludesLight', true)` melden (Häuser, Bäume hinter dem Zaun).
+   */
   private canOcclude(o: Drawable, lights: Set<Phaser.GameObjects.GameObject>, lit: Phaser.Geom.Rectangle[]): boolean {
     if (lights.has(o) || o === this.rt || !o.visible || !o.active) return false;
-    if (o.scrollFactorX !== 1 || o.depth >= DEPTH_TINT) return false;
+    if (o.depth >= DEPTH_TINT) return false;
+    if (o.scrollFactorX !== 1 && o.getData('occludesLight') !== true) return false;
     if ((o as unknown as { alpha?: number }).alpha === 0) return false;
     if (o instanceof Phaser.GameObjects.Particles.ParticleEmitter) return false;
     const bounded = o as unknown as { getBounds?: () => Phaser.Geom.Rectangle };
     if (bounded.getBounds && !(o instanceof Phaser.GameObjects.Graphics)) {
-      const b = bounded.getBounds();
+      const b = worldBounds(o, this.scene.cameras.main);
       return lit.some((l) => Phaser.Geom.Intersects.RectangleToRectangle(b, l));
     }
     return true;
   }
+}
+
+/** Umriss in Weltkoordinaten, auch für Dinge mit Parallaxe (wo sie gerade auf dem Bildschirm stehen). */
+function worldBounds(o: Drawable, cam: Phaser.Cameras.Scene2D.Camera): Phaser.Geom.Rectangle {
+  const b = (o as unknown as Phaser.GameObjects.Image).getBounds();
+  b.x += cam.scrollX * (1 - o.scrollFactorX);
+  return b;
 }

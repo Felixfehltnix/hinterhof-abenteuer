@@ -4,7 +4,7 @@ import type { ToyId } from './toys';
 // Die Spielwiese im Hinterhof – komplett im Code definiert.
 // Koordinaten sind Weltkoordinaten (Welt: WORLD_WIDTH × 1080, Start links). x/y = Fußpunkt.
 
-export type EquipmentKind = 'slide' | 'swing' | 'sandbox' | 'tree';
+export type EquipmentKind = 'playhouse' | 'swing' | 'sandbox' | 'tree';
 
 export interface EquipmentDef {
   id: string;
@@ -16,8 +16,8 @@ export interface EquipmentDef {
 export const EQUIPMENT: EquipmentDef[] = [
   { id: 'baum', kind: 'tree', x: 230, y: 780 },
   { id: 'schaukel', kind: 'swing', x: 700, y: 820 },
-  // Rutsche und Sandkasten im mittleren Teil der Welt (#34)
-  { id: 'rutsche', kind: 'slide', x: 2500, y: 840 },
+  // Kletter-Spielhaus mit Rutsche (#65, ersetzt die alte Rutsche) und Sandkasten in der Mitte der Welt
+  { id: 'spielhaus', kind: 'playhouse', x: 2480, y: 880 },
   { id: 'sandkasten', kind: 'sandbox', x: 3150, y: 1010 },
 ];
 

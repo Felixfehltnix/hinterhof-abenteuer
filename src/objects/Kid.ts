@@ -60,6 +60,7 @@ const MODE_ACTIVITY: Record<KidMode, Activity> = {
   seesawing: 'seesaw',
   bathing: 'bathe',
   hiding: 'hidden',
+  playing: 'sit',
   leaving: 'walk',
 };
 
@@ -73,11 +74,15 @@ export type KidMode =
   | 'seesawing'
   | 'bathing'
   | 'hiding'
+  /** Im Kletter-Spielhaus (oben auf dem Podest oder drinnen). */
+  | 'playing'
   | 'leaving';
 
 /** Alles, worauf ein Kind "sitzen" kann (z. B. die Schaukel). */
 export interface Seat {
   unseat(kid: Kid): void;
+  /** Kind wurde angetippt: true = der Sitz hat reagiert (dann hüpft das Kind nicht). */
+  tap?(kid: Kid): boolean;
 }
 
 /**
@@ -175,6 +180,8 @@ export class Kid extends Phaser.GameObjects.Container {
     this.setData('onTap', () => {
       this.emit('tapped');
       this.idleTime = 0;
+      // Z. B. oben im Spielhaus: Antippen = rutschen
+      if (this.seatedOn?.tap?.(this)) return;
       // Hält es etwas, macht es damit etwas (pusten, trommeln, gießen, werfen), sonst hüpft es.
       const inHand = this.holding as { useBy?: (kid: Kid) => boolean } | undefined;
       if (!inHand?.useBy?.(this)) this.hop();

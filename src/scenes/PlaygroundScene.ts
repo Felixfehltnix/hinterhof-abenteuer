@@ -319,6 +319,23 @@ export class PlaygroundScene extends Phaser.Scene {
   private setupInput(): void {
     this.input.dragDistanceThreshold = DRAG_THRESHOLD;
 
+    // Bewegliches hat Vorrang: Liegt ganz oben feststehende Deko (Baum) oder ein großes
+    // Spielgerät (Korb, Tor, Pool, …), bekommt ein Kind oder kleines Spielzeug dahinter den Finger.
+    // Phaser gibt Tippen und Ziehen nur an das erste Objekt dieser Liste (topOnly).
+    const sort = this.input.sortGameObjects.bind(this.input);
+    this.input.sortGameObjects = (objects, pointer) => {
+      const list = sort(objects, pointer);
+      const top = list.length > 1 ? touchRank(list[0]) : -1;
+      if (top <= 0) return list; // Bewegliches oder Leiste/Kiste/Tor liegt schon oben
+      let best = 0;
+      for (let i = 1; i < list.length; i++) {
+        const r = touchRank(list[i]);
+        if (r >= 0 && r < touchRank(list[best])) best = i;
+      }
+      if (best > 0) list.unshift(...list.splice(best, 1));
+      return list;
+    };
+
     this.input.on('dragstart', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
       if (!(obj instanceof Toy) && !(obj instanceof Kid)) return;
       obj.handleDragStart();
@@ -381,4 +398,15 @@ export class PlaygroundScene extends Phaser.Scene {
       g.fillCircle(x, y, 6);
     }
   }
+}
+
+/**
+ * Vorrang beim Antippen: 0 = Kind oder kleines Spielzeug, 1 = großes Spielgerät,
+ * 2 = feststehende Deko (`setData('scenery', true)`), −1 = alles andere (Leisten, Kiste, Tor, Wolken).
+ */
+function touchRank(obj: Phaser.GameObjects.GameObject): number {
+  if (obj instanceof Kid) return 0;
+  if (obj instanceof Toy) return obj.def.large ? 1 : 0;
+  if (obj.getData('scenery') === true) return 2;
+  return -1;
 }

@@ -196,7 +196,16 @@ export class Tree extends Equipment {
   constructor(scene: Phaser.Scene, def: EquipmentDef) {
     super(scene, def);
     const image = (this.image = scene.add.image(def.x, def.y, 'tree').setOrigin(0.5, 1).setDepth(def.y));
-    image.setInteractive({ useHandCursor: true });
+    // Nur Stamm und unterer Kronenbereich wackeln beim Antippen (Maße passend zum Platzhalter 300×460).
+    const trunk = new Phaser.Geom.Rectangle(95, 200, 110, 260);
+    const lowerCrown = new Phaser.Geom.Rectangle(40, 150, 220, 110);
+    image.setInteractive({
+      hitArea: trunk,
+      hitAreaCallback: (_area: Phaser.Geom.Rectangle, x: number, y: number) => trunk.contains(x, y) || lowerCrown.contains(x, y),
+      useHandCursor: true,
+    });
+    // Deko: Kinder und Spielzeuge dahinter haben beim Antippen Vorrang (PlaygroundScene.touchRank).
+    image.setData('scenery', true);
     image.setData('onTap', () => {
       if (scene.tweens.isTweening(image)) return;
       scene.tweens.add({

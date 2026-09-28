@@ -42,6 +42,10 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Neue Spielgeräte: Klasse in `src/objects/Equipment.ts` von `Equipment` ableiten,
   `accepts()`/`use()`/`update()` überschreiben, in `createEquipment()` eintragen.
 - Tippen: `obj.setData('onTap', fn)`. Die Szene ruft `fn(pointer)` auf, wenn nicht gezogen wurde.
+- **Vorrang beim Antippen/Ziehen** (`touchRank` in `PlaygroundScene`): Kinder und kleine Spielzeuge
+  gehen vor großen Spielgeräten (`large: true` im Katalog, z. B. Korb, Tor, Pool, Fahrzeuge) und vor
+  feststehender Deko (`setData('scenery', true)`, z. B. der Baum) – auch wenn sie dahinter liegen.
+  Leisten, Kiste und Tor behalten ihren Platz. Große Deko bekommt eine kleine Touch-Fläche.
 - Grafiken: Platzhalter entstehen in `BootScene` (Spielzeuge: `src/scenes/placeholders/toys.ts`). Echte PNGs kommen nach `public/assets/`
   und werden in `BootScene.preload()` unter demselben Texture-Key geladen.
 - Code-Kommentare auf Deutsch, Bezeichner auf Englisch.

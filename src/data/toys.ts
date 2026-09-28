@@ -103,6 +103,11 @@ export interface ToyDef {
   tags?: readonly ToyTag[];
   /** Nicht in der Spielzeugkiste (entsteht anders, z. B. Schneebälle im Schnee). */
   hidden?: boolean;
+  /**
+   * Großes Spielgerät (Korb, Tor, Fahrzeug, Pool, …): Kinder und kleine Spielzeuge, die dahinter
+   * liegen, haben beim Antippen und Ziehen Vorrang.
+   */
+  large?: boolean;
   /** Abweichungen von DEFAULT_TOY_PARAMS. */
   params?: Partial<ToyParams>;
 }
@@ -201,6 +206,7 @@ export const TOYS = [
   {
     // Ball fliegt oder fällt durch den Ring: Netz wackelt, Sterne sprühen.
     id: 'hoop',
+    large: true,
     width: 170,
     height: 330,
     behaviors: ['draggable', 'hoop'],
@@ -209,6 +215,7 @@ export const TOYS = [
   {
     // Ball rollt ins Tor: Netz beult sich, alle Kinder jubeln.
     id: 'goal',
+    large: true,
     width: 300,
     height: 170,
     behaviors: ['draggable', 'goal'],
@@ -233,6 +240,7 @@ export const TOYS = [
   {
     // Kind darauf ziehen: sitzt. Ziehen: fährt. Antippen: hupt.
     id: 'bobbycar',
+    large: true,
     width: 180,
     height: 100,
     behaviors: ['draggable', 'rideable', 'honk'],
@@ -241,6 +249,7 @@ export const TOYS = [
   {
     // Wie Bobbycar, das Kind macht Laufbewegungen.
     id: 'balancebike',
+    large: true,
     width: 190,
     height: 110,
     behaviors: ['draggable', 'rideable', 'wobble'],
@@ -249,6 +258,7 @@ export const TOYS = [
   {
     // Wie Bobbycar, das Kind steht und stößt sich ab.
     id: 'scooter',
+    large: true,
     width: 150,
     height: 150,
     behaviors: ['draggable', 'rideable', 'wobble'],
@@ -257,6 +267,7 @@ export const TOYS = [
   {
     // Spielzeug oder Kind hineinlegen und samt Inhalt schieben.
     id: 'wheelbarrow',
+    large: true,
     width: 200,
     height: 110,
     behaviors: ['draggable', 'rideable', 'wobble'],
@@ -265,6 +276,7 @@ export const TOYS = [
   {
     // Kind darauf: hüpft von selbst. Antippen: Salto.
     id: 'trampoline',
+    large: true,
     width: 230,
     height: 90,
     behaviors: ['draggable', 'trampoline'],
@@ -273,6 +285,7 @@ export const TOYS = [
   {
     // Ein Kind: diese Seite runter. Zwei Kinder: wippt.
     id: 'seesaw',
+    large: true,
     width: 360,
     height: 90,
     behaviors: ['draggable', 'seesaw'],
@@ -297,6 +310,7 @@ export const TOYS = [
   {
     // Kinder und Spielzeug hinein: planschen und schwimmen.
     id: 'pool',
+    large: true,
     width: 320,
     height: 100,
     behaviors: ['draggable', 'pool'],
@@ -345,6 +359,7 @@ export const TOYS = [
   {
     // 8 Platten einzeln antippen, Noten fliegen. (Ton-Ereignis 'xylophone', pitch 0–7)
     id: 'xylophone',
+    large: true,
     width: 300,
     height: 110,
     behaviors: ['draggable', 'xylophone'],
@@ -353,6 +368,7 @@ export const TOYS = [
   {
     // Kinder hineinziehen, antippen: Kuckuck!, nochmal: raus.
     id: 'tent',
+    large: true,
     width: 250,
     height: 180,
     behaviors: ['draggable', 'tent'],
@@ -369,6 +385,7 @@ export const TOYS = [
   {
     // Bis zu 6 Kinder, die beim Hineinsetzen der Reihe nach durchzählen. Antippen: nochmal zählen.
     id: 'whirlpool',
+    large: true,
     width: 360,
     height: 130,
     behaviors: ['draggable', 'whirlpool'],
@@ -395,6 +412,7 @@ export const TOYS = [
   },
   {
     id: 'snowman',
+    large: true,
     width: 150,
     height: 270,
     tags: ['snow'],

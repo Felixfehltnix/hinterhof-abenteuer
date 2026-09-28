@@ -123,14 +123,20 @@ Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst
 `rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße in `src/data/vehicles.ts`),
 `honk` (Antippen = Hupe; Ton über `scene.events.emit('sound', { kind: 'honk' })`).
 `trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
-Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Reifen kreist um ein Kind (hintere Hälfte hinter,
+Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Das Kind hält den Reifen (handheld), Kind antippen = er kreist um die Hüfte (hintere Hälfte hinter,
 vordere vor dem Kind, per `setCrop`), hört auf bei `kid.emit('tapped'|'grabbed')`.
 `dig` (Schaufel), `fillable` (Eimer füllt sich), `mold` (Sandkuchen), `water` (Gießkanne,
 Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
 `drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
-`handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
+`handheld` (Kind hält es in der Hand, Haltung als Daten `hold: { pose, dx, dy, angle }` im Katalog,
+Armhaltungen `HOLD_POSES` in poses.ts), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
+**In der Hand:** Ein Kind hält immer nur eines (`kid.holding`, `toy.heldBy`); `takeInHand`/`takeFromHand`
+(`toys/hand.ts`) tauschen und lassen fallen. Kind antippen (oder das Gehaltene) ruft `onUse(kid)` der
+Bausteine auf (pusten, trommeln, gießen, werfen per `toy.throwFromHand`, Hula starten), ohne Aktion hüpft
+das Kind. `onLetGo(drop)`: loslassen. Zweihändiges (`twoHanded`) fällt beim Aufsitzen vor die Füße.
+Gespeichert wird `heldBy` je Spielzeug; beim Laden hält das Kind es wieder.
 `whirlpool`: bis zu 6 Kinder (Modus `bathing`), jedes Kind zählt reihum mit Hüpfer und
 Zahlenblase (`sound` `count` mit `value` und `voice`); Antippen = neu zählen, ein 7. Kind landet daneben.
 Hoher, freistehender Pool: Kinder hüpfen über den Rand hinein/hinaus, die Vorderwand (`whirlpool-front`,

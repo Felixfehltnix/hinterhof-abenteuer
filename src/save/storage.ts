@@ -8,6 +8,8 @@ export interface SavedObject {
   id: string;
   x: number;
   y: number;
+  /** Nur Spielzeuge: id des Kindes, das es in der Hand hält (optional, ältere Stände haben es nicht). */
+  heldBy?: string;
 }
 
 export interface SaveData {
@@ -43,7 +45,7 @@ function parseSave(value: unknown): SaveData | null {
   return {
     version: SAVE_VERSION,
     kids: value.kids.filter(isSavedObject),
-    toys: value.toys.filter(isSavedObject),
+    toys: value.toys.filter(isSavedObject).map((t) => (t.heldBy === undefined || typeof t.heldBy === 'string' ? t : { ...t, heldBy: undefined })),
     world: isRecord(value.world) ? value.world : {},
   };
 }

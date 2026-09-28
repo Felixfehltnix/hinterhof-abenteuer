@@ -16,6 +16,8 @@ export interface Release {
   readonly onGround: boolean;
   /** Geschwindigkeit des Fingers kurz vor dem Loslassen (px/s). */
   readonly pointerVelocity: { readonly x: number; readonly y: number };
+  /** Ein Kind hat es aus der Hand geworfen (nicht gleich wieder festhalten). */
+  readonly fromHand?: boolean;
 }
 
 /**
@@ -37,6 +39,10 @@ export interface ToyBehavior {
   onReceive?(kind: string, amount: number): void;
   /** Das Spielzeug wird gerade weggeräumt (Kind absteigen lassen, Ladung ausschütten, …). */
   onRemove?(): void;
+  /** Das Kind, das es hält, wurde angetippt (pusten, trommeln, gießen, werfen). true = etwas passiert. */
+  onUse?(kid: Kid): boolean;
+  /** Das Kind lässt es los (tauschen, aufsitzen, werfen). drop = vor die Füße fallen lassen. */
+  onLetGo?(drop: boolean): void;
   /** Das Spielzeug verschwindet (weggeräumt, geplatzt): eigene Objekte aufräumen. */
   onDestroy?(): void;
   /** Jeden Frame, deltaMs = Zeit seit dem letzten Frame. */

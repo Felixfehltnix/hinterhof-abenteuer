@@ -213,7 +213,7 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
 }
 
 /** Kurze Gesten, die eine Tätigkeit für einen Moment überlagern. */
-export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land';
+export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow';
 
 export interface GestureDef {
   duration: number;
@@ -281,6 +281,28 @@ export const GESTURES: Record<GestureName, GestureDef> = {
     pose: 'wave',
     face: 'joy',
     motion: (_p, t) => ({ 'arm-r': { angle: Math.sin(t * 13) * 24 } }),
+  },
+  drum: {
+    duration: 650,
+    face: 'joy',
+    // Abwechselnd mit beiden Händen auf die Trommel
+    motion: (_p, t) => ({
+      'arm-l': { angle: -22 * Math.max(0, Math.sin(t * 24)) },
+      'arm-r': { angle: 22 * Math.max(0, Math.sin(t * 24 + Math.PI)) },
+      head: { angle: Math.sin(t * 12) * 3 },
+    }),
+  },
+  throw: {
+    duration: 420,
+    face: 'joy',
+    // Arm holt kräftig aus nach vorn oben, der Oberkörper geht mit
+    motion: (p) => ({ 'arm-r': { angle: -150 * Math.sin(Math.PI * Math.min(1, p * 1.3)) }, body: { angle: -5 * env(p) } }),
+  },
+  blow: {
+    duration: 700,
+    face: 'yawn',
+    // Pusten: Kopf zum Stab geneigt, Backen rund (Gesicht mit rundem Mund)
+    motion: (p) => ({ head: { angle: 7 * env(p), y: 2 * env(p) } }),
   },
   land: {
     duration: 300,

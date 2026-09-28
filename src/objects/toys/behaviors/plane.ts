@@ -7,6 +7,12 @@ export const plane: BehaviorFactory = (toy) => {
   let nextLoopCheck = 0;
 
   return {
+    // Hält es ein Kind: Kind antippen = in Blickrichtung werfen
+    onUse: (kid) => {
+      toy.throwFromHand(kid.flipX ? -1 : 1, kid.y);
+      kid.act('throw');
+      return true;
+    },
     update: () => {
       const ph = toy.physics;
       const now = toy.scene.time.now;

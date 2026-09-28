@@ -10,6 +10,12 @@ export const boomerang: BehaviorFactory = (toy) => {
   let flight: { dir: number; startX: number; accel: number } | undefined;
 
   return {
+    // Hält es ein Kind: Kind antippen = in Blickrichtung werfen
+    onUse: (kid) => {
+      toy.throwFromHand(kid.flipX ? -1 : 1, kid.y);
+      kid.act('throw');
+      return true;
+    },
     onDragStart: () => {
       flight = undefined;
     },

@@ -1,7 +1,20 @@
 import Phaser from 'phaser';
 import { DEPTH_DRAGGING, GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../config';
 import type { CharacterDef } from '../data/characters';
-import { ARM_REACH, HIP, KID_FRAME, KID_RIG, PART_ORDER, POSES, SEAT_DROP, type PartId, type PartPose, type PoseName } from '../data/poses';
+import {
+  ARM_REACH,
+  HIP,
+  HOLD_POSES,
+  KID_FRAME,
+  KID_RIG,
+  PART_ORDER,
+  POSES,
+  SEAT_DROP,
+  type HoldPose,
+  type PartId,
+  type PartPose,
+  type PoseName,
+} from '../data/poses';
 import {
   ACTIVITY_FACE,
   ACTIVITY_POSE,
@@ -25,10 +38,6 @@ const HEAD_TOP = 56;
 
 // So schnell folgen die Gelenke der Bewegung (1/s): weich, aber ohne sichtbare Verzögerung.
 const FOLLOW_RATE = 16;
-// Arm, der etwas hält, ist mindestens so weit gehoben (Grad, rechter Arm):
-// Schnur (Ballon, Drachen) schräg nach oben, Lampe nach vorn.
-const HOLD_STRING_ANGLE = -118;
-const HOLD_HAND_ANGLE = -70;
 // Nachschwingen beim Ziehen: Federhärte, Dämpfung, Grad pro px/s
 const SWAY_STIFFNESS = 70;
 const SWAY_DAMPING = 7;
@@ -166,7 +175,9 @@ export class Kid extends Phaser.GameObjects.Container {
     this.setData('onTap', () => {
       this.emit('tapped');
       this.idleTime = 0;
-      this.hop();
+      // Hält es etwas, macht es damit etwas (pusten, trommeln, gießen, werfen), sonst hüpft es.
+      const inHand = this.holding as { useBy?: (kid: Kid) => boolean } | undefined;
+      if (!inHand?.useBy?.(this)) this.hop();
     });
   }
 
@@ -376,10 +387,18 @@ export class Kid extends Phaser.GameObjects.Container {
       j.y = b.y + m.y;
       j.scaleY = b.scaleY * m.scaleY;
     }
-    // Wer etwas an der Schnur oder in der Hand hält, hebt den rechten Arm (höher geht immer).
-    if (this.holding && this.mode !== 'hiding') {
-      const inHand = this.holding.getData?.('heldInHand') === true;
-      this.joints['arm-r'].angle = Math.min(this.joints['arm-r'].angle, inHand ? HOLD_HAND_ANGLE : HOLD_STRING_ANGLE);
+    // Wer etwas hält, hält die Arme so, wie es der Gegenstand braucht (HOLD_POSES); die Bewegung
+    // der Tätigkeit (Atmen, Trommeln, …) läuft obendrauf weiter. Arme hoch (Jubeln) bleiben hoch.
+    const holdPose = this.holding?.getData('holdPose') as HoldPose | undefined;
+    if (holdPose && this.mode !== 'hiding') {
+      const arms = HOLD_POSES[holdPose].arms;
+      for (const id of ['arm-l', 'arm-r'] as const) {
+        const angle = arms[id];
+        if (angle === undefined) continue;
+        const j = this.joints[id];
+        const raisedHigher = Math.abs(this.base[id].angle) > Math.abs(angle) + 20;
+        if (!raisedHigher) j.angle = angle + this.motion[id].angle;
+      }
     }
     const s = this.def.size;
     const m = this.mirrored ? -1 : 1;
@@ -628,6 +647,12 @@ export class Kid extends Phaser.GameObjects.Container {
   kick(dir: number): void {
     if (this.mode !== 'idle' || this.gesture) return;
     this.playGesture('kick', Math.sign(dir) || 1);
+  }
+
+  /** Kurze Bewegung beim Benutzen eines gehaltenen Spielzeugs (trommeln, werfen, pusten). */
+  act(name: 'drum' | 'throw' | 'blow'): void {
+    if (this.mode === 'leaving' || this.mode === 'hiding' || this.mode === 'dragging') return;
+    this.playGesture(name);
   }
 
   /** Winkt zum Abschied mit einem Arm. */

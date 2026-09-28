@@ -196,3 +196,25 @@ export const POSES = {
 } satisfies Record<string, Pose>;
 
 export type PoseName = keyof typeof POSES;
+
+/**
+ * Armhaltung beim Halten in der Hand (Winkel in Grad, ersetzt die Grundpose dieser Arme; die
+ * Bewegung der Tätigkeit läuft obendrauf weiter). string = Schnur (Ballon, Drachen).
+ */
+export type HoldPose = 'up' | 'forward' | 'hang' | 'both' | 'diagonal' | 'string';
+
+export const HOLD_POSES: Record<HoldPose, { arms: Partial<Record<'arm-l' | 'arm-r', number>>; twoHanded: boolean }> = {
+  /** Rechte Hand erhoben (Bumerang, Seifenblasenstab, Papierflieger). */
+  up: { arms: { 'arm-r': -150 }, twoHanded: false },
+  /** Rechte Hand nach vorn (Taschenlampe, Frisbee, Förmchen). */
+  forward: { arms: { 'arm-r': -70 }, twoHanded: false },
+  /** Rechter Arm hängt, das Spielzeug baumelt am Henkel (Eimer, Gießkanne, Reifen). */
+  hang: { arms: { 'arm-r': -6 }, twoHanded: false },
+  /** Beide Hände vor dem Bauch (Trommel). */
+  both: { arms: { 'arm-l': -42, 'arm-r': 42 }, twoHanded: true },
+  /** Beide Hände schräg vor dem Körper (Schaufel). */
+  diagonal: { arms: { 'arm-l': -34, 'arm-r': 28 }, twoHanded: true },
+  /** Schnur schräg nach oben (Ballon, Drachen). */
+  string: { arms: { 'arm-r': -118 }, twoHanded: false },
+};
+

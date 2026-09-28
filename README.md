@@ -70,7 +70,9 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Kind aufs Trampolin | hüpft von selbst, Trampolin antippen = Salto |
 | Ein / zwei Kinder auf die Wippe | eine Seite geht runter / es wippt |
 | Kind auf den Hüpfball | hüpft über die Wiese |
-| Hula-Hoop auf ein Kind ziehen | kreist um die Hüfte, Antippen hört auf |
+| Hula-Hoop auf ein Kind ziehen, dann Kind antippen | Kind hält ihn / er kreist um die Hüfte, Antippen hört auf |
+| Eimer, Schaufel, Förmchen, Gießkanne, Seifenblasenstab, Frisbee, Papierflieger, Bumerang, Trommel aufs Kind ziehen | Kind hält es in der Hand (ein zweites tauscht, das alte fällt vor die Füße) |
+| Kind (oder was es hält) antippen | pustet Seifenblasen / trommelt / gießt Blumen / wirft Frisbee, Flieger, Bumerang; sonst hüpft es |
 | Kinder / Spielzeug ins Planschbecken | planschen / schwimmen |
 | Schaufel im Sandkasten ziehen | buddelt; ein Eimer daneben füllt sich (voll antippen = ausschütten) |
 | Förmchen im Sandkasten antippen | Sandkuchen (antippen = zerbröselt) |

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
 import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
-import { TOY_PLACEHOLDERS } from './placeholders/toys';
+import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
 // Sobald echte Grafiken da sind: PNGs nach public/assets/ legen, hier in preload()
@@ -216,22 +216,8 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Vorderer Rand des Whirlpools (über den Kindern, Wasser halbdurchsichtig)
-    this.makeTexture('whirlpool-front', 360, 130, (g) => {
-      const half = (cx: number, cy: number, rx: number, ry: number, reverse = false) => {
-        const pts: Phaser.Math.Vector2[] = [];
-        for (let i = 0; i <= 28; i++) {
-          const a = (i / 28) * Math.PI;
-          pts.push(new Phaser.Math.Vector2(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry));
-        }
-        return reverse ? pts.reverse() : pts;
-      };
-      g.fillStyle(0x48cae4, 0.55);
-      g.fillPoints(half(180, 62, 150, 40), true);
-      g.fillStyle(0xf1faee);
-      g.fillPoints([...half(180, 70, 178, 58), ...half(180, 64, 158, 45, true)], true);
-      g.fillStyle(0x2a9d8f);
-      g.fillPoints([...half(180, 70, 178, 58), ...half(180, 70, 178, 50, true)], true);
-    });
+    // Vorderer Teil des Whirlpools (liegt über den Kindern), gleiche Fläche wie die Whirlpool-Grafik
+    this.makeTexture('whirlpool-front', 380, 230, (g) => drawWhirlpool(g, true));
 
     this.makeTexture('drop', 10, 14, (g) => {
       g.fillStyle(0x4cc9f0);

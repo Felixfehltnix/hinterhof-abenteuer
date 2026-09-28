@@ -386,8 +386,8 @@ export const TOYS = [
     // Bis zu 6 Kinder, die beim Hineinsetzen der Reihe nach durchzählen. Antippen: nochmal zählen.
     id: 'whirlpool',
     large: true,
-    width: 360,
-    height: 130,
+    width: 380,
+    height: 230,
     behaviors: ['draggable', 'whirlpool'],
     params: { bounce: 0, rollFriction: 20 },
   },

@@ -395,17 +395,7 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillRoundedRect(24, 6, 12, 6, 2); // Schalter
   },
 
-  whirlpool: (g) => {
-    // Runder Pool: Rand, sprudelndes Wasser, ein paar Blasen
-    g.fillStyle(0xf1faee);
-    g.fillEllipse(180, 70, 356, 116);
-    g.fillStyle(0x2a9d8f);
-    g.fillEllipse(180, 64, 316, 90);
-    g.fillStyle(0x48cae4);
-    g.fillEllipse(180, 62, 300, 80);
-    g.fillStyle(0xffffff, 0.6);
-    for (let i = 0; i < 9; i++) g.fillCircle(60 + i * 30, 55 + (i % 3) * 8, 5 + (i % 2) * 3);
-  },
+  whirlpool: (g) => drawWhirlpool(g, false),
 
   snowball: (g) => {
     g.fillStyle(0xffffff);
@@ -456,4 +446,107 @@ function pentagon(cx: number, cy: number, r: number): Phaser.Math.Vector2[] {
     points.push(new Phaser.Math.Vector2(cx + Math.cos(a) * r, cy + Math.sin(a) * r));
   }
   return points;
+}
+
+// Aufblasbarer Whirlpool (Stil Intex PureSpa, braun), 380 × 230: hohe gewölbte Seitenwand in
+// Rattan-Optik, heller dicker Wulst oben, Wasser nur von oben sichtbar, Pumpe seitlich.
+export const WHIRLPOOL = {
+  cx: 190,
+  /** Mittellinie des oberen Wulstes und Wasserfläche. */
+  rimY: 62,
+  /** Mittellinie der unteren Kante. */
+  bottomY: 196,
+  rx: 182,
+  rimRy: 52,
+  /** Innenkante des Wulstes = Wasserrand. */
+  waterRx: 156,
+  waterRy: 38,
+  bottomRy: 32,
+};
+
+/** Untere (vordere) Hälfte einer Ellipse, von rechts nach links. */
+function lowerHalf(cx: number, cy: number, rx: number, ry: number, reverse = false): Phaser.Math.Vector2[] {
+  const pts: Phaser.Math.Vector2[] = [];
+  for (let i = 0; i <= 32; i++) {
+    const a = (i / 32) * Math.PI;
+    pts.push(new Phaser.Math.Vector2(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry));
+  }
+  return reverse ? pts.reverse() : pts;
+}
+
+/**
+ * Whirlpool zeichnen. front = nur der vordere Teil (Wand, vorderer Wulst, Wasser davor), der als
+ * eigene Grafik über den Kindern liegt und sie ab Brusthöhe verdeckt.
+ */
+export function drawWhirlpool(g: Phaser.GameObjects.Graphics, front: boolean): void {
+  const { cx, rimY, bottomY, rx, rimRy, waterRx, waterRy, bottomRy } = WHIRLPOOL;
+  const wallTopAt = (x: number) => {
+    const u = Math.max(-1, Math.min(1, (x - cx) / rx));
+    return front ? rimY + rimRy * Math.sqrt(1 - u * u) - 6 : rimY;
+  };
+  const wallBottomAt = (x: number) => {
+    const u = Math.max(-1, Math.min(1, (x - cx) / rx));
+    return bottomY + bottomRy * Math.sqrt(1 - u * u);
+  };
+
+  if (front) {
+    // Wasser vor den Kindern: halb durchsichtig, so sitzen sie „im“ Wasser
+    g.fillStyle(0x48cae4, 0.55);
+    g.fillPoints(lowerHalf(cx, rimY + 2, waterRx, waterRy), true);
+  }
+
+  // Seitenwand (vorn gewölbt bis zur unteren Kante)
+  g.fillStyle(0x6f4e37);
+  g.fillPoints(
+    [
+      ...(front ? lowerHalf(cx, rimY, rx, rimRy) : [new Phaser.Math.Vector2(cx + rx, rimY), new Phaser.Math.Vector2(cx - rx, rimY)]),
+      ...lowerHalf(cx, bottomY, rx, bottomRy, true),
+    ],
+    true,
+  );
+  // Rattan-Streifen: senkrecht, zur Seite hin enger (Rundung)
+  for (let i = 0; i < 30; i++) {
+    const a = (Math.PI * (i + 0.5)) / 30;
+    const x = cx - Math.cos(a) * rx;
+    const w = 1.5 + 4 * Math.sin(a);
+    g.fillStyle(i % 2 ? 0x9c7a55 : 0x8a6a48);
+    g.fillRect(x - w / 2, wallTopAt(x), w, wallBottomAt(x) - wallTopAt(x) - 2);
+  }
+  // Gewölbt wie aufgeblasen: Seiten dunkler, Mitte etwas heller
+  g.fillStyle(0x000000, 0.16);
+  g.fillRect(cx - rx, wallTopAt(cx - rx + 10), 22, wallBottomAt(cx - rx + 10) - wallTopAt(cx - rx + 10));
+  g.fillRect(cx + rx - 22, wallTopAt(cx + rx - 10), 22, wallBottomAt(cx + rx - 10) - wallTopAt(cx + rx - 10));
+  g.fillStyle(0xffffff, 0.07);
+  g.fillRect(cx - 70, wallTopAt(cx - 70), 60, wallBottomAt(cx - 40) - wallTopAt(cx - 70) - 4);
+  // Unterer Wulst
+  g.lineStyle(5, 0x5a3e2b);
+  g.strokePoints(lowerHalf(cx, bottomY, rx - 2, bottomRy - 2), false);
+
+  // Pumpe seitlich am Rand (nur Deko)
+  g.fillStyle(0x3d3d3d);
+  g.fillRoundedRect(cx + rx - 44, rimY + 70, 44, 54, 8);
+  g.fillStyle(0x4cc9f0);
+  g.fillCircle(cx + rx - 22, rimY + 88, 7);
+  g.fillStyle(0xef476f);
+  g.fillCircle(cx + rx - 22, rimY + 108, 4);
+
+  if (front) {
+    // Vorderer Wulst
+    g.fillStyle(0xd8b98f);
+    g.fillPoints([...lowerHalf(cx, rimY, rx + 2, rimRy + 2), ...lowerHalf(cx, rimY + 2, waterRx, waterRy, true)], true);
+    g.fillStyle(0xffffff, 0.25);
+    g.fillPoints([...lowerHalf(cx, rimY - 1, rx - 10, rimRy - 12), ...lowerHalf(cx, rimY + 2, waterRx + 4, waterRy + 3, true)], true);
+    return;
+  }
+  // Ganzer Wulst und Wasser (von oben gesehen)
+  g.fillStyle(0xd8b98f);
+  g.fillEllipse(cx, rimY, (rx + 2) * 2, (rimRy + 2) * 2);
+  g.fillStyle(0xe9d3b0);
+  g.fillEllipse(cx, rimY - 4, (rx - 8) * 2, (rimRy - 10) * 2);
+  g.fillStyle(0x2a9d8f);
+  g.fillEllipse(cx, rimY + 2, waterRx * 2, waterRy * 2);
+  g.fillStyle(0x48cae4);
+  g.fillEllipse(cx, rimY + 5, (waterRx - 8) * 2, (waterRy - 6) * 2);
+  g.fillStyle(0x90e0ef, 0.7);
+  for (let i = 0; i < 5; i++) g.fillEllipse(cx - 100 + i * 50, rimY + (i % 2 ? 8 : -2), 34, 6);
 }

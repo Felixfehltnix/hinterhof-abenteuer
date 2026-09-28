@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y, MIN_TOUCH_SIZE } from '../../config';
+import { GROUND_MAX_Y, GROUND_MIN_Y, MIN_TOUCH_SIZE, WORLD_WIDTH } from '../../config';
 import { DEFAULT_TOY_PARAMS, type ToyDef, type ToyParams } from '../../data/toys';
 import { BEHAVIORS, type Release, type ToyBehavior } from './behaviors';
 import { environment } from '../../world/environment';
@@ -114,7 +114,7 @@ export class Toy extends Phaser.GameObjects.Image {
   restPosition(): { x: number; y: number } {
     const y = this.physics.active ? this.physics.groundY : this.y;
     return {
-      x: Phaser.Math.Clamp(this.x, this.width / 2, GAME_WIDTH - this.width / 2),
+      x: Phaser.Math.Clamp(this.x, this.width / 2, WORLD_WIDTH - this.width / 2),
       y: Phaser.Math.Clamp(y, GROUND_MIN_Y, GROUND_MAX_Y),
     };
   }

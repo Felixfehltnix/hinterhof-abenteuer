@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../../../config';
 import type { Kid } from '../../Kid';
 import type { BehaviorFactory } from './types';
 import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
@@ -12,9 +11,9 @@ export const kidKick: BehaviorFactory = (toy) => {
     const kid = kicker;
     kicker = undefined;
     if (!kid || !kid.active || kid.mode !== 'idle') return;
-    // Weg vom Kind, aber lieber zur Bildmitte hin, damit er nicht an der Bande klebt.
+    // Weg vom Kind, aber lieber zur Mitte des sichtbaren Ausschnitts hin, damit er nicht an der Bande klebt.
     let dir = toy.x < kid.x ? -1 : 1;
-    if (Math.abs(toy.x - kid.x) < 20) dir = kid.x > GAME_WIDTH / 2 ? -1 : 1;
+    if (Math.abs(toy.x - kid.x) < 20) dir = kid.x > toy.scene.cameras.main.worldView.centerX ? -1 : 1;
     kid.kick(dir);
     const depth = Phaser.Math.FloatBetween(-1, 1) * toy.params.kickDepth;
     toy.physics.launch(dir * toy.params.kickSpeed * 1.4 * Phaser.Math.FloatBetween(0.9, 1.1), -toy.params.kickLift * 0.9, undefined, depth);

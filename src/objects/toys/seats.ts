@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../../config';
+import { GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../../config';
 import type { Kid, KidMode, Seat } from '../Kid';
 import type { Toy } from './Toy';
 
@@ -62,14 +62,14 @@ export class ToySeats {
     this.riders.forEach((kid, i) => {
       if (!kid) return;
       this.release(kid);
-      kid.setPosition(Phaser.Math.Clamp(exit.x + i * 70, 60, GAME_WIDTH - 60), exit.y).setDepth(exit.y);
+      kid.setPosition(Phaser.Math.Clamp(exit.x + i * 70, 60, WORLD_WIDTH - 60), exit.y).setDepth(exit.y);
       kid.hop();
     });
   }
 
   private exitPoint(): { x: number; y: number } {
     return {
-      x: Phaser.Math.Clamp(this.toy.x + this.toy.displayWidth / 2 + 60, 60, GAME_WIDTH - 60),
+      x: Phaser.Math.Clamp(this.toy.x + this.toy.displayWidth / 2 + 60, 60, WORLD_WIDTH - 60),
       y: Phaser.Math.Clamp(this.toy.y + 10, GROUND_MIN_Y, GROUND_MAX_Y),
     };
   }

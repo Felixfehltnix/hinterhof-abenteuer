@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
-import { DEPTH_LIGHTS, DEPTH_SKY_LIGHTS, DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
+import { DEPTH_LIGHTS, DEPTH_SKY_LIGHTS, DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../config';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 import { environment, type TimeOfDay } from './environment';
 
 const ORDER: TimeOfDay[] = ['morning', 'noon', 'evening', 'night'];
 const TRANSITION_MS = 2000;
+/** Wolken bewegen sich beim Scrollen mit diesem Anteil mit (0 = fest, 1 = wie die Wiese). */
+export const CLOUD_PARALLAX = 0.2;
 
 /** Wie die Welt zu einer Tageszeit aussieht. Zwischen zwei Looks wird weich überblendet. */
 interface Look {
@@ -135,16 +137,17 @@ export class DayCycle {
   private nextYawn = 0;
 
   constructor(private readonly scene: PlaygroundScene) {
-    this.sky = scene.add.graphics().setDepth(-1100);
+    // Himmel, Sonne, Mond, Sterne und Einfärbung stehen fest; Tau und Lichterkette gehören zur Welt.
+    this.sky = scene.add.graphics().setDepth(-1100).setScrollFactor(0);
 
     // Sterne (nachts) und Mond leuchten über der Einfärbung
     for (let i = 0; i < 45; i++) {
       const x = (i * 331 + 70) % GAME_WIDTH;
       const y = 30 + ((i * 97) % 420);
-      this.stars.push(scene.add.image(x, y, 'twinkle').setDepth(DEPTH_SKY_LIGHTS).setScale(0.5 + (i % 3) * 0.25));
+      this.stars.push(scene.add.image(x, y, 'twinkle').setDepth(DEPTH_SKY_LIGHTS).setScale(0.5 + (i % 3) * 0.25).setScrollFactor(0));
     }
-    this.moon = scene.add.image(1560, 170, 'moon').setDepth(DEPTH_SKY_LIGHTS);
-    this.sun = scene.add.image(1720, 140, 'sun').setDepth(-1050);
+    this.moon = scene.add.image(1560, 170, 'moon').setDepth(DEPTH_SKY_LIGHTS).setScrollFactor(0);
+    this.sun = scene.add.image(1720, 140, 'sun').setDepth(-1050).setScrollFactor(0);
     for (const body of [this.sun, this.moon]) {
       body.setInteractive({ hitArea: new Phaser.Geom.Circle(body.width / 2, body.height / 2, 130), hitAreaCallback: Phaser.Geom.Circle.Contains, useHandCursor: true });
       body.setData('onTap', () => this.next());
@@ -155,12 +158,13 @@ export class DayCycle {
       [960, 130],
       [1400, 240],
     ]) {
-      this.clouds.push(scene.add.image(x, y, 'cloud').setDepth(-1040));
+      // Wolken ziehen beim Scrollen nur leicht mit (Tiefenwirkung)
+      this.clouds.push(scene.add.image(x, y, 'cloud').setDepth(-1040).setScrollFactor(CLOUD_PARALLAX, 0));
     }
 
     // Tau glitzert morgens auf der Wiese
-    for (let i = 0; i < 36; i++) {
-      const x = (i * 263 + 90) % GAME_WIDTH;
+    for (let i = 0; i < 36 * 3; i++) {
+      const x = (i * 263 + 90) % WORLD_WIDTH;
       const y = GROUND_TOP + 40 + ((i * 71) % (GAME_HEIGHT - GROUND_TOP - 60));
       this.dew.push(scene.add.image(x, y, 'twinkle').setDepth(-990).setScale(0.45));
     }
@@ -170,13 +174,13 @@ export class DayCycle {
     const colors = [0xff5d8f, 0xffd166, 0x06d6a0, 0x4cc9f0, 0xc77dff];
     const top = GROUND_TOP - 112;
     const points: Phaser.Math.Vector2[] = [];
-    for (let x = 20; x <= GAME_WIDTH - 20; x += 16) {
+    for (let x = 20; x <= WORLD_WIDTH - 20; x += 16) {
       const seg = ((x - 20) % 160) / 160; // durchhängend zwischen den Aufhängungen
       points.push(new Phaser.Math.Vector2(x, top + Math.sin(seg * Math.PI) * 26));
     }
     this.wire.lineStyle(3, 0x2b2d42, 1);
     this.wire.strokePoints(points);
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 24 * 3; i++) {
       const p = points[Math.min(points.length - 1, 5 + i * 5)];
       this.bulbs.push(
         scene.add
@@ -191,7 +195,8 @@ export class DayCycle {
       .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0xffffff)
       .setOrigin(0)
       .setBlendMode(Phaser.BlendModes.MULTIPLY)
-      .setDepth(DEPTH_TINT);
+      .setDepth(DEPTH_TINT)
+      .setScrollFactor(0);
 
     scene.registerWorldState('timeOfDay', {
       save: () => this.target,

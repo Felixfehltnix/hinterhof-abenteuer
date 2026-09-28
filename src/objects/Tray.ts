@@ -53,7 +53,8 @@ export class Tray {
     private readonly scene: Phaser.Scene,
     private readonly opts: TrayOptions,
   ) {
-    this.root = scene.add.container(0, GAME_HEIGHT + HEIGHT + 40).setDepth(DEPTH_TRAY).setVisible(false);
+    // Die Leiste steht fest auf dem Bildschirm (scrollt nicht mit der Wiese).
+    this.root = scene.add.container(0, GAME_HEIGHT + HEIGHT + 40).setDepth(DEPTH_TRAY).setVisible(false).setScrollFactor(0, 0, true);
 
     const bg = scene.add.graphics();
     bg.fillStyle(0x6d4c41, 0.95);
@@ -76,7 +77,7 @@ export class Tray {
     this.root.add(this.content);
 
     // Maske, damit weggescrollte Symbole nicht über den Rand hinausragen.
-    this.maskShape = scene.make.graphics({ x: 0, y: this.root.y }, false);
+    this.maskShape = scene.make.graphics({ x: 0, y: this.root.y }, false).setScrollFactor(0);
     this.maskShape.fillStyle(0xffffff);
     this.maskShape.fillRect(LEFT + 10, -HEIGHT, RIGHT - LEFT - 20, HEIGHT);
     this.content.setMask(this.maskShape.createGeometryMask());
@@ -86,6 +87,7 @@ export class Tray {
       .zone(LEFT, GAME_HEIGHT - HEIGHT, RIGHT - LEFT, HEIGHT)
       .setOrigin(0)
       .setDepth(DEPTH_TRAY)
+      .setScrollFactor(0)
       .setInteractive();
     this.zone.input!.enabled = false;
     this.zone.on('pointerdown', (p: Phaser.Input.Pointer) => {

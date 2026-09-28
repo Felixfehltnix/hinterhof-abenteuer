@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { DEPTH_TINT, GAME_WIDTH, GROUND_TOP } from '../config';
+import { DEPTH_TINT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../config';
 import type { Kid } from '../objects/Kid';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
-import type { DayCycle } from './DayCycle';
+import { CLOUD_PARALLAX, type DayCycle } from './DayCycle';
 import { Snow } from './Snow';
 import { environment, type WeatherKind } from './environment';
 
@@ -38,6 +38,12 @@ const PUDDLES = [
   { x: 1320, y: 885 },
   { x: 1580, y: 1035 },
   { x: 1000, y: 800 },
+  { x: 2250, y: 900 },
+  { x: 2800, y: 1030 },
+  { x: 3550, y: 850 },
+  { x: 4300, y: 960 },
+  { x: 5000, y: 880 },
+  { x: 5450, y: 1020 },
 ];
 const PUDDLE_GROW = 1 / 20; // pro Sekunde bei Regen (in 20 s voll)
 const PUDDLE_DRY = 1 / 90; // pro Sekunde danach (in 90 s trocken)
@@ -74,7 +80,7 @@ export class Weather {
       [1180, 90, 1.2],
       [1750, 250, 0.9],
     ]) {
-      this.extraClouds.push(scene.add.image(x, y, 'cloud').setDepth(-1039).setScale(s).setAlpha(0));
+      this.extraClouds.push(scene.add.image(x, y, 'cloud').setDepth(-1039).setScale(s).setAlpha(0).setScrollFactor(CLOUD_PARALLAX, 0));
     }
     // Alle Wolken sind der Wetter-Knopf
     for (const cloud of [...dayCycle.clouds, ...this.extraClouds]) {
@@ -86,7 +92,7 @@ export class Weather {
       cloud.setData('onTap', () => this.next());
     }
 
-    this.rainbow = scene.add.image(GAME_WIDTH / 2, GROUND_TOP, 'rainbow').setOrigin(0.5, 1).setDepth(-1060).setAlpha(0);
+    this.rainbow = scene.add.image(GAME_WIDTH / 2, GROUND_TOP, 'rainbow').setOrigin(0.5, 1).setDepth(-1060).setAlpha(0).setScrollFactor(0);
 
     this.puddles = PUDDLES.map((p) => ({ img: scene.add.image(p.x, p.y, 'puddle').setOrigin(0.5, 0.5).setDepth(-985).setScale(0), size: 0 }));
 
@@ -101,7 +107,8 @@ export class Weather {
       alpha: { start: 0.75, end: 0.5 },
       emitting: false,
     });
-    this.rain.setDepth(DEPTH_TINT - 10);
+    // Regen, Blätter und Schnee fallen im sichtbaren Ausschnitt (stehen beim Scrollen fest).
+    this.rain.setDepth(DEPTH_TINT - 10).setScrollFactor(0);
 
     // Wind: Blätter wehen von links durchs Bild
     this.leaves = scene.add.particles(-40, 0, 'leaf', {
@@ -116,7 +123,7 @@ export class Weather {
       scale: { min: 0.6, max: 1.1 },
       emitting: false,
     });
-    this.leaves.setDepth(DEPTH_TINT - 20);
+    this.leaves.setDepth(DEPTH_TINT - 20).setScrollFactor(0);
 
     scene.registerWorldState('weather', {
       save: () => ({ kind: this.kind, snow: Math.round(this.snow.coverAmount * 100) / 100 }),
@@ -241,7 +248,9 @@ export class Weather {
     const drift = CLOUD_DRIFT + Math.max(0, environment.wind) * CLOUD_WIND;
     for (const c of [...this.dayCycle.clouds, ...this.extraClouds]) {
       c.x += drift * dt;
-      if (c.x > GAME_WIDTH + c.displayWidth / 2 + 20) c.x = -c.displayWidth / 2 - 20;
+      // Wolken umrunden den Bereich, den man bei ganz gescrollter Welt sieht
+      const range = GAME_WIDTH + (WORLD_WIDTH - GAME_WIDTH) * CLOUD_PARALLAX;
+      if (c.x > range + c.displayWidth / 2 + 20) c.x = -c.displayWidth / 2 - 20;
     }
 
     const raining = this.kind === 'rain';

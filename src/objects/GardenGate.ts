@@ -65,11 +65,15 @@ export class GardenGate {
     this.tray.refresh();
   }
 
-  /** Würde ein an (x, y) losgelassenes Kind hier nach Hause gehen? */
-  accepts(x: number, y: number): boolean {
-    if (this.tray.contains(x, y)) return true;
+  /**
+   * Würde ein hier losgelassenes Kind nach Hause gehen? Die Leiste steht fest auf dem Bildschirm
+   * (Bildschirm-Koordinaten), das Tor gehört zur Welt (Welt-Koordinaten).
+   */
+  accepts(pointer: Phaser.Input.Pointer): boolean {
+    if (this.tray.contains(pointer.x, pointer.y)) return true;
+    const w = this.scene.worldPoint(pointer);
     const b = this.frame.getBounds();
-    return Phaser.Geom.Rectangle.Contains(new Phaser.Geom.Rectangle(b.x - 40, b.y - 60, b.width + 80, b.height + 100), x, y);
+    return Phaser.Geom.Rectangle.Contains(new Phaser.Geom.Rectangle(b.x - 40, b.y - 60, b.width + 80, b.height + 100), w.x, w.y);
   }
 
   /** Das Kind winkt und geht durchs Tor hinaus. */
@@ -126,7 +130,9 @@ export class GardenGate {
 
   private pull(id: CharacterId, pointer: Phaser.Input.Pointer): PullSession | null {
     const def = getCharacterDef(id);
-    const kid = this.scene.spawnKid(def, pointer.x, pointer.y);
+    // Aus der (festen) Leiste gezogen, aber in der Welt erzeugt.
+    const w = this.scene.worldPoint(pointer);
+    const kid = this.scene.spawnKid(def, w.x, w.y);
     if (!kid) {
       this.refuse();
       return null;
@@ -134,9 +140,12 @@ export class GardenGate {
     // Der Finger hält das Kind in der Mitte.
     const offsetY = kid.height / 2;
     kid.handleDragStart();
-    kid.handleDrag(pointer, pointer.x, pointer.y + offsetY);
+    kid.handleDrag(pointer, w.x, w.y + offsetY);
     return {
-      move: (p) => kid.handleDrag(p, p.x, p.y + offsetY),
+      move: (p) => {
+        const pw = this.scene.worldPoint(p);
+        kid.handleDrag(p, pw.x, pw.y + offsetY);
+      },
       release: (p) => this.scene.releaseKid(kid, p, true),
     };
   }

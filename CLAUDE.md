@@ -8,7 +8,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - `npm run dev` für den Browser, `npm run build` muss fehlerfrei durchlaufen (inkl. `tsc`)
 
 ## Konventionen
-- Feste Auflösung 1920×1080, Querformat. Alle Koordinaten in diesem System.
+- Feste Auflösung 1920×1080 (`GAME_WIDTH`), Querformat. Die Welt ist breiter (`WORLD_WIDTH`,
+  3 Bildschirme) und scrollt waagerecht (`src/world/CameraControl.ts`, `scene.cameraControl`).
+- **Welt- vs. Bildschirm-Koordinaten:** Objekte auf der Wiese leben in Weltkoordinaten; Grenzen
+  (Bande, Klemmen) benutzen `WORLD_WIDTH`. Zeiger für Welt-Prüfungen immer über
+  `scene.worldPoint(pointer)`, nie `pointer.x`. Fest stehende Dinge (Himmel, Sonne/Mond, Sterne,
+  Einfärbung, Regen/Schnee/Blätter, Spielzeugkiste, Leisten) haben `setScrollFactor(0)` und
+  rechnen in Bildschirmkoordinaten (`GAME_WIDTH`); Wolken `CLOUD_PARALLAX`. „Zur Bildmitte“
+  heißt: `cameras.main.worldView.centerX`.
 - Position eines Objekts = Fußpunkt (Origin 0.5, 1).
 - Tiefe = y-Koordinate (weiter unten = weiter vorne). Gezogene Objekte: `DEPTH_DRAGGING`.
 - Tageszeit (`src/world/DayCycle.ts`): Die ganze Szene wird über ein Rechteck mit

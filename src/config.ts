@@ -2,6 +2,10 @@
 export const GAME_WIDTH = 1920;
 export const GAME_HEIGHT = 1080;
 
+// Die Welt (Wiese) ist breiter als der Bildschirm und wird waagerecht gescrollt.
+// Weltgrenzen (Bande, Wiese, Zaun) benutzen WORLD_WIDTH, der sichtbare Ausschnitt GAME_WIDTH.
+export const WORLD_WIDTH = GAME_WIDTH * 3;
+
 // Ab dieser Höhe beginnt die Wiese. Figuren und Gegenstände landen immer darunter.
 export const GROUND_TOP = 700;
 export const GROUND_MIN_Y = GROUND_TOP + 40;

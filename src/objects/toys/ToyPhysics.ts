@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../../config';
+import { GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../../config';
 import type { ToyParams } from '../../data/toys';
 import { environment } from '../../world/environment';
 
@@ -16,7 +16,7 @@ const GROUND_WIND = 0.5;
  * Einfache 2,5D-Bewegung für Spielzeuge: Das Spielzeug hat eine Bodenlinie (groundY,
  * bestimmt die Tiefe) und eine Höhe z darüber. Auf dem Bildschirm steht es bei y = groundY - z.
  * vx bewegt nach links/rechts, vdepth die Bodenlinie nach hinten (−) oder vorne (+), vz die Höhe.
- * Die Bildränder wirken wie eine Bande, ebenso Zaun (GROUND_MIN_Y) und Vorderkante (GROUND_MAX_Y).
+ * Die Weltränder (0 und WORLD_WIDTH) wirken wie eine Bande, ebenso Zaun (GROUND_MIN_Y) und Vorderkante (GROUND_MAX_Y).
  */
 export class ToyPhysics {
   vx = 0;
@@ -109,8 +109,8 @@ export class ToyPhysics {
     if (x < half) {
       x = half;
       this.vx = Math.abs(this.vx) * p.bounce;
-    } else if (x > GAME_WIDTH - half) {
-      x = GAME_WIDTH - half;
+    } else if (x > WORLD_WIDTH - half) {
+      x = WORLD_WIDTH - half;
       this.vx = -Math.abs(this.vx) * p.bounce;
     }
 

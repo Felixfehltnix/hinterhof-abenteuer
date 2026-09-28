@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DEPTH_DRAGGING, GAME_WIDTH, GROUND_MAX_Y, GROUND_MIN_Y } from '../config';
+import { DEPTH_DRAGGING, GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../config';
 import type { CharacterDef } from '../data/characters';
 
 export type KidMode =
@@ -65,7 +65,7 @@ export class Kid extends Phaser.GameObjects.Image {
 
   /** Lässt das Kind auf die Wiese fallen, falls es in der Luft losgelassen wurde. */
   settle(onLanded?: () => void): void {
-    this.x = Phaser.Math.Clamp(this.x, 60, GAME_WIDTH - 60);
+    this.x = Phaser.Math.Clamp(this.x, 60, WORLD_WIDTH - 60);
     const targetY = Phaser.Math.Clamp(this.y, GROUND_MIN_Y, GROUND_MAX_Y);
 
     if (this.y >= targetY) {
@@ -105,7 +105,7 @@ export class Kid extends Phaser.GameObjects.Image {
   restPosition(): { x: number; y: number } {
     const p = this.mode !== 'idle' && this.exitPoint ? this.exitPoint : this;
     return {
-      x: Phaser.Math.Clamp(p.x, 60, GAME_WIDTH - 60),
+      x: Phaser.Math.Clamp(p.x, 60, WORLD_WIDTH - 60),
       y: Phaser.Math.Clamp(p.y, GROUND_MIN_Y, GROUND_MAX_Y),
     };
   }

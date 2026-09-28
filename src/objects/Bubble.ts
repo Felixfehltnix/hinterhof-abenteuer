@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../config';
+import { WORLD_WIDTH } from '../config';
 import { environment } from '../world/environment';
 
 // Höchstens so viele Blasen gleichzeitig (Tablet-Leistung).
@@ -44,8 +44,8 @@ export class Bubble extends Phaser.GameObjects.Image {
     this.x += (this.vx + Math.sin(t * 2 + this.phase) * 30) * dt;
     this.y -= this.rise * dt;
     const r = this.displayWidth / 2;
-    if (this.x < r || this.x > GAME_WIDTH - r) this.vx = -this.vx;
-    this.x = Phaser.Math.Clamp(this.x, r, GAME_WIDTH - r);
+    if (this.x < r || this.x > WORLD_WIDTH - r) this.vx = -this.vx;
+    this.x = Phaser.Math.Clamp(this.x, r, WORLD_WIDTH - r);
     // Schillern
     const hue = (t * 0.15 + this.phase) % 1;
     this.setTint(Phaser.Display.Color.HSVToRGB(hue, 0.35, 1).color);

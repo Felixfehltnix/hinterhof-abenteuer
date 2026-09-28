@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../../../config';
+import { WORLD_WIDTH } from '../../../config';
 import { environment } from '../../../world/environment';
 import type { BehaviorFactory } from './types';
 
@@ -32,8 +32,8 @@ export const float: BehaviorFactory = (toy) => {
       if (x < half) {
         x = half;
         vx = Math.abs(vx) * 0.5;
-      } else if (x > GAME_WIDTH - half) {
-        x = GAME_WIDTH - half;
+      } else if (x > WORLD_WIDTH - half) {
+        x = WORLD_WIDTH - half;
         vx = -Math.abs(vx) * 0.5;
       }
       toy.x = x;

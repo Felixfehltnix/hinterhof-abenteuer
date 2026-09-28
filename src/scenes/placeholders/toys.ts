@@ -43,7 +43,7 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillPoints(pentagon(38, 38, 12), true);
     for (let i = 0; i < 5; i++) {
       const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
-      g.fillPoints(pentagon(38 + Math.cos(a) * 29, 38 + Math.sin(a) * 29, 8), true);
+      g.fillPoints(pentagon(38 + Math.cos(a) * 26, 38 + Math.sin(a) * 26, 8), true);
     }
   },
 
@@ -52,14 +52,19 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillCircle(42, 42, 40);
     g.lineStyle(3, 0x3d2314);
     g.strokeCircle(42, 42, 40);
-    g.lineBetween(2, 42, 82, 42);
-    g.lineBetween(42, 2, 42, 82);
-    g.beginPath();
-    g.arc(0, 42, 30, -Math.PI / 2, Math.PI / 2, false);
-    g.strokePath();
-    g.beginPath();
-    g.arc(84, 42, 30, Math.PI / 2, (3 * Math.PI) / 2, false);
-    g.strokePath();
+    g.lineBetween(4, 42, 80, 42);
+    g.lineBetween(42, 4, 42, 80);
+    // Seitliche Nähte: Bögen, deren Enden genau auf dem Ballrand liegen (nichts ragt heraus).
+    for (const side of [-1, 1]) {
+      const cx = 42 + side * 50;
+      const r = 36;
+      // Schnittwinkel des Naht-Kreises mit dem Ballkreis (Radius 40, Abstand 50)
+      const a = Math.acos((50 * 50 + r * r - 40 * 40) / (2 * 50 * r));
+      const toward = side < 0 ? 0 : Math.PI;
+      g.beginPath();
+      g.arc(cx, 42, r, toward - a, toward + a, false);
+      g.strokePath();
+    }
   },
 
   beachball: (g) => {

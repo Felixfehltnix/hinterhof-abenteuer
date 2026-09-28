@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../../config';
 import type { ToyParams } from '../../data/toys';
+import type { Toy } from './Toy';
 import { environment } from '../../world/environment';
 
 // Unter dieser Aufprallgeschwindigkeit (px/s) springt nichts mehr hoch.
@@ -30,7 +31,7 @@ export class ToyPhysics {
   readonly landListeners: (() => void)[] = [];
 
   constructor(
-    private readonly obj: Phaser.GameObjects.Image,
+    private readonly obj: Toy,
     private readonly params: ToyParams,
   ) {}
 
@@ -124,7 +125,8 @@ export class ToyPhysics {
       this.vz = -Math.abs(this.vz) * p.bounce;
     }
 
-    if (p.spin) obj.rotation += ((this.vx + this.vdepth * 0.3 * Math.sign(this.vx || 1)) * dt) / half;
+    // Rollen: Drehung um die Mitte (Toy.spin), passend zum zurückgelegten Weg
+    if (p.spin) obj.spin += ((this.vx + this.vdepth * 0.3 * Math.sign(this.vx || 1)) * dt) / half;
     obj.setPosition(x, this.groundY - this.z);
 
     const pushedByWind = Math.abs(environment.wind * p.windFactor) > 40;

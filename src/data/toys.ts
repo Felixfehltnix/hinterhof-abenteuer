@@ -133,13 +133,13 @@ export const TOYS = [
     params: { bounce: 0.4, rollFriction: 1.1, spin: true, kickSpeed: 850, kickLift: 320, gravity: 3200, depthShare: 0.8, kickDepth: 260 },
   },
   {
-    // Hoher Bogen, springt ein paarmal nach.
+    // Schräger Bogen nach vorn, springt ein paarmal nach.
     id: 'basketball',
     tags: ['ball'],
     width: 84,
     height: 84,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
-    params: { bounce: 0.5, rollFriction: 2.5, spin: true, kickSpeed: 220, kickLift: 1450, gravity: 3300, depthShare: 0.15, kickDepth: 80 },
+    params: { bounce: 0.5, rollFriction: 2.5, spin: true, kickSpeed: 500, kickLift: 1250, gravity: 3000, depthShare: 0.15, kickDepth: 80 },
   },
   {
     // Groß und leicht: fliegt langsam und schwebt lange.

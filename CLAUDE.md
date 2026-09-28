@@ -107,6 +107,9 @@ Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/o
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
 `drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
 `handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel, Tiefe `DEPTH_LIGHTS`).
+`whirlpool`: bis zu 6 Kinder (Modus `bathing`), jedes Kind zählt reihum mit Hüpfer und
+Zahlenblase (`sound` `count` mit `value` und `voice`); Antippen = neu zählen, ein 7. Kind landet daneben.
+Die Ziffern in der Blase sind die bewusste Ausnahme von „kein Text“ (Issue #37).
 Weitere Hooks: `onToyDropped` (Spielzeug auf Spielzeug, z. B. Schubkarre), `onRemove`
 (vor dem Wegräumen: Kinder absteigen lassen, Ladung ausschütten).
 Bausteine können beim Loslassen `release.handled = true` setzen (eigene Bewegung statt Wurf-Physik).

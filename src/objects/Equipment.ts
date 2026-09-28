@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { EquipmentDef } from '../data/playground';
+import { BIG_TREE } from '../scenes/placeholders/backdrop';
 import { windStrength } from '../world/environment';
 import type { Kid, Seat } from './Kid';
 
@@ -196,9 +197,8 @@ export class Tree extends Equipment {
   constructor(scene: Phaser.Scene, def: EquipmentDef) {
     super(scene, def);
     const image = (this.image = scene.add.image(def.x, def.y, 'tree').setOrigin(0.5, 1).setDepth(def.y));
-    // Nur Stamm und unterer Kronenbereich wackeln beim Antippen (Maße passend zum Platzhalter 300×460).
-    const trunk = new Phaser.Geom.Rectangle(95, 200, 110, 260);
-    const lowerCrown = new Phaser.Geom.Rectangle(40, 150, 220, 110);
+    // Nur Stamm und unterer Kronenbereich wackeln beim Antippen (Maße passend zum Platzhalter).
+    const { trunk, lowerCrown } = BIG_TREE;
     image.setInteractive({
       hitArea: trunk,
       hitAreaCallback: (_area: Phaser.Geom.Rectangle, x: number, y: number) => trunk.contains(x, y) || lowerCrown.contains(x, y),

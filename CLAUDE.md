@@ -32,7 +32,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `src/world/LightLayer.ts`): Sie zeichnet die Lichter über der Einfärbung (`DEPTH_LIGHTS`) und
   radiert pixelgenau aus, was auf der Welt davor steht (Tiefe größer als `depth()`). Lichter nie
   direkt auf `DEPTH_LIGHTS` legen, sonst scheinen sie durch Kinder hindurch (#52). Himmel, Sonne, Mond und Wolken
-  zeichnet der DayCycle, die Szene nur Zaun und Wiese.
+  zeichnet der DayCycle. Hintergrund-Ebenen mit Parallaxe verdecken Lichter nur mit `setData('occludesLight', true)`.
+- **Hintergrund** (`src/world/Backdrop.ts`, #63): der echte Hinterhof. Aufstellung in `src/data/backdrop.ts`, Zeichnungen in
+  `src/scenes/placeholders/backdrop.ts`. Ebenen: Häuser (`HOUSE_PARALLAX` 0,3) → Bäume hinter dem Zaun
+  (`BACK_TREE_PARALLAX` 0,6) → Zaun mit Pergola und Efeu, Büsche → Wiese. Alles wird einmal in Texturen
+  vorgezeichnet (Zaun und Wiese in Kacheln von Bildschirmbreite: `fence-<i>`, `meadow-<i>`; Pergola nur, wo sie
+  steht: `pergola-<i>`), nie jedes Bild neu. Nachts gehen Fenster einzeln an (Lichtebene), abends glüht der Backstein
+  (`dayCycle.brickGlow`), bei Schnee liegt Schnee auf Dächern und Zaun (`<key>-snow`) und es raucht aus
+  Schornsteinen, bei Wind wiegen sich Bäume und Büsche. Der große Laubbaum links ist das Spielgerät `tree`.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.

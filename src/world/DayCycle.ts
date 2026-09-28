@@ -27,6 +27,8 @@ interface Look {
   dewAlpha: number;
   lightsAlpha: number;
   cloudTint: number;
+  /** Wie warm der Backstein der Häuser glüht (0..1, abends am stärksten). */
+  brickGlow: number;
 }
 
 const LOOKS: Record<TimeOfDay, Look> = {
@@ -43,6 +45,7 @@ const LOOKS: Record<TimeOfDay, Look> = {
     dewAlpha: 1,
     lightsAlpha: 0,
     cloudTint: 0xffe0ea,
+    brickGlow: 0.35,
   },
   noon: {
     skyTop: 0x7ec8ff,
@@ -57,6 +60,7 @@ const LOOKS: Record<TimeOfDay, Look> = {
     dewAlpha: 0,
     lightsAlpha: 0,
     cloudTint: 0xffffff,
+    brickGlow: 0,
   },
   evening: {
     skyTop: 0x8e6bbf,
@@ -71,6 +75,7 @@ const LOOKS: Record<TimeOfDay, Look> = {
     dewAlpha: 0,
     lightsAlpha: 0.5,
     cloudTint: 0xffc2b0,
+    brickGlow: 1,
   },
   night: {
     skyTop: 0x1e2d5c,
@@ -86,6 +91,7 @@ const LOOKS: Record<TimeOfDay, Look> = {
     dewAlpha: 0,
     lightsAlpha: 1,
     cloudTint: 0x9ca8d8,
+    brickGlow: 0,
   },
 };
 
@@ -114,6 +120,7 @@ function mix(a: Look, b: Look, t: number): Look {
     dewAlpha: lerp(a.dewAlpha, b.dewAlpha, t),
     lightsAlpha: lerp(a.lightsAlpha, b.lightsAlpha, t),
     cloudTint: lerpColor(a.cloudTint, b.cloudTint, t),
+    brickGlow: lerp(a.brickGlow, b.brickGlow, t),
   };
 }
 
@@ -138,6 +145,8 @@ export class DayCycle {
   private target: TimeOfDay = 'noon';
   private from: Look = LOOKS.noon;
   private current: Look = LOOKS.noon;
+  /** Was gerade zu sehen ist (mit Wetter). */
+  private shown: Look = LOOKS.noon;
   private progress = { t: 1 };
   private weatherGrey = 0;
   private nextYawn = 0;
@@ -228,6 +237,16 @@ export class DayCycle {
     this.apply(this.current);
   }
 
+  /** Wie hell Lichter gerade leuchten (0 tagsüber, 0,5 abends, 1 nachts; mit Wetter). */
+  get lightsAmount(): number {
+    return this.shown.lightsAlpha;
+  }
+
+  /** Wie warm der Backstein gerade glüht (0..1, mit Wetter). */
+  get brickGlow(): number {
+    return this.shown.brickGlow;
+  }
+
   get timeOfDay(): TimeOfDay {
     return this.target;
   }
@@ -272,6 +291,7 @@ export class DayCycle {
         // Bei Regen sind die Sterne weg und der Mond nur noch schwach hinter den Wolken
         starsAlpha: look.starsAlpha * Math.max(0, 1 - w * 1.6),
         moonAlpha: look.moonAlpha * (1 - w * 0.85),
+        brickGlow: look.brickGlow * (1 - w * 0.7),
       };
     }
     this.apply(look);
@@ -279,6 +299,7 @@ export class DayCycle {
   }
 
   private apply(look: Look): void {
+    this.shown = look;
     const t = this.scene.time.now / 1000;
     this.sky.clear();
     this.sky.fillGradientStyle(look.skyTop, look.skyTop, look.skyBottom, look.skyBottom, 1);

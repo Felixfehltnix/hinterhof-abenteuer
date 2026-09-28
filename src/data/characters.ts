@@ -1,6 +1,6 @@
 // Die Kinder aus der Nachbarschaft. Aktuell Platzhalter mit Farben;
-// später kommt pro Kind eine fertige Grafik unter dem Key `kid-<id>` (ganze Figur)
-// und `portrait-<id>` (nur der Kopf, fürs Gartentor) dazu.
+// später kommen pro Kind Einzelteile `kid-<id>-head/-body/-arm/-leg` (siehe README und
+// src/data/poses.ts) und `portrait-<id>` (nur der Kopf, fürs Gartentor) dazu.
 
 export type HairStyle = 'short' | 'long' | 'pigtails' | 'curly' | 'spiky' | 'bun';
 
@@ -12,7 +12,7 @@ export interface CharacterDef {
   hair: number;
   hairStyle: HairStyle;
   skin: number;
-  /** Größe relativ zur Standardfigur (140×240). */
+  /** Größe relativ zur Standardfigur (140×264, siehe KID_FRAME). */
   size: number;
 }
 

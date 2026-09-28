@@ -6,8 +6,8 @@ Spielwiese im Hinterhof. Figuren und Gegenstände kann man antippen und herumzie
 ## Voraussetzungen
 
 - Node.js 20+
-- Für Android: [Android Studio](https://developer.android.com/studio) (bringt SDK und JDK mit)
-- Ein Android-Gerät mit aktiviertem USB-Debugging (oder den Emulator)
+- Für Android nichts: Das APK baut GitHub Actions (siehe „APK aufs Tablet“). Nur wer selbst
+  bauen will, braucht [Android Studio](https://developer.android.com/studio).
 
 ## Im Browser entwickeln
 
@@ -20,28 +20,68 @@ Dann die angezeigte URL öffnen. In den DevTools auf Geräte-Emulation (Tablet, 
 umschalten, damit Touch-Eingaben simuliert werden. Durch `--host` ist der Dev-Server auch
 im WLAN erreichbar, du kannst also direkt mit dem Tablet-Browser testen.
 
-## Android einrichten (einmalig)
+## APK aufs Tablet
+
+Das APK muss niemand selbst bauen: Bei jedem Merge auf `main` baut GitHub Actions
+(`.github/workflows/android.yml`) ein signiertes APK und legt es unter **Releases** ab
+(Version `v0.<Laufnummer>`). Der feste Link zeigt immer auf das neueste:
+
+**https://github.com/Felixfehltnix/hinterhof-abenteuer/releases/latest/download/hinterhof-abenteuer.apk**
+
+1. Den Link auf dem Tablet öffnen (Browser lädt die Datei herunter).
+2. Beim ersten Mal „Installation aus unbekannten Quellen“ für den Browser erlauben
+   (Android fragt von selbst nach).
+3. Installieren. Updates später genauso über denselben Link – die App wird ersetzt,
+   die Wiese bleibt erhalten.
+
+Die App startet im Querformat, im Vollbild ohne Statusleiste, und der Bildschirm bleibt an.
+
+### Signaturschlüssel einrichten (einmalig, vor dem ersten Release)
+
+Updates lassen sich nur über die installierte App spielen, wenn jedes APK mit **demselben**
+Schlüssel signiert ist. Deshalb gibt es einen festen Schlüssel, der als Repo-Secret hinterlegt ist.
+Einmalig im Projektordner ausführen (braucht Java/`keytool` und die GitHub-CLI `gh`, vorher
+`gh auth login`):
 
 ```bash
-npm run build
-npx cap add android
+bash scripts/keystore-einrichten.sh
 ```
 
-Danach in `android/app/src/main/AndroidManifest.xml` beim `<activity>`-Element
-Querformat erzwingen:
+Das Skript erzeugt den Schlüssel in `~/hinterhof-abenteuer-signatur/` (nicht im Repo) und trägt die
+vier Secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` und
+`ANDROID_KEY_PASSWORD` ein. Ohne `gh` gibt es die Werte aus, dann unter *Settings → Secrets and
+variables → Actions* von Hand anlegen. **Den Ordner gut aufheben** (z. B. USB-Stick): Ist der
+Schlüssel weg, muss die App einmal neu installiert werden, und die Wiese ist verloren.
+Fehlen die Secrets, bricht der Workflow mit einer klaren Meldung ab, statt ein APK zu bauen,
+das sich nicht aktualisieren lässt. Keystore-Dateien (`*.jks`, `*.keystore`) nie einchecken.
 
-```xml
-android:screenOrientation="sensorLandscape"
-```
+Pull Requests bauen nur zur Probe ein unsigniertes Debug-APK (als Artefakt am Workflow-Lauf).
 
-Den `android/`-Ordner mit einchecken.
+### Web-Vorschau
 
-## Android bauen & testen
+Derselbe Workflow veröffentlicht jeden Stand von `main` auf GitHub Pages:
+**https://felixfehltnix.github.io/hinterhof-abenteuer/** – zum schnellen Testen im Tablet-Browser.
+Einmalig einschalten: *Settings → Pages → Build and deployment → Source: GitHub Actions*.
+Solange Pages aus ist, überspringt der Workflow die Vorschau mit einem Hinweis. Bei einem
+**privaten** Repo gibt es Pages nur mit bestimmten GitHub-Tarifen; dann wird die Vorschau
+übersprungen, das APK funktioniert trotzdem.
+
+**Datenschutz:** Releases und Pages eines öffentlichen Repos kann jeder sehen und herunterladen.
+Mit Platzhalter-Grafiken ist das egal. Sobald echte Figuren oder Stimmen der Kinder dazukommen,
+muss das Repo privat sein – Actions und Releases funktionieren dort genauso.
+
+## Android selbst bauen (optional)
+
+Das Android-Projekt liegt in `android/` (Capacitor). Mit Android Studio und angeschlossenem Tablet:
 
 ```bash
 npm run android:run     # baut, synchronisiert und startet auf dem angeschlossenen Gerät
-npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein Release-APK)
+npm run android:open    # öffnet das Projekt in Android Studio
 ```
+
+Querformat, Vollbild und „Bildschirm bleibt an“ stehen in `AndroidManifest.xml` und
+`MainActivity.java`. Versionsnummer und Signatur setzt der Workflow über
+`-PversionCode=…` und Umgebungsvariablen (siehe `android/app/build.gradle`).
 
 ## Was drin ist
 

@@ -31,6 +31,10 @@ export interface PlacedToy {
 export const PLACED_TOYS: PlacedToy[] = [
   { toy: 'ball', x: 900, y: 930 },
   { toy: 'bucket', x: 1180, y: 985 },
+  // In Felix' Garten (#64): zwei rote Bobbycars und das kleine Rutschfahrzeug
+  { toy: 'bobbycar', x: 4930, y: 880 },
+  { toy: 'bobbycar', x: 5200, y: 960 },
+  { toy: 'ridecar', x: 5520, y: 900 },
 ];
 
 // Die Spielzeugkiste steht fest unten links (Fußpunkt).

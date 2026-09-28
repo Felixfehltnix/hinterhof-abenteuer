@@ -25,7 +25,7 @@ const FENCE_DEPTH = -1000;
 const PERGOLA_DEPTH = -999.5;
 const FENCE_SNOW_DEPTH = -999;
 const PERGOLA_SNOW_DEPTH = -998.9;
-// Büsche stehen vor dem Zaun, also auch vor der Lichterkette (−995).
+// Büsche stehen vor dem Zaun.
 const BUSH_DEPTH = -994;
 
 /** Abends glüht der Backstein etwas wärmer. */

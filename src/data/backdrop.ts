@@ -70,14 +70,12 @@ export const BACK_TREES: BackTreePlacement[] = [
 export const PERGOLAS: [number, number][] = [
   [820, 1420],
   [2960, 3660],
-  [4700, 5260],
 ];
 
 /** Efeu und Kletterpflanzen am Zaun (auch an Pergola-Pfosten und -Balken darin). */
 export const IVY: [number, number][] = [
   [1120, 1700],
   [3380, 3900],
-  [5020, 5300],
 ];
 
 export type BushKind = 'green' | 'dark' | 'red' | 'orange';
@@ -105,8 +103,24 @@ export const BUSHES: BushPlacement[] = [
   { kind: 'red', x: 3920 },
   { kind: 'green', x: 4230, scale: 0.95 },
   { kind: 'orange', x: 4490, scale: 1.1 },
-  { kind: 'dark', x: 4800 },
-  { kind: 'red', x: 5110, scale: 1.15 },
-  { kind: 'green', x: 5420 },
-  { kind: 'orange', x: 5680, scale: 0.9 },
+  { kind: 'dark', x: 4660, scale: 0.9 },
 ];
+
+/**
+ * Felix' Garten (#64) ganz rechts in der Welt: Holz-Pergola mit wildem Wein über dem Grill,
+ * Holzbrüstung davor, schwarzer Schuppen dahinter, dicker Baumstamm, grünes Gartentor.
+ * Weltkoordinaten; y ist jeweils der Fußpunkt (= Tiefe).
+ */
+export const FELIX_GARDEN = {
+  /** Ab hier ist der Boden Erde und Rindenmulch statt Rasen. */
+  mulchFrom: 4720,
+  /** Pergola: linker und rechter Pfosten vorn, Oberkante der Balken, Fußlinie. */
+  pergola: { left: 4800, right: 5340, top: 392, y: GROUND_TOP + 44 },
+  /** Schwarzer Holzschuppen hinter der Pergola (steht am Zaun). */
+  shed: { left: 4830, right: 5300, top: 440 },
+  grill: { x: 5075, y: GROUND_TOP + 32 },
+  /** Niedrige Holzbrüstung vor der Pergola. */
+  railing: { left: 4790, right: 5350, height: 78, y: GROUND_TOP + 46 },
+  trunk: { x: 5460, y: GROUND_TOP + 12 },
+  gate: { x: 5625, y: GROUND_TOP + 4 },
+};

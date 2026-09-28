@@ -16,7 +16,7 @@ const FALLBACK: VehicleDef = { style: 'sit', seat: { dx: 0, dy: -20 }, wheels: [
 export const rideable: BehaviorFactory = (toy) => {
   const geo = VEHICLES[toy.def.id] ?? FALLBACK;
   const scene = toy.scene;
-  const wheels = geo.wheels.map((w) => scene.add.image(toy.x, toy.y, 'wheel').setScale(w.r / 22));
+  const wheels = geo.wheels.map((w) => scene.add.image(toy.x, toy.y, geo.wheelTexture ?? 'wheel').setScale(w.r / 22));
   let rider: Kid | undefined;
   let cargo: Toy | undefined;
   let facing = 1;
@@ -66,6 +66,8 @@ export const rideable: BehaviorFactory = (toy) => {
         return { bob: Math.sin(travel / 15) * 2, angle: 0 };
       case 'sit':
         return { bob: Math.sin(travel / 18) * 3, angle: Math.sin(travel / 36) * 2 };
+      case 'toddle':
+        return { bob: -Math.abs(Math.sin(travel / 9)) * 2, angle: Math.sin(travel / 18) * 1.5 };
     }
   };
 
@@ -89,7 +91,8 @@ export const rideable: BehaviorFactory = (toy) => {
       geo.wheels.forEach((w, i) => {
         wheels[i]
           .setPosition(toy.x + facing * w.dx, toy.y + w.dy)
-          .setDepth(toy.depth + 0.1)
+          // Räder auf der anderen Seite liegen hinter Fahrzeug und Kind
+          .setDepth(toy.depth + (w.behind ? -0.6 : 0.1))
           .setRotation(wheels[i].rotation + dx / w.r);
       });
 
@@ -98,7 +101,7 @@ export const rideable: BehaviorFactory = (toy) => {
         const { bob, angle } = pose();
         // Das Kind bewegt Arme und Beine selbst passend zum Fahrstil.
         rider.setActivity(`ride-${geo.style}`);
-        const sitting = geo.style === 'sit' || geo.style === 'cart';
+        const sitting = geo.style === 'sit' || geo.style === 'toddle' || geo.style === 'cart';
         rider
           .setPosition(toy.x + facing * geo.seat.dx, toy.y + geo.seat.dy + bob + (sitting ? rider.hipHeight() : 0))
           .setAngle(angle)

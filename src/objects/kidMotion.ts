@@ -11,6 +11,7 @@ export type Activity =
   | 'climb'
   | 'slide'
   | 'ride-sit'
+  | 'ride-toddle'
   | 'ride-run'
   | 'ride-push'
   | 'ride-cart'
@@ -59,6 +60,7 @@ export const ACTIVITY_POSE: Record<Activity, PoseName> = {
   climb: 'stand',
   slide: 'slideDown',
   'ride-sit': 'rideSit',
+  'ride-toddle': 'rideSit',
   'ride-run': 'rideStand',
   'ride-push': 'rideStand',
   'ride-cart': 'cartSit',
@@ -147,6 +149,11 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
       // Mit den Füßen abstoßen (je nach gefahrenem Weg)
       const s = Math.sin(c.travel / 14);
       return merge(breathe(c, 0.6), { 'leg-l': { angle: 12 * s }, 'leg-r': { angle: -12 * s } });
+    }
+    case 'ride-toddle': {
+      // Rutschfahrzeug: kleine, schnelle Trippelschritte mit beiden Füßen im Wechsel
+      const s = Math.sin(c.travel / 7);
+      return merge(breathe(c, 0.6), { 'leg-l': { angle: 16 * s }, 'leg-r': { angle: -16 * s } });
     }
     case 'ride-run':
       // Laufrad: richtige Laufbewegung, Hände bleiben am Lenker

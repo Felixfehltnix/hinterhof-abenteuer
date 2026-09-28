@@ -40,6 +40,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   steht: `pergola-<i>`), nie jedes Bild neu. Nachts gehen Fenster einzeln an (Lichtebene), abends glüht der Backstein
   (`dayCycle.brickGlow`), bei Schnee liegt Schnee auf Dächern und Zaun (`<key>-snow`) und es raucht aus
   Schornsteinen, bei Wind wiegen sich Bäume und Büsche. Der große Laubbaum links ist das Spielgerät `tree`.
+- **Felix' Garten** (`src/world/FelixGarden.ts`, `scene.felixGarden`, #64) ganz rechts: Pergola mit wildem Wein,
+  Grill, Holzbrüstung, Schuppen, Baumstamm, Mulchboden (ab `FELIX_GARDEN.mulchFrom`), Maße in `FELIX_GARDEN`
+  (`src/data/backdrop.ts`), Zeichnungen in `src/scenes/placeholders/garden.ts`. Die warmweiße Lichterkette hängt
+  nur hier (Antippen = an/aus, tagsüber gedimmt, Weltzustand `fairyLights`). Grill und grünes Tor
+  (`src/objects/FelixGate.ts`) sind reine Deko ohne Touch-Fläche – später der Eingang zum Grill-Spiel (#66).
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -56,6 +61,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   gehen vor großen Spielgeräten (`large: true` im Katalog, z. B. Korb, Tor, Pool, Fahrzeuge) und vor
   feststehender Deko (`setData('scenery', true)`, z. B. der Baum) – auch wenn sie dahinter liegen.
   Leisten, Kiste und Tor behalten ihren Platz. Große Deko bekommt eine kleine Touch-Fläche.
+  Ein Kind auf einem Fahrzeug (`mode === 'riding'`) zählt wie das Fahrzeug (sonst verdeckt es kleine Fahrzeuge ganz).
 - Grafiken: Platzhalter entstehen in `BootScene` (Spielzeuge: `src/scenes/placeholders/toys.ts`). Echte PNGs kommen nach `public/assets/`
   und werden in `BootScene.preload()` unter demselben Texture-Key geladen.
 - Code-Kommentare auf Deutsch, Bezeichner auf Englisch.
@@ -130,7 +136,8 @@ der Schnur), `float` (schwebt am Himmel), `holdable` (Kind hält es an der Schnu
 `hoop` (Basketballkorb mit Zielhilfe), `goal` (Fußballtor, Kinder jubeln), `cans`/`pins`
 (Dosen/Kegel purzeln, Antippen baut neu auf; gemeinsame Logik in `toys/knockdown.ts`).
 Treffer-Ziele reagieren nur auf Spielzeuge mit `tags: ['ball']`; Treffer bewusst großzügig.
-`rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße in `src/data/vehicles.ts`),
+`rideable` (Fahrzeug: Kind aufsitzen, fahren, ausrollen; Maße, Fahrstil und Räder in `src/data/vehicles.ts`,
+z. B. `toddle` = sitzen und trippeln beim Rutschfahrzeug `ridecar`),
 `honk` (Antippen = Hupe; Ton über `scene.events.emit('sound', { kind: 'honk' })`).
 `trampoline`, `seesaw`, `hopper` (Hüpfball), `pool` (Planschbecken): Kinder sitzen über den
 Helfer `toys/seats.ts` (`ToySeats`, Seat-Prinzip). `hula`: Das Kind hält den Reifen (handheld), Kind antippen = er kreist um die Hüfte (hintere Hälfte hinter,

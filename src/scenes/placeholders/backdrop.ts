@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../../config';
-import { FENCE_TOP, IVY, PERGOLAS, PERGOLA_TOP, type BackTreeKind, type BushKind, type HouseKind } from '../../data/backdrop';
+import { FELIX_GARDEN, FENCE_TOP, IVY, PERGOLAS, PERGOLA_TOP, type BackTreeKind, type BushKind, type HouseKind } from '../../data/backdrop';
 
 // Platzhalter-Zeichnungen für den Hintergrund (#63): rote Backsteinhäuser, Bäume, Zaun, Wiese.
 // Alles wird einmal beim Start in Texturen gezeichnet (flüssig auf dem Tablet). Echte Grafiken
@@ -50,7 +50,7 @@ const SNOW = 0xf7fbff;
 const SNOW_SHADE = 0xdbe6f3;
 
 /** Immer gleiche Zufallsfolge (alle Kacheln sehen dieselbe Welt). */
-function rng(seed: number): () => number {
+export function rng(seed: number): () => number {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -630,7 +630,48 @@ export function drawMeadow(g: G, ox: number, oy: number): void {
     g.fillStyle(0xffd166);
     g.fillCircle(x, y, 2);
   }
+
+  drawMulch(g, r);
   g.restore();
+}
+
+/** Felix' Garten (#64): Erde und Rindenmulch mit Herbstlaub statt Rasen, Rand ausgefranst. */
+function drawMulch(g: G, r: () => number): void {
+  const from = FELIX_GARDEN.mulchFrom;
+  const h = GAME_HEIGHT - GROUND_TOP;
+  const edge: Phaser.Math.Vector2[] = [];
+  for (let y = GROUND_TOP; y <= GAME_HEIGHT; y += 20) edge.push(v(from + Math.sin(y / 37) * 26 + (r() - 0.5) * 24, y));
+  g.fillStyle(0x6b4f3a);
+  g.fillPoints([...edge, v(WORLD_WIDTH, GAME_HEIGHT), v(WORLD_WIDTH, GROUND_TOP)], true);
+  // Rindenstücke
+  const bark = [0x8a6446, 0x5a3f2c, 0x7a5a40, 0x9c7652, 0x4e3726];
+  for (let i = 0; i < 2600; i++) {
+    const x = from + 10 + r() * (WORLD_WIDTH - from);
+    const y = GROUND_TOP + r() * h;
+    const s = 0.6 + ((y - GROUND_TOP) / h) * 0.8;
+    g.fillStyle(bark[Math.floor(r() * bark.length)]);
+    g.fillEllipse(x, y, (8 + r() * 8) * s, (3 + r() * 3) * s);
+  }
+  // Herbstlaub
+  const leaves = [0xd9822b, 0xc0392b, 0xe3b53a, 0xb5651d];
+  for (let i = 0; i < 220; i++) {
+    const x = from + 20 + r() * (WORLD_WIDTH - from);
+    const y = GROUND_TOP + 10 + r() * (h - 10);
+    const s = 0.7 + ((y - GROUND_TOP) / h) * 0.8;
+    g.fillStyle(leaves[Math.floor(r() * leaves.length)]);
+    g.fillEllipse(x, y, 14 * s, 8 * s);
+    g.fillTriangle(x - 7 * s, y, x - 12 * s, y - 2 * s, x - 9 * s, y + 3 * s);
+  }
+  // Grasbüschel wachsen über den Rand
+  for (const p of edge) {
+    for (let k = 0; k < 3; k++) {
+      const x = p.x + (r() - 0.3) * 30;
+      const y = p.y + (r() - 0.5) * 18;
+      g.lineStyle(2, 0x58a844);
+      g.lineBetween(x, y, x - 4, y - 9);
+      g.lineBetween(x, y, x + 3, y - 10);
+    }
+  }
 }
 
 // --- Kleinteile ---------------------------------------------------------------------

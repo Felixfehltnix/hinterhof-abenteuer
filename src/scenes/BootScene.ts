@@ -5,6 +5,27 @@ import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
 import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
 import { BACK_TREE_SIZE, BIG_TREE, BUSH_SIZE, drawBackTree, drawBigTree, drawBush, drawFence, drawFenceSnow, drawMeadow, drawPergola, drawPergolaSnow, drawSmoke, drawWindowGlow, FENCE_TILE_HEIGHT, FENCE_TILE_TOP, HOUSE_SPECS, houseKey, MEADOW_TILE_HEIGHT, pergolaArea, TILE_COUNT, WINDOW_GLOW_SIZE } from './placeholders/backdrop';
+import {
+  drawFairyLights,
+  drawGate,
+  drawGrill,
+  drawPergola as drawGardenPergola,
+  drawPergolaSnow as drawGardenPergolaSnow,
+  drawRailing,
+  drawShed,
+  drawShedSnow,
+  drawSoftGlow,
+  drawTrunk,
+  drawVineCurtain,
+  GATE_SIZE,
+  GRILL_SIZE,
+  LIGHTS_AREA,
+  PERGOLA_AREA,
+  RAILING_SIZE,
+  SHED_AREA,
+  TRUNK_SIZE,
+  VINE_CURTAIN_SIZE,
+} from './placeholders/garden';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -181,6 +202,15 @@ export class BootScene extends Phaser.Scene {
       g.lineBetween(4, 22, 40, 22);
     });
 
+    this.makeTexture('wheel-yellow', 44, 44, (g) => {
+      g.fillStyle(0xffc300);
+      g.fillCircle(22, 22, 22);
+      g.fillStyle(0xffe066);
+      g.fillCircle(22, 22, 11);
+      g.fillStyle(0xd49a00);
+      g.fillCircle(22, 22, 4);
+    });
+
     this.makeTexture('seesaw-beam', 330, 22, (g) => {
       g.fillStyle(0xe76f51);
       g.fillRoundedRect(0, 0, 330, 22, 10);
@@ -299,7 +329,7 @@ export class BootScene extends Phaser.Scene {
       g.fillPoints(starPoints(10, 10, 10, 3.5), true);
     });
 
-    // Glühbirne der Lichterkette (weiß, wird eingefärbt und additiv geblendet)
+    // Leuchten einer Glühbirne (weiß, wird eingefärbt, über die Lichtebene gezeichnet)
     this.makeTexture('bulb', 36, 36, (g) => {
       g.fillStyle(0xffffff, 0.25);
       g.fillCircle(18, 18, 18);
@@ -386,6 +416,18 @@ export class BootScene extends Phaser.Scene {
       this.makeTexture(`pergola-${i}`, w, h, (g) => drawPergola(g, i));
       this.makeTexture(`pergola-snow-${i}`, w, h, (g) => drawPergolaSnow(g, i));
     });
+    // Felix' Garten (#64)
+    this.makeTexture('felix-pergola', PERGOLA_AREA.w, PERGOLA_AREA.h, drawGardenPergola);
+    this.makeTexture('felix-pergola-snow', PERGOLA_AREA.w, PERGOLA_AREA.h, drawGardenPergolaSnow);
+    this.makeTexture('felix-vine', VINE_CURTAIN_SIZE.width, VINE_CURTAIN_SIZE.height, drawVineCurtain);
+    this.makeTexture('felix-grill', GRILL_SIZE.width, GRILL_SIZE.height, drawGrill);
+    this.makeTexture('felix-railing', RAILING_SIZE.width, RAILING_SIZE.height, drawRailing);
+    this.makeTexture('felix-shed', SHED_AREA.w, SHED_AREA.h, drawShed);
+    this.makeTexture('felix-shed-snow', SHED_AREA.w, SHED_AREA.h, drawShedSnow);
+    this.makeTexture('felix-trunk', TRUNK_SIZE.width, TRUNK_SIZE.height, drawTrunk);
+    this.makeTexture('felix-gate', GATE_SIZE.width, GATE_SIZE.height, drawGate);
+    this.makeTexture('felix-lights', LIGHTS_AREA.w, LIGHTS_AREA.h, drawFairyLights);
+    this.makeTexture('glow-soft', 128, 128, drawSoftGlow);
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
   }

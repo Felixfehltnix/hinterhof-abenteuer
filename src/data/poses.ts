@@ -59,7 +59,7 @@ export interface PartPose {
 export type Pose = Partial<Record<PartId, PartPose>>;
 
 // Im Sitzen sinkt die Hüfte ungefähr um die Länge der Oberschenkel.
-const SEAT_DROP = 34;
+export const SEAT_DROP = 34;
 
 export const POSES = {
   /** Steht gerade, Arme hängen. */
@@ -101,6 +101,97 @@ export const POSES = {
   /** Hält etwas mit der rechten Hand hoch (Schnur, Taschenlampe). */
   hold: {
     'arm-r': { angle: -70 },
+  },
+
+  // --- Grundposen der Tätigkeiten (Animationen, src/objects/kidMotion.ts) ---
+
+  /** Schaukel: sitzt, beide Hände oben an den Seilen. */
+  swingSit: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: 6 },
+    'leg-r': { y: SEAT_DROP, angle: -6 },
+    'arm-l': { angle: 176 },
+    'arm-r': { angle: -176 },
+  },
+  /** Rutschen: sitzt mit gestreckten Beinen, Arme hoch („Juhu!“). */
+  slideDown: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: -80 },
+    'leg-r': { y: SEAT_DROP, angle: -86 },
+    'arm-l': { angle: 150 },
+    'arm-r': { angle: -160 },
+  },
+  /** Bobbycar: sitzt, Füße vorn am Boden, Hände am Lenkrad. */
+  rideSit: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: -55 },
+    'leg-r': { y: SEAT_DROP, angle: -62 },
+    'arm-l': { angle: -45 },
+    'arm-r': { angle: -52 },
+  },
+  /** Laufrad, Roller: steht/läuft, Hände vorn am Lenker. */
+  rideStand: {
+    'arm-l': { angle: -50 },
+    'arm-r': { angle: -58 },
+  },
+  /** Schubkarre: sitzt auf dem Rand, Beine hängen vorn über den Rand, Hände halten sich fest. */
+  cartSit: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: -28 },
+    'leg-r': { y: SEAT_DROP, angle: -40 },
+    'arm-l': { angle: 30 },
+    'arm-r': { angle: -30 },
+  },
+  /** Hüpfball: sitzt mit angewinkelten Beinen, hält den Griff vorn. */
+  hopSit: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: 22, scaleY: 0.7 },
+    'leg-r': { y: SEAT_DROP, angle: -22, scaleY: 0.7 },
+    'arm-l': { angle: -20 },
+    'arm-r': { angle: 20 },
+  },
+  /** Wippe: sitzt, Beine nach vorn, Hände am Griff. */
+  seesawSit: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: -60 },
+    'leg-r': { y: SEAT_DROP, angle: -66 },
+    'arm-l': { angle: -40 },
+    'arm-r': { angle: -48 },
+  },
+  /** Planschbecken, Whirlpool: sitzt im Wasser, Hände seitlich überm Wasser. */
+  bathe: {
+    body: { y: SEAT_DROP },
+    'leg-l': { y: SEAT_DROP, angle: 30, scaleY: 0.55 },
+    'leg-r': { y: SEAT_DROP, angle: -30, scaleY: 0.55 },
+    'arm-l': { angle: 55 },
+    'arm-r': { angle: -55 },
+  },
+
+  // --- Kurze Posen (Gesten) ---
+
+  /** Kleiner Freudensprung. */
+  hopArms: {
+    'arm-l': { angle: 115 },
+    'arm-r': { angle: -115 },
+  },
+  /** Kichern: Hände vor dem Bauch, Kopf schief. */
+  giggle: {
+    'arm-l': { angle: -38 },
+    'arm-r': { angle: 38 },
+    head: { angle: 8 },
+  },
+  /** Gähnen: sich strecken. */
+  stretch: {
+    body: { y: -5 },
+    'arm-l': { angle: 168 },
+    'arm-r': { angle: -168 },
+    head: { y: -3 },
+  },
+  /** Böe: Arme schützend vors Gesicht, Kopf eingezogen. */
+  brace: {
+    'arm-l': { angle: 150 },
+    'arm-r': { angle: -150 },
+    head: { y: 5 },
   },
 } satisfies Record<string, Pose>;
 

@@ -52,7 +52,17 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `wave`, `dangle`, `hold`). Position = Fußpunkt, Gelenke steuert nur das Kind selbst.
   Kid bietet weiter an, was früher das Einzelbild konnte: `flipX`/`setFlipX`, `displayHeight`,
   `getBounds()` (ganze Figurfläche, unabhängig von der Pose), `setTint`, `setVisible`, `setScale`, `angle`.
-  `handPoint()` folgt der Pose.
+  `handPoint()` und `headTop()` folgen der Pose.
+- **Animationen** (`src/objects/kidMotion.ts`): Das Kind bewegt sich passend zu seiner Tätigkeit.
+  Die Tätigkeit ergibt sich aus `kid.mode`; Spielgeräte sagen höchstens genauer, was das Kind tut:
+  `kid.setActivity('ride-run')`, `kid.setActivity('bounce', { height, salto })`,
+  `kid.setActivity('seesaw', { up })` (jedes Bild aufrufen ist in Ordnung). Die Gelenke steuert
+  allein das Kind: Grundpose je Tätigkeit (`ACTIVITY_POSE`) + Bewegung (`activityMotion`, aus
+  Zeit, zurückgelegtem Weg und Geschwindigkeit). Kurze Gesten: `hop`, `cheer`, `giggle`, `yawn`,
+  `brace`, `kick`, `wave` (`GESTURES`), Landen nach dem Loslassen: `land()`.
+  Wer ein Kind auf einen Sitz setzt, legt die Hüfte auf den Sitz: `y = sitzY + kid.hipHeight()`
+  (folgt der Pose, auch während des Überblendens), für Tweens `kid.sitHeight`.
+  Gesichter (`kid-<id>-face-blink/-joy/-yawn`) liegen über dem Kopf; fehlen sie, bleibt das Gesicht gleich.
 - Texturen: `kid-<id>-head/-body/-arm/-leg` (Einzelteile, Format in der README) und
   `portrait-<id>` (Kopf fürs Tor), Platzhalter in `src/scenes/placeholders/kids.ts`.
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.

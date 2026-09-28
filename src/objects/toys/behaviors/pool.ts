@@ -5,6 +5,8 @@ import type { BehaviorFactory } from './types';
 
 const MAX_FLOATERS = 4;
 const KID_SLOTS = [-70, 70];
+// Höhe der Hüfte eines sitzenden Kindes über dem Fußpunkt des Beckens.
+const WATER_HIP = 50;
 
 /**
  * Planschbecken: Kinder hineinziehen → sitzen im Wasser, es spritzt.
@@ -60,7 +62,8 @@ export const pool: BehaviorFactory = (toy) => {
       front.setPosition(toy.x, toy.y).setDepth(toy.depth + 0.6).setScale(toy.scaleX, toy.scaleY);
       seats.riders.forEach((kid, i) => {
         if (!kid) return;
-        kid.setPosition(toy.x + KID_SLOTS[i], toy.y - 16 + Math.sin(t * 2 + i) * 3).setDepth(toy.depth + 0.5);
+        // Sitzt im Wasser: Hüfte knapp unter der Wasserlinie, der vordere Rand verdeckt die Beine.
+        kid.setPosition(toy.x + KID_SLOTS[i], toy.y - WATER_HIP + kid.hipHeight() + Math.sin(t * 2 + i) * 3).setDepth(toy.depth + 0.5);
       });
       floaters = floaters.filter((f) => f.active && !f.isDragging && !f.heldBy);
       floaters.forEach((f, i) => {

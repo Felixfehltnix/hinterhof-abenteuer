@@ -102,13 +102,11 @@ export class GardenGate {
             y: this.y + 20,
             duration: Math.max(300, (dist / WALK_SPEED) * 1000),
             ease: 'Sine.easeInOut',
+            // Die Gehbewegung macht das Kind selbst (Modus 'leaving' → Tätigkeit 'walk').
             onUpdate: () => {
               kid.setDepth(kid.y);
-              // Kleines Wippen beim Gehen
-              kid.setAngle(Math.sin(this.scene.time.now / 60) * 4);
             },
             onComplete: () => {
-              kid.setAngle(0);
               // Durchs Tor: kleiner werden und verschwinden
               this.scene.tweens.add({
                 targets: kid,

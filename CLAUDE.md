@@ -6,6 +6,9 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 ## Stack
 - TypeScript + Vite, Phaser 3, Capacitor (Android)
 - `npm run dev` für den Browser, `npm run build` muss fehlerfrei durchlaufen (inkl. `tsc`)
+- Android-Projekt in `android/` (eingecheckt). APK und Web-Vorschau baut `.github/workflows/android.yml`
+  bei jedem Merge auf `main` (Release `v0.<run_number>`, fester Signaturschlüssel aus Repo-Secrets,
+  README „APK aufs Tablet“). Pull Requests bauen nur ein Debug-APK zur Probe.
 
 ## Konventionen
 - Feste Auflösung 1920×1080 (`GAME_WIDTH`), Querformat. Die Welt ist breiter (`WORLD_WIDTH`,

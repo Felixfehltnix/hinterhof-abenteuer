@@ -96,11 +96,15 @@ export const rideable: BehaviorFactory = (toy) => {
       if (rider && (!rider.active || rider.seatedOn !== seat)) rider = undefined;
       if (rider) {
         const { bob, angle } = pose();
+        // Das Kind bewegt Arme und Beine selbst passend zum Fahrstil.
+        rider.setActivity(`ride-${geo.style}`);
+        const sitting = geo.style === 'sit' || geo.style === 'cart';
         rider
-          .setPosition(toy.x + facing * geo.seat.dx, toy.y + geo.seat.dy + bob)
+          .setPosition(toy.x + facing * geo.seat.dx, toy.y + geo.seat.dy + bob + (sitting ? rider.hipHeight() : 0))
           .setAngle(angle)
           .setFlipX(facing < 0)
-          .setDepth(toy.depth - 0.5);
+          // In der Schubkarre sitzt es vorn auf dem Rand (Beine davor), sonst hinter dem Lenker.
+          .setDepth(toy.depth + (geo.style === 'cart' ? 0.5 : -0.5));
         rider.exitPoint = { x: toy.x + 100, y: toy.y + 10 };
       }
 

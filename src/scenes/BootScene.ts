@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { CHARACTERS } from '../data/characters';
 import { TOYS } from '../data/toys';
-import { drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
+import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
 import { TOY_PLACEHOLDERS } from './placeholders/toys';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
@@ -21,9 +21,18 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     CHARACTERS.forEach((c) => {
+      // Gesichter (Blinzeln, Lachen, Gähnen) passen nur zum Platzhalter-Kopf. Für einen echten Kopf
+      // müssen sie mitgeliefert werden – sonst bleibt das Gesicht einfach unverändert.
+      const placeholderHead = !this.textures.exists(`kid-${c.id}-head`);
       for (const part of ['head', 'body', 'arm', 'leg'] as const) {
         const { width, height } = partSize(c, part);
         this.makeTexture(`kid-${c.id}-${part}`, width, height, (g) => drawKidPart(g, c, part));
+      }
+      if (placeholderHead) {
+        const { width, height } = partSize(c, 'head');
+        for (const face of ['blink', 'joy', 'yawn'] as const) {
+          this.makeTexture(`kid-${c.id}-face-${face}`, width, height, (g) => drawKidFace(g, c, face));
+        }
       }
       this.makeTexture(`portrait-${c.id}`, PORTRAIT_SIZE, PORTRAIT_SIZE, (g) => drawPortrait(g, c));
     });

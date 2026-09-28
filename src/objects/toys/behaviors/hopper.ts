@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { WORLD_WIDTH } from '../../../config';
 import { ToySeats } from '../seats';
+import type { Kid } from '../../Kid';
 import type { BehaviorFactory } from './types';
 
 const SPEED = 110; // px/s
@@ -14,6 +15,8 @@ export const hopper: BehaviorFactory = (toy) => {
   let dir = 1;
   let baseY: number | undefined;
   let nextTurn = 0;
+  // Das Kind sitzt mit der Hüfte oben auf dem Ball.
+  const seatY = (kid: Kid) => toy.y - toy.displayHeight + 22 + kid.hipHeight();
 
   return {
     onKidDropped: (kid) => {
@@ -32,7 +35,7 @@ export const hopper: BehaviorFactory = (toy) => {
           toy.y = baseY; // wieder auf dem Boden absetzen
           baseY = undefined;
         }
-        if (kid) kid.setPosition(toy.x, toy.y - toy.displayHeight + 28).setDepth(toy.depth + 1);
+        if (kid) kid.setActivity('hop-ball').setPosition(toy.x, seatY(kid)).setDepth(toy.depth + 1);
         return;
       }
       if (toy.physics.active) return; // erst landen lassen
@@ -50,7 +53,7 @@ export const hopper: BehaviorFactory = (toy) => {
       const p = (now % HOP_TIME) / HOP_TIME;
       const h = 4 * p * (1 - p) * HOP_HEIGHT;
       toy.setPosition(x, baseY - h).setFlipX(dir < 0).setDepth(baseY);
-      kid.setPosition(toy.x, toy.y - toy.displayHeight + 28).setFlipX(dir < 0).setDepth(baseY + 1);
+      kid.setActivity('hop-ball', { height: h / HOP_HEIGHT }).setPosition(toy.x, seatY(kid)).setFlipX(dir < 0).setDepth(baseY + 1);
     },
     onRemove: () => {
       if (baseY !== undefined) toy.y = baseY;

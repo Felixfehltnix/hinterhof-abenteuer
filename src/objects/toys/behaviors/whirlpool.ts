@@ -13,6 +13,8 @@ const SLOTS = [
   { dx: -70, dy: -6 },
   { dx: 70, dy: -6 },
 ];
+// Höhe der Hüfte eines sitzenden Kindes über dem Platz (dy).
+const WATER_HIP = 40;
 const COUNT_STEP = 600; // ms pro Kind beim Durchzählen
 const COUNT_DELAY = 350; // ms vor der ersten Zahl
 const HOP_TIME = 320;
@@ -165,7 +167,10 @@ export const whirlpool: BehaviorFactory = (toy) => {
         }
         // Leichtes Wippen im sprudelnden Wasser
         const bob = Math.sin(t / 300 + i * 1.3) * 3;
-        kid.setPosition(toy.x + slot.dx, toy.y + slot.dy + bob - hop).setDepth(toy.depth + (slot.dy > -10 ? 0.5 : 0.4));
+        // Sitzt im Wasser: Hüfte knapp unter der Wasserlinie des Platzes.
+        kid
+          .setPosition(toy.x + slot.dx, toy.y + slot.dy - WATER_HIP + kid.hipHeight() + bob - hop)
+          .setDepth(toy.depth + (slot.dy > -10 ? 0.5 : 0.4));
       });
     },
     onRemove: () => {

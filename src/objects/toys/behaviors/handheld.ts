@@ -4,6 +4,8 @@ import type { BehaviorFactory } from './types';
 
 /** Ein Kind hält das Spielzeug in der Hand (z. B. Taschenlampe): aufs Kind ziehen oder Kind darauf ziehen. */
 export const handheld: BehaviorFactory = (toy) => {
+  // Das Kind hält es in der Hand (Arm nach vorn), nicht an einer Schnur.
+  toy.setData('heldInHand', true);
   const attach = (kid: Kid): boolean => {
     if (kid.holding || kid.mode === 'leaving' || kid.mode === 'hiding' || toy.heldBy) return false;
     toy.heldBy = kid;

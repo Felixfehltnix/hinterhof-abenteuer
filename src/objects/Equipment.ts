@@ -108,9 +108,10 @@ export class Swing extends Equipment implements Seat {
       return;
     }
     const r = this.ropes.rotation;
-    const L = Swing.ROPE_LENGTH;
+    // Das Kind sitzt mit der Hüfte auf dem Brett (Oberkante bei L − 8), die Beine hängen darunter.
+    const d = Swing.ROPE_LENGTH - 8 + this.rider.hipHeight();
     this.rider
-      .setPosition(this.pivot.x - L * Math.sin(r), this.pivot.y + L * Math.cos(r) - 4)
+      .setPosition(this.pivot.x - d * Math.sin(r), this.pivot.y + d * Math.cos(r))
       .setRotation(r)
       .setDepth(this.def.y + 2);
   }
@@ -142,6 +143,9 @@ export class Slide extends Equipment {
     kid.exitPoint = { x: this.bottom.x + 90, y: this.bottom.y + 30 };
     kid.disableInteractive();
     kid.setDepth(this.def.y + 1);
+    kid.setActivity('climb');
+    // Beim Rutschen sitzt das Kind: Fußpunkt so tief, dass die Hüfte auf der Rutschfläche liegt.
+    const sit = kid.sitHeight;
 
     this.scene.tweens.chain({
       targets: kid,
@@ -151,11 +155,12 @@ export class Slide extends Equipment {
         // runterrutschen
         {
           x: this.bottom.x,
-          y: this.bottom.y,
+          y: this.bottom.y + sit,
           delay: 150,
           duration: 650,
           ease: 'Quad.easeIn',
           onStart: () => {
+            kid.setActivity('slide');
             kid.setRotation(-0.3); // nach hinten lehnen
           },
         },
@@ -166,6 +171,7 @@ export class Slide extends Equipment {
           duration: 260,
           ease: 'Quad.easeOut',
           onStart: () => {
+            kid.setActivity('walk');
             kid.setRotation(0);
           },
         },

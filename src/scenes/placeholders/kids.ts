@@ -97,6 +97,52 @@ export function drawKidPart(g: G, c: CharacterDef, part: PartTexture): void {
   }
 }
 
+/**
+ * Gesichtsausdruck als Auflage für den Kopf (gleiche Fläche wie das Kopf-Bild): übermalt nur
+ * Augen bzw. Mund, der Rest bleibt durchsichtig.
+ */
+export function drawKidFace(g: G, c: CharacterDef, face: 'blink' | 'joy' | 'yawn'): void {
+  const s = c.size;
+  const k = (v: number) => v * s;
+  const cx = k(FACE_X);
+  const cy = k(FACE_Y);
+  const closedEyes = () => {
+    g.fillStyle(c.skin);
+    g.fillCircle(cx - k(14), cy - k(2), k(7.5));
+    g.fillCircle(cx + k(14), cy - k(2), k(7.5));
+    g.lineStyle(k(3.5), 0x222222);
+    for (const ex of [cx - k(14), cx + k(14)]) {
+      g.beginPath();
+      g.arc(ex, cy - k(5), k(6), 0.2 * Math.PI, 0.8 * Math.PI, false);
+      g.strokePath();
+    }
+  };
+  const coverMouth = () => {
+    g.fillStyle(c.skin);
+    g.fillEllipse(cx, cy + k(19), k(32), k(17));
+  };
+  switch (face) {
+    case 'blink':
+      closedEyes();
+      break;
+    case 'joy':
+      // Lachen mit offenem Mund
+      coverMouth();
+      g.fillStyle(0x5a1a1a);
+      g.slice(cx, cy + k(12), k(12), 0, Math.PI, false);
+      g.fillPath();
+      g.fillStyle(0xe86a7a);
+      g.fillCircle(cx, cy + k(19), k(4));
+      break;
+    case 'yawn':
+      closedEyes();
+      coverMouth();
+      g.fillStyle(0x5a1a1a);
+      g.fillEllipse(cx, cy + k(19), k(15), k(19));
+      break;
+  }
+}
+
 /** Porträt fürs Gartentor: nur der Kopf, alle gleich groß. */
 export function drawPortrait(g: G, c: CharacterDef): void {
   drawHead(g, c, PORTRAIT_SIZE / 2, PORTRAIT_SIZE / 2 + 18, 1);

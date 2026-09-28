@@ -30,8 +30,10 @@ export const seesaw: BehaviorFactory = (toy) => {
       seats.riders.forEach((kid, i) => {
         if (!kid) return;
         const s = i === 0 ? -HALF_BEAM : HALF_BEAM;
+        // Oben (−1 unten … 1 oben): Arme hoch. Die Hüfte sitzt auf dem Balken.
+        kid.setActivity('seesaw', { up: (i === 0 ? tilt : -tilt) / MAX_TILT });
         kid
-          .setPosition(px + s * Math.cos(tilt), py + s * Math.sin(tilt) - 6)
+          .setPosition(px + s * Math.cos(tilt), py + s * Math.sin(tilt) - 10 + kid.hipHeight())
           .setFlipX(i === 1) // beide schauen zur Mitte
           .setDepth(toy.depth + 0.5);
       });

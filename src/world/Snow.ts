@@ -92,13 +92,12 @@ export class Snow {
         this.hats.set(kid, hat);
       }
       hat.setAlpha(Phaser.Math.Clamp(hat.alpha + (wear ? 0.05 : -0.05), 0, 1));
-      // Mütze sitzt auf dem Kopf (Platzhalter: Kopfoberkante ~ 226 px über den Füßen)
+      // Mütze sitzt auf dem Kopf und folgt ihm (Sitzen, Kopf neigen, Salto)
       const s = kid.def.size * kid.scaleY;
-      const rad = kid.rotation;
-      const up = 196 * s;
+      const top = kid.headTop();
       hat
-        .setPosition(kid.x + Math.sin(rad) * up, kid.y - Math.cos(rad) * up)
-        .setRotation(rad)
+        .setPosition(top.x, top.y)
+        .setRotation(top.rotation)
         .setScale(s)
         .setFlipX(kid.flipX)
         .setVisible(kid.visible && hat.alpha > 0.01)

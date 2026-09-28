@@ -93,6 +93,8 @@ npm run android:open    # öffnet das Projekt in Android Studio (z. B. für ein 
 | Gartentor (rechts im Zaun) antippen | Leiste mit allen Kindern geht auf |
 | Kind aus der Leiste ziehen | kommt auf die Wiese und hüpft vor Freude |
 | Kind aufs Tor ziehen | winkt und geht nach Hause |
+| Kind eine Weile in Ruhe lassen | atmet, blinzelt, schaut sich um, winkt oder hüpft irgendwann von selbst |
+| Kind hochheben und schnell hin und her ziehen | Beine baumeln und schwingen nach, beim Absetzen geht es kurz in die Knie |
 
 Die Wiese merkt sich alles (lokal auf dem Gerät). Zum Zurücksetzen im Browser:
 `localStorage.removeItem('hinterhof-abenteuer/wiese')` in der Konsole, auf Android: App-Daten löschen.
@@ -131,6 +133,9 @@ Arme hängen locker herab). Linker und rechter Arm bzw. Bein benutzen dasselbe B
 | `kid-<id>-arm` | `kinder/<id>/arm.png` | ein Arm mit Hand, senkrecht hängend | 22 × 70 | Schulter: 0,5 / 0,143 |
 | `kid-<id>-leg` | `kinder/<id>/leg.png` | ein Bein mit Schuh, senkrecht | 24 × 70 | Hüfte: 0,5 / 0,057 |
 | `portrait-<id>` | `kinder/<id>/portrait.png` | nur der Kopf fürs Gartentor | 130 × 130 | – |
+| `kid-<id>-face-blink` | `kinder/<id>/face-blink.png` | *optional:* geschlossene Augen | wie `head` | wie `head` |
+| `kid-<id>-face-joy` | `kinder/<id>/face-joy.png` | *optional:* lachen, Mund offen | wie `head` | wie `head` |
+| `kid-<id>-face-yawn` | `kinder/<id>/face-yawn.png` | *optional:* gähnen (Augen zu, Mund rund) | wie `head` | wie `head` |
 
 - Die Maße sind die der Standardfigur (140 × 264 px, Fußpunkt unten Mitte). Die Bilder dürfen
   größer sein (z. B. 4-fach für scharfe Tablets), das **Seitenverhältnis** und die **Drehpunkte**
@@ -138,7 +143,10 @@ Arme hängen locker herab). Linker und rechter Arm bzw. Bein benutzen dasselbe B
 - Wo die Gelenke in der stehenden Figur sitzen (Schultern, Hüften, Hals) und die Posen stehen in
   `src/data/poses.ts` (`KID_RIG`, `POSES`). Teile sollten an den Gelenken etwas überlappen
   (runde Schulter, Hüfte unter dem Rumpf), damit beim Drehen keine Lücken entstehen.
-- Zeichenreihenfolge von hinten nach vorn: Beine, Arme, Rumpf, Kopf.
+- Zeichenreihenfolge von hinten nach vorn: Beine, Arme, Rumpf, Kopf (darüber das Gesicht).
+- Die Gesichter sind Auflagen genau über dem Kopf-Bild (gleiche Größe, gleicher Drehpunkt) und
+  enthalten nur, was sich ändert (Augen, Mund), der Rest ist durchsichtig. Ohne sie blinzelt und
+  lacht die Figur eben nicht – alle Bewegungen gehen trotzdem.
 - Echte Fotos oder Grafiken echter Kinder kommen nur mit ausdrücklichem Okay ins Repo.
 
 Bei Schaukel und Rutsche hängen Seil- bzw. Rutschpunkte an der Grafik

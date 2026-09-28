@@ -42,6 +42,7 @@ export const trampoline: BehaviorFactory = (toy) => {
         const p = ((now - start) % HOP_TIME) / HOP_TIME;
         h = 4 * p * (1 - p) * HOP_HEIGHT;
       }
+      kid.setActivity('bounce', { height: h / HOP_HEIGHT, salto: salto !== 0 });
       // Um die Körpermitte drehen, nicht um die Füße
       const half = kid.displayHeight / 2;
       const rad = (angle * Math.PI) / 180;

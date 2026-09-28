@@ -23,6 +23,9 @@ export const cans: BehaviorFactory = (toy) =>
       const r = ball.displayWidth / 2 + 30;
       const cx = ball.x;
       const cy = ball.y - ball.displayHeight / 2;
-      return Math.abs(cx - t.x) < 70 + r && cy > t.y - 230 - r && cy < t.y - 40 + r;
+      // Auch die Tiefe muss ungefähr passen, sonst rollt der Ball hinter den Dosen vorbei.
+      const groundY = ball.physics.active ? ball.physics.groundY : ball.y;
+      const sameDepth = Math.abs(groundY - t.y) < 120;
+      return sameDepth && Math.abs(cx - t.x) < 70 + r && cy > t.y - 230 - r && cy < t.y - 40 + r;
     },
   });

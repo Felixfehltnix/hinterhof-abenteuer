@@ -16,7 +16,8 @@ export const kidKick: BehaviorFactory = (toy) => {
     let dir = toy.x < kid.x ? -1 : 1;
     if (Math.abs(toy.x - kid.x) < 20) dir = kid.x > GAME_WIDTH / 2 ? -1 : 1;
     kid.kick(dir);
-    toy.physics.launch(dir * toy.params.kickSpeed * 1.4 * Phaser.Math.FloatBetween(0.9, 1.1), -toy.params.kickLift * 0.9);
+    const depth = Phaser.Math.FloatBetween(-1, 1) * toy.params.kickDepth;
+    toy.physics.launch(dir * toy.params.kickSpeed * 1.4 * Phaser.Math.FloatBetween(0.9, 1.1), -toy.params.kickLift * 0.9, undefined, depth);
   };
 
   toy.physics.landListeners.push(() => {

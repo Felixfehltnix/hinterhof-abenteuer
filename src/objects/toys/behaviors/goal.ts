@@ -6,8 +6,9 @@ import type { BehaviorFactory } from './types';
 
 // Großzügige Torzone relativ zum Fußpunkt des Tors (Tor ist 300 px breit, 170 hoch).
 const HALF_WIDTH = 150;
-const DEPTH_BEHIND = 90;
-const DEPTH_FRONT = 45;
+// Tiefe: Bälle rollen jetzt auch schräg über die Wiese (#32), daher großzügig in beide Richtungen.
+const DEPTH_BEHIND = 110;
+const DEPTH_FRONT = 70;
 const MAX_HEIGHT = 170;
 const MIN_SPEED = 90;
 

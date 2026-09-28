@@ -91,7 +91,10 @@ Wind: `src/world/environment.ts` (`environment.wind`), Spielzeuge reagieren mit 
 Neuer Baustein: Datei in `src/objects/toys/behaviors/` mit einer `BehaviorFactory`
 (Hooks `onTap`, `onDragStart`, `onDragEnd`, `update`), in `behaviors/index.ts` eintragen,
 `BehaviorId` in `toys.ts` erweitern. Bewegung läuft über `toy.physics` (`ToyPhysics`:
-Bodenlinie + Höhe, Bildränder sind eine Bande), nicht über eigene Tweens auf x/y.
+`vx` links/rechts, `vdepth` in die Tiefe = Bodenlinie `groundY`, `vz` Höhe; Bildränder, Zaun
+und Vorderkante sind eine Bande), nicht über eigene Tweens auf x/y. Auf der Wiese losgelassen
+geht senkrechtes Wischen zum Teil in die Tiefe (`params.depthShare`), in der Luft losgelassen
+landet ein Spielzeug auf der Linie, wo es aufgehoben wurde (`toy.pickupGroundY`).
 Aufpralle: `toy.physics.landListeners`. Szene-Abfragen (z. B. Kinder) über `toy.scene as PlaygroundScene`.
 
 ## Zielgruppe

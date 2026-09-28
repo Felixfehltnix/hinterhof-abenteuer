@@ -52,6 +52,8 @@ export const hoop: BehaviorFactory = (toy) => {
           const wanted = dx / Math.max(t, 0.05);
           const k = 1 - Math.exp(-ASSIST_RATE * (delta / 1000));
           ph.vx += (wanted - ph.vx) * k;
+          // … und in der Tiefe auf die Linie des Korbs
+          ph.vdepth += ((toy.y + 4 - ph.groundY) / Math.max(t, 0.05) - ph.vdepth) * k;
         }
         if (ph.vz > 0) continue; // Treffer zählen nur beim Herunterfallen
         // Fällt ein Ball über dem Ring herunter, landet er in der Tiefe des Korbs

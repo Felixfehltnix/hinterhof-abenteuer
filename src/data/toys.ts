@@ -68,6 +68,13 @@ export interface ToyParams {
   kickLift: number;
   /** fling: Wurfgeschwindigkeit = Fingergeschwindigkeit × Faktor. */
   throwFactor: number;
+  /**
+   * Auf der Wiese losgelassen: Anteil der senkrechten Wischbewegung, der in die Tiefe geht
+   * (Rest in die Höhe). 1 = rollt nur über die Wiese, 0 = fliegt nur hoch.
+   */
+  depthShare: number;
+  /** kick: größte zufällige Tiefengeschwindigkeit beim Schuss (px/s). */
+  kickDepth: number;
 }
 
 export const DEFAULT_TOY_PARAMS: ToyParams = {
@@ -82,6 +89,8 @@ export const DEFAULT_TOY_PARAMS: ToyParams = {
   kickSpeed: 260,
   kickLift: 950,
   throwFactor: 1,
+  depthShare: 0.6,
+  kickDepth: 160,
 };
 
 export interface ToyDef {
@@ -120,7 +129,7 @@ export const TOYS = [
     width: 76,
     height: 76,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
-    params: { bounce: 0.4, rollFriction: 1.1, spin: true, kickSpeed: 850, kickLift: 320, gravity: 3200 },
+    params: { bounce: 0.4, rollFriction: 1.1, spin: true, kickSpeed: 850, kickLift: 320, gravity: 3200, depthShare: 0.8, kickDepth: 260 },
   },
   {
     // Hoher Bogen, springt ein paarmal nach.
@@ -129,7 +138,7 @@ export const TOYS = [
     width: 84,
     height: 84,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
-    params: { bounce: 0.5, rollFriction: 2.5, spin: true, kickSpeed: 220, kickLift: 1450, gravity: 3300 },
+    params: { bounce: 0.5, rollFriction: 2.5, spin: true, kickSpeed: 220, kickLift: 1450, gravity: 3300, depthShare: 0.15, kickDepth: 80 },
   },
   {
     // Groß und leicht: fliegt langsam und schwebt lange.
@@ -146,7 +155,7 @@ export const TOYS = [
     width: 110,
     height: 34,
     behaviors: ['draggable', 'fling', 'glide', 'wobble'],
-    params: { bounce: 0.15, rollFriction: 6, gravity: 2600, lift: 0.85, airDrag: 0.3, throwFactor: 1.2 },
+    params: { bounce: 0.15, rollFriction: 6, gravity: 2600, lift: 0.85, airDrag: 0.3, throwFactor: 1.2, depthShare: 0.85 },
   },
   {
     // Werfen: gleitet in Wurfrichtung, sinkt sanft, ab und zu ein Looping.

@@ -25,6 +25,11 @@ export class Toy extends Phaser.GameObjects.Image {
   isDragging = false;
   /** Das Kind, das es gerade an der Schnur hält (holdable). */
   heldBy?: Kid;
+  /**
+   * Bodenlinie, auf der es aufgehoben wurde. Wird es in der Luft losgelassen, landet es wieder
+   * dort. undefined = frisch aus der Kiste (landet dann ganz hinten).
+   */
+  pickupGroundY?: number;
 
   constructor(scene: Phaser.Scene, def: ToyDef, x: number, y: number) {
     super(scene, x, y, def.id);
@@ -53,6 +58,7 @@ export class Toy extends Phaser.GameObjects.Image {
 
   handleDragStart(): void {
     this.scene.tweens.killTweensOf(this);
+    this.pickupGroundY = this.physics.active ? this.physics.groundY : Phaser.Math.Clamp(this.y, GROUND_MIN_Y, GROUND_MAX_Y);
     this.physics.stop();
     if (!this.params.spin) this.setRotation(0);
     this.track = [];
@@ -70,11 +76,18 @@ export class Toy extends Phaser.GameObjects.Image {
   }
 
   handleDragEnd(pointer: Phaser.Input.Pointer): void {
-    const release: Release = { vx: 0, vy: 0, pointerVelocity: this.pointerVelocity(pointer.upTime) };
+    // In der Luft losgelassen (über der Wiese): fällt auf die Linie zurück, wo es aufgehoben wurde.
+    const onGround = this.y >= GROUND_MIN_Y;
+    const release: Release = {
+      vx: 0,
+      vy: 0,
+      onGround,
+      groundY: onGround ? undefined : this.pickupGroundY,
+      pointerVelocity: this.pointerVelocity(pointer.upTime),
+    };
     this.isDragging = false;
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
-    // Auch ohne Wurf: fällt aus der Luft zurück auf die Wiese.
-    if (!release.handled) this.physics.launch(release.vx, release.vy, release.groundY);
+    if (!release.handled) this.physics.launch(release.vx, release.vy, release.groundY, release.vdepth ?? 0);
   }
 
   /** Ein Kind wurde auf diesem Spielzeug losgelassen. true = ein Baustein hat es angenommen. */

@@ -13,6 +13,14 @@ export const fling: BehaviorFactory = (toy) => ({
     if (speed < MIN_FLING_SPEED) return;
     const factor = Math.min(1, MAX_FLING_SPEED / speed) * toy.params.throwFactor;
     release.vx = x * factor;
-    release.vy = y * factor;
+    if (release.onGround) {
+      // Auf der Wiese: Wischen nach oben/unten geht teils in die Tiefe (nach hinten/vorne),
+      // der Rest in die Höhe (je Spielzeug: Frisbee flach, Basketball hoch).
+      const share = toy.params.depthShare;
+      release.vdepth = y * factor * share;
+      release.vy = y * factor * (1 - share);
+    } else {
+      release.vy = y * factor;
+    }
   },
 });

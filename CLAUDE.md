@@ -136,6 +136,8 @@ Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
 `handheld` (Kind hält es in der Hand), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
 `whirlpool`: bis zu 6 Kinder (Modus `bathing`), jedes Kind zählt reihum mit Hüpfer und
 Zahlenblase (`sound` `count` mit `value` und `voice`); Antippen = neu zählen, ein 7. Kind landet daneben.
+Hoher, freistehender Pool: Kinder hüpfen über den Rand hinein/hinaus, die Vorderwand (`whirlpool-front`,
+Zeichnung `drawWhirlpool` in `placeholders/toys.ts`) verdeckt sie ab Brusthöhe.
 Die Ziffern in der Blase sind die bewusste Ausnahme von „kein Text“ (Issue #37).
 Weitere Hooks: `onToyDropped` (Spielzeug auf Spielzeug, z. B. Schubkarre), `onRemove`
 (vor dem Wegräumen: Kinder absteigen lassen, Ladung ausschütten).

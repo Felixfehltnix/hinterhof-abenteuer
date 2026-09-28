@@ -3,18 +3,24 @@ import type { Kid } from '../../Kid';
 import { ToySeats } from '../seats';
 import type { BehaviorFactory } from './types';
 
-// Sitzplätze im Halbkreis (relativ zum Fußpunkt). Die Reihenfolge ist auch die Zähl-Reihenfolge.
-// Die Kinder sitzen tief im Wasser: Der vordere Rand verdeckt die Beine.
+// Sitzplätze: hinten vier, vorn zwei (dy relativ zur vorderen Reihe). Die Reihenfolge ist auch
+// die Zähl-Reihenfolge.
 const SLOTS = [
-  { dx: -105, dy: -18 },
-  { dx: -35, dy: -26 },
-  { dx: 35, dy: -26 },
-  { dx: 105, dy: -18 },
-  { dx: -70, dy: -6 },
-  { dx: 70, dy: -6 },
+  { dx: -105, dy: -14 },
+  { dx: -35, dy: -22 },
+  { dx: 35, dy: -22 },
+  { dx: 105, dy: -14 },
+  { dx: -70, dy: 0 },
+  { dx: 70, dy: 0 },
 ];
-// Höhe der Hüfte eines sitzenden Kindes über dem Platz (dy).
-const WATER_HIP = 40;
+// Hüfte der vorderen Reihe relativ zum Fußpunkt: Die hohe Vorderwand verdeckt die Kinder ab
+// Brusthöhe, Kopf und Schultern schauen heraus (passend zur Platzhalter-Grafik 380 × 230).
+const HIP_Y = -88;
+// Wasserfläche relativ zum Fußpunkt (Blasen, Spritzer)
+const WATER_Y = -168;
+// Hopser über den hohen Rand beim Hinein- und Hinaussteigen
+const RIM_HOP_TIME = 420;
+const RIM_HOP_HEIGHT = 110;
 const COUNT_STEP = 600; // ms pro Kind beim Durchzählen
 const COUNT_DELAY = 350; // ms vor der ersten Zahl
 const HOP_TIME = 320;
@@ -32,7 +38,7 @@ export const whirlpool: BehaviorFactory = (toy) => {
   const front = scene.add.image(toy.x, toy.y, 'whirlpool-front').setOrigin(0.5, 1);
   const bubbles = scene.add.particles(toy.x, toy.y, 'bubble', {
     x: { min: -140, max: 140 },
-    y: { min: -60, max: -20 },
+    y: { min: WATER_Y - 18, max: WATER_Y + 18 },
     speedY: { min: -70, max: -30 },
     speedX: { min: -10, max: 10 },
     scale: { start: 0.28, end: 0.08 },
@@ -41,6 +47,29 @@ export const whirlpool: BehaviorFactory = (toy) => {
     frequency: 70,
   });
   const hopStart: (number | undefined)[] = SLOTS.map(() => undefined);
+  // Wer gerade über den Rand hineinhüpft: Start und Ausgangspunkt
+  const entering: ({ start: number; x: number; y: number } | undefined)[] = SLOTS.map(() => undefined);
+
+  /** Hopser im Bogen über den Rand (hinaus oder daneben). */
+  const hopOver = (kid: Kid, toX: number, toY: number) => {
+    const fromX = kid.x;
+    const fromY = kid.y;
+    scene.tweens.killTweensOf(kid);
+    scene.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: RIM_HOP_TIME,
+      onUpdate: (tw) => {
+        const p = tw.getValue() ?? 1;
+        kid.setPosition(fromX + (toX - fromX) * p, fromY + (toY - fromY) * p - Math.sin(p * Math.PI) * RIM_HOP_HEIGHT);
+        kid.setDepth(Math.max(kid.y, toy.depth + 1));
+      },
+      onComplete: () => {
+        kid.setDepth(kid.y);
+        kid.land();
+      },
+    });
+  };
   let timers: Phaser.Time.TimerEvent[] = [];
   let lastCount = 0;
   // Kinder im Pool antippen zählt auch neu (sie verdecken den Pool fast ganz).
@@ -128,22 +157,24 @@ export const whirlpool: BehaviorFactory = (toy) => {
     onKidDropped: (kid) => {
       if (seats.count >= SLOTS.length) {
         // Voll: kräftig blubbern, das Kind landet daneben, alle rufen noch einmal die Anzahl.
-        bubbles.explode(30, toy.x, toy.y - 40);
-        splash(toy.x, toy.y - 50, 18);
-        kid.setPosition(toy.x + toy.displayWidth / 2 + 70, toy.y + 10);
+        bubbles.explode(30, toy.x, toy.y + WATER_Y);
+        splash(toy.x, toy.y + WATER_Y, 18);
+        hopOver(kid, toy.x + toy.displayWidth / 2 + 70, toy.y + 10);
         countRound();
         return true;
       }
       const slot = seats.mount(kid, seats.riders.findIndex((r) => !r));
       if (slot < 0) return false;
-      splash(toy.x + SLOTS[slot].dx, toy.y - 40);
+      // Kurzer Hopser über den Rand ins Wasser
+      entering[slot] = { start: scene.time.now, x: kid.x, y: kid.y };
+      splash(toy.x + SLOTS[slot].dx, toy.y + WATER_Y);
       lastCount = seats.count;
       countRound();
       return true;
     },
     onTap: () => {
       if (seats.count > 0) countRound();
-      else bubbles.explode(12, toy.x, toy.y - 40);
+      else bubbles.explode(12, toy.x, toy.y + WATER_Y);
     },
     update: () => {
       seats.cleanup();
@@ -156,7 +187,10 @@ export const whirlpool: BehaviorFactory = (toy) => {
       front.setPosition(toy.x, toy.y).setDepth(toy.depth + 0.6).setScale(toy.scaleX, toy.scaleY);
       bubbles.setPosition(toy.x, toy.y).setDepth(toy.depth + 0.7);
       seats.riders.forEach((kid, i) => {
-        if (!kid) return;
+        if (!kid) {
+          entering[i] = undefined;
+          return;
+        }
         const slot = SLOTS[i];
         let hop = 0;
         const start = hopStart[i];
@@ -167,15 +201,32 @@ export const whirlpool: BehaviorFactory = (toy) => {
         }
         // Leichtes Wippen im sprudelnden Wasser
         const bob = Math.sin(t / 300 + i * 1.3) * 3;
-        // Sitzt im Wasser: Hüfte knapp unter der Wasserlinie des Platzes.
-        kid
-          .setPosition(toy.x + slot.dx, toy.y + slot.dy - WATER_HIP + kid.hipHeight() + bob - hop)
-          .setDepth(toy.depth + (slot.dy > -10 ? 0.5 : 0.4));
+        // Sitzt im Wasser: Hüfte unter der Wasserlinie, die Vorderwand verdeckt ab Brusthöhe.
+        let x = toy.x + slot.dx;
+        let y = toy.y + HIP_Y + slot.dy + kid.hipHeight() + bob - hop;
+        const enter = entering[i];
+        if (enter) {
+          const p = Math.min(1, (t - enter.start) / RIM_HOP_TIME);
+          x = enter.x + (x - enter.x) * p;
+          y = enter.y + (y - enter.y) * p - Math.sin(p * Math.PI) * RIM_HOP_HEIGHT;
+          if (p >= 1) entering[i] = undefined;
+        }
+        kid.setPosition(x, y).setDepth(toy.depth + (slot.dy > -10 ? 0.5 : 0.4));
       });
     },
     onRemove: () => {
       cancelCounting();
+      // Alle hüpfen über den Rand hinaus (dismountAll stellt sie neben den Pool)
+      const inside = seats.riders.map((kid) => kid && { kid, x: kid.x, y: kid.y });
       seats.dismountAll();
+      inside.forEach((e) => {
+        if (!e) return;
+        const toX = e.kid.x;
+        const toY = e.kid.y;
+        e.kid.setPosition(e.x, e.y);
+        hopOver(e.kid, toX, toY);
+      });
+      entering.fill(undefined);
       syncListeners();
     },
     onDestroy: () => {

@@ -122,6 +122,8 @@ Neuer Baustein: Datei in `src/objects/toys/behaviors/` mit einer `BehaviorFactor
 und Vorderkante sind eine Bande), nicht über eigene Tweens auf x/y. Auf der Wiese losgelassen
 geht senkrechtes Wischen zum Teil in die Tiefe (`params.depthShare`), in der Luft losgelassen
 landet ein Spielzeug auf der Linie, wo es aufgehoben wurde (`toy.pickupGroundY`).
+Rollen/Fliegen mit `params.spin` dreht über `toy.spin` (nur das Bild, um die Mitte; Fußpunkt, Touch-Fläche
+und Bounds bleiben ungedreht), `toy.rotation`/`angle` dreht um den Fußpunkt (Wackeln).
 Aufpralle: `toy.physics.landListeners`. Szene-Abfragen (z. B. Kinder) über `toy.scene as PlaygroundScene`.
 
 ## Zielgruppe

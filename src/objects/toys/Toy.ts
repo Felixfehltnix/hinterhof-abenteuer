@@ -11,6 +11,12 @@ const VELOCITY_WINDOW_MS = 100;
 // Hat der Finger vor dem Loslassen so lange stillgehalten, wird nicht geworfen.
 const VELOCITY_STALE_MS = 60;
 
+// Die Zeichen-Methoden von Phaser.GameObjects.Image, die Toy für die Drehung um die Mitte umhüllt.
+const IMAGE_RENDER = Phaser.GameObjects.Image.prototype as unknown as {
+  renderWebGL(...args: unknown[]): void;
+  renderCanvas(...args: unknown[]): void;
+};
+
 /**
  * Ein Spielzeug auf der Wiese. Was es kann, bestimmen die Bausteine aus dem Katalog
  * (src/data/toys.ts). Die Szene reicht nur Ziehen und Tippen weiter.
@@ -30,6 +36,12 @@ export class Toy extends Phaser.GameObjects.Image {
    * dort. undefined = frisch aus der Kiste (landet dann ganz hinten).
    */
   pickupGroundY?: number;
+  /**
+   * Drehung beim Rollen und Fliegen (rad, params.spin). Nur fürs Bild und um die Mitte:
+   * Position (Fußpunkt), Tiefe, Touch-Fläche und Bounds bleiben ungedreht.
+   * `rotation` bleibt frei für Wackeln & Co. (dreht um den Fußpunkt).
+   */
+  spin = 0;
 
   constructor(scene: Phaser.Scene, def: ToyDef, x: number, y: number) {
     super(scene, x, y, def.id);
@@ -60,7 +72,7 @@ export class Toy extends Phaser.GameObjects.Image {
     this.scene.tweens.killTweensOf(this);
     this.pickupGroundY = this.physics.active ? this.physics.groundY : Phaser.Math.Clamp(this.y, GROUND_MIN_Y, GROUND_MAX_Y);
     this.physics.stop();
-    if (!this.params.spin) this.setRotation(0);
+    this.setRotation(0);
     this.track = [];
     this.isDragging = true;
     this.behaviors.forEach((b) => b.onDragStart?.());
@@ -134,6 +146,45 @@ export class Toy extends Phaser.GameObjects.Image {
     }
     this.physics.update(delta);
     this.behaviors.forEach((b) => b.update?.(delta));
+  }
+
+  // Phaser ruft diese beiden zum Zeichnen auf (in den Typen von Image nicht aufgeführt).
+  renderWebGL(...args: unknown[]): void {
+    this.withSpin(() => IMAGE_RENDER.renderWebGL.apply(this, args));
+  }
+
+  renderCanvas(...args: unknown[]): void {
+    this.withSpin(() => IMAGE_RENDER.renderCanvas.apply(this, args));
+  }
+
+  /**
+   * Zeichnet mit zusätzlicher Drehung um die Bildmitte. Phaser dreht immer um den Origin
+   * (hier den Fußpunkt); darum wird der Fußpunkt nur für diesen einen Zeichenaufruf so
+   * verschoben, dass die Mitte an ihrem Platz bleibt.
+   */
+  private withSpin(draw: () => void): void {
+    if (this.spin === 0) {
+      draw();
+      return;
+    }
+    const { x, y, rotation } = this;
+    // Abstand Fußpunkt → Mitte (Origin 0.5, 1)
+    const half = this.displayHeight * (this.originY - 0.5);
+    const total = rotation + this.spin;
+    // Mitte, wie sie ohne Drehung (nur mit Wackeln um den Fußpunkt) läge …
+    const cx = x + Math.sin(rotation) * half;
+    const cy = y - Math.cos(rotation) * half;
+    // … und der Fußpunkt, von dem aus die gedrehte Grafik genau dort ihre Mitte hat.
+    this.x = cx - Math.sin(total) * half;
+    this.y = cy + Math.cos(total) * half;
+    this.rotation = total;
+    try {
+      draw();
+    } finally {
+      this.x = x;
+      this.y = y;
+      this.rotation = rotation;
+    }
   }
 
   /** Fingergeschwindigkeit kurz vor dem Loslassen in px/s. */

@@ -13,6 +13,8 @@ new Phaser.Game({
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
   },
+  // Ton macht src/audio/Sound.ts mit eigenem AudioContext.
+  audio: { noAudio: true },
   input: {
     activePointers: 3, // mehrere Kinderfinger gleichzeitig
   },

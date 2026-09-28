@@ -19,6 +19,7 @@ export const pool: BehaviorFactory = (toy) => {
   let nextSplash = 0;
 
   const splash = (x: number, y: number) => {
+    scene.events.emit('sound', { kind: 'splash', x });
     for (let i = 0; i < 10; i++) {
       const drop = scene.add.circle(x, y, Phaser.Math.Between(4, 8), 0x8ecae6).setDepth(toy.depth + 1);
       const a = -Math.PI / 2 + Phaser.Math.FloatBetween(-1.1, 1.1);

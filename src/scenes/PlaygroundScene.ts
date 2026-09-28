@@ -24,6 +24,7 @@ import { AutoSave } from '../save/AutoSave';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { CameraControl } from '../world/CameraControl';
+import { SoundSystem } from '../audio/Sound';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
 
 /** Ein Stück Weltzustand, das mitgespeichert wird (Tageszeit, Wetter, …). */
@@ -50,6 +51,8 @@ export class PlaygroundScene extends Phaser.Scene {
   weather!: Weather;
   /** Kamera über der breiten Wiese (Wischen zum Scrollen) */
   cameraControl!: CameraControl;
+  /** Tonausgabe (hört auf 'sound'-Ereignisse) */
+  audio!: SoundSystem;
   private readonly worldStates = new Map<string, WorldState>();
   /** Gerade gezogene Objekte je Finger (für das Scrollen am Bildschirmrand). */
   private readonly drags = new Map<number, { pointer: Phaser.Input.Pointer; ox: number; oy: number; move: DragMove }>();
@@ -80,6 +83,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);
+    this.audio = new SoundSystem(this);
 
     this.setupInput();
     new AutoSave(this, () => this.snapshot());

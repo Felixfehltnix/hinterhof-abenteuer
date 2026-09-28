@@ -55,6 +55,7 @@ export class Bubble extends Phaser.GameObjects.Image {
   pop(): void {
     if (this.popped) return;
     this.popped = true;
+    this.scene.events.emit('sound', { kind: 'bubble', x: this.x });
     this.disableInteractive();
     this.scene.tweens.add({
       targets: this,

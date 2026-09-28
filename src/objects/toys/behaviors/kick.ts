@@ -9,5 +9,6 @@ export const kick: BehaviorFactory = (toy) => ({
     // Kleine zufällige Tiefe, damit der Schuss nicht immer auf derselben Linie bleibt
     const depth = Phaser.Math.FloatBetween(-1, 1) * toy.params.kickDepth;
     toy.physics.launch(dir * speed, -toy.params.kickLift, undefined, depth);
+    toy.scene.events.emit('sound', { kind: 'kick', x: toy.x });
   },
 });

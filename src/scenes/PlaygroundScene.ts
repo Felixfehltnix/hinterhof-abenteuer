@@ -22,6 +22,8 @@ import { FelixGarden } from '../world/FelixGarden';
 import { ToyBox } from '../objects/ToyBox';
 import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
+import { parseOutfit, type Outfit } from '../data/costumes';
+import type { DressUpData } from './DressUpScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { CameraControl } from '../world/CameraControl';
@@ -59,6 +61,8 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Lichter über der Nacht, die trotzdem von allem davor verdeckt werden */
   lightLayer!: LightLayer;
   private readonly worldStates = new Map<string, WorldState>();
+  /** Verkleidung je Kind (Ankleidekiste, #70) – bleibt auch, wenn das Kind heimgeht und wiederkommt. */
+  private readonly outfits = new Map<string, Outfit>();
   /** Gerade gezogene Objekte je Finger (für das Scrollen am Bildschirmrand). */
   private readonly drags = new Map<number, { pointer: Phaser.Input.Pointer; ox: number; oy: number; move: DragMove }>();
   /** Der Finger, der gerade das Scrollen am Rand steuert. */
@@ -78,6 +82,18 @@ export class PlaygroundScene extends Phaser.Scene {
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
     this.toyBox = new ToyBox(this, TOY_BOX.x, TOY_BOX.y);
+
+    this.registerWorldState('outfits', {
+      save: () => Object.fromEntries(this.outfits),
+      load: (v) => {
+        if (typeof v !== 'object' || v === null) return;
+        for (const [id, o] of Object.entries(v as Record<string, unknown>)) {
+          const outfit = parseOutfit(o);
+          if (Object.keys(outfit).length) this.outfits.set(id, outfit);
+        }
+        for (const kid of this.kids) kid.setOutfit(this.outfits.get(kid.def.id) ?? {});
+      },
+    });
 
     const save = loadSave();
     if (save) this.restore(save);
@@ -265,6 +281,7 @@ export class PlaygroundScene extends Phaser.Scene {
   spawnKid(def: CharacterDef, x: number, y: number): Kid | null {
     if (this.isFull() || this.hasKid(def.id as CharacterId)) return null;
     const kid = new Kid(this, def, x, y);
+    kid.setOutfit(this.outfits.get(def.id) ?? {});
     this.kids.add(kid);
     this.gate?.refresh();
     return kid;
@@ -312,6 +329,40 @@ export class PlaygroundScene extends Phaser.Scene {
       // Neu angekommene Kinder freuen sich mit einem Hüpfer; in einer Pfütze spritzt es.
       this.weather.onKidLanded(kid);
       if (arriving) kid.hop();
+    });
+  }
+
+  // --- Ankleidekiste (#70) ------------------------------------------------------
+
+  /** Neue Verkleidung für ein Kind (wird gespeichert). */
+  setKidOutfit(kid: Kid, outfit: Outfit): void {
+    if (Object.keys(outfit).length) this.outfits.set(kid.def.id, { ...outfit });
+    else this.outfits.delete(kid.def.id);
+    kid.setOutfit(outfit);
+  }
+
+  /**
+   * Wechselt ins Ankleide-Spiel (DressUpScene). Die Wiese schläft solange; jede Änderung wird
+   * sofort übernommen. Zurück auf der Wiese ruft sie `back` (das Kind kommt aus der Kiste).
+   */
+  openDressUp(kid: Kid, back: () => void): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: DressUpData = {
+        def: kid.def,
+        outfit: kid.outfit,
+        onChange: (outfit) => this.setKidOutfit(kid, outfit),
+        onDone: () => {
+          this.scene.stop('DressUp');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+          back();
+        },
+      };
+      this.scene.launch('DressUp', data);
+      this.scene.sleep();
     });
   }
 

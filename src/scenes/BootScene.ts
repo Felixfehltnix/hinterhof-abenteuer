@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GROUND_TOP } from '../config';
+import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
+import { COSTUMES, costumeKey, SLOTS } from '../data/costumes';
+import { COSTUME_ART, layerLayout } from './placeholders/costumes';
+import { BOX, boxDoorOutline, drawDressBox, drawDressBoxInside, drawDressRoom, drawHanger, drawItemGlow } from './placeholders/dressup';
 import { TOYS } from '../data/toys';
 import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
 import { BACK_TREE_SIZE, BIG_TREE, BUSH_SIZE, drawBackTree, drawBigTree, drawBush, drawFence, drawFenceSnow, drawMeadow, drawPergola, drawPergolaSnow, drawSmoke, drawWindowGlow, FENCE_TILE_HEIGHT, FENCE_TILE_TOP, HOUSE_SPECS, houseKey, MEADOW_TILE_HEIGHT, pergolaArea, TILE_COUNT, WINDOW_GLOW_SIZE } from './placeholders/backdrop';
@@ -416,6 +419,42 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('playhouse-front-solid');
   }
 
+  /** Ankleidekiste (#70): Kiste, Innenraum, Bügel und alle Verkleidungs-Teile. */
+  private makeDressUp(): void {
+    this.makeTexture('dressbox-inside', BOX.width, BOX.height, drawDressBoxInside);
+    // Vorderseite mit ausgestanzter Tür: dahinter sieht man das Innere (und das Kind, das hineingeht)
+    if (!this.textures.exists('dressbox')) {
+      this.makeTexture('dressbox-solid', BOX.width, BOX.height, drawDressBox);
+      const canvas = this.textures.createCanvas('dressbox', BOX.width, BOX.height);
+      if (canvas) {
+        const ctx = canvas.context;
+        ctx.drawImage(this.textures.get('dressbox-solid').getSourceImage() as CanvasImageSource, 0, 0);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        boxDoorOutline().forEach((p, i) => (i ? ctx.lineTo(p.x + BOX.footX, p.y + BOX.footY) : ctx.moveTo(p.x + BOX.footX, p.y + BOX.footY)));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        canvas.refresh();
+      }
+      this.textures.remove('dressbox-solid');
+    }
+    this.makeTexture('dressup-room', GAME_WIDTH, GAME_HEIGHT, drawDressRoom);
+    this.makeTexture('dressup-hanger', 80, 46, drawHanger);
+    this.makeTexture('dressup-glow', 120, 120, drawItemGlow);
+    for (const costume of COSTUMES) {
+      for (const slot of SLOTS) {
+        for (const art of COSTUME_ART[costume][slot]) {
+          const { width, height } = layerLayout(art);
+          this.makeTexture(costumeKey(costume, slot, art.layer), width, height, (g) => {
+            g.translateCanvas(art.pad[0], art.pad[1]);
+            art.draw(g);
+          });
+        }
+      }
+    }
+  }
+
   /** Hintergrund wie der echte Hinterhof (#63): Häuser, Bäume, Büsche, Zaun- und Wiesen-Kacheln. */
   private makeBackdrop(): void {
     for (const [kind, spec] of Object.entries(HOUSE_SPECS) as [HouseKind, (typeof HOUSE_SPECS)[HouseKind]][]) {
@@ -453,6 +492,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('felix-gate', GATE_SIZE.width, GATE_SIZE.height, drawGate);
     this.makeTexture('felix-lights', LIGHTS_AREA.w, LIGHTS_AREA.h, drawFairyLights);
     this.makeTexture('glow-soft', 128, 128, drawSoftGlow);
+    this.makeDressUp();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
   }

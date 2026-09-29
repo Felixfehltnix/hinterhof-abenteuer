@@ -109,6 +109,7 @@ Querformat, Vollbild und „Bildschirm bleibt an“ stehen in `AndroidManifest.x
 | Ball auf Dosen / Kegel | purzeln um, Antippen stellt sie wieder auf |
 | Kind auf Bobbycar / Rutschfahrzeug / Laufrad / Roller ziehen | sitzt auf; Fahrzeug ziehen = fahren; Kind wegziehen = absteigen |
 | Bobbycar antippen | hupt |
+| Kind in die große Pappkiste ziehen | Ankleide-Spiel: Kleidung am Ständer antippen oder aufs Kind ziehen = anziehen, am Kind antippen = ausziehen, Tür links = zurück |
 | Lichterkette in Felix' Garten (ganz rechts) antippen | an / aus, tagsüber gedimmt |
 | Spielzeug oder Kind in die Schubkarre | wird mitgeschoben |
 | Kind aufs Trampolin | hüpft von selbst, Trampolin antippen = Salto |

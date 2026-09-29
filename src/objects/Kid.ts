@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { DEPTH_DRAGGING, GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../config';
 import type { CharacterDef } from '../data/characters';
+import { costumeKey, type Outfit, type Slot } from '../data/costumes';
+import { COSTUME_ART, layerLayout, type CostumeLayer } from '../scenes/placeholders/costumes';
 import {
   ARM_REACH,
   HIP,
@@ -116,6 +118,10 @@ export class Kid extends Phaser.GameObjects.Container {
    * Achtung: nicht `faces` nennen – daran erkennt Phaser ein Mesh und übergeht die Touch-Fläche.
    */
   private readonly expressions = new Map<Face, Phaser.GameObjects.Image>();
+  /** Verkleidung (Ankleidekiste, #70): je Stelle ein Kostüm. */
+  private worn: Outfit = {};
+  /** Auflagen der Verkleidung: folgen ihrem Körperteil (back = hinter allem, dreht mit dem Rumpf). */
+  private overlays: { part: PartId; img: Phaser.GameObjects.Image; width: number; height: number; originX: number }[] = [];
 
   // Animation
   private explicit?: { activity: Activity; mode: KidMode };
@@ -443,6 +449,7 @@ export class Kid extends Phaser.GameObjects.Container {
         // Auf Rig-Größe bringen (echte Grafiken dürfen eine andere Auflösung haben)
         .setScale((rig.width * s) / this.parts[id].width, (rig.height * s * st.scaleY) / this.parts[id].height);
     }
+    this.placeOverlays();
     const head = this.parts.head;
     for (const face of this.expressions.values()) {
       face
@@ -450,6 +457,75 @@ export class Kid extends Phaser.GameObjects.Container {
         .setRotation(head.rotation)
         .setFlipX(this.mirrored)
         .setScale((KID_RIG.head.width * s) / face.width, (KID_RIG.head.height * s) / face.height);
+    }
+  }
+
+  // --- Verkleidung (Ankleidekiste, #70) --------------------------------------
+
+  /** Was das Kind gerade trägt (Kopie). */
+  get outfit(): Outfit {
+    return { ...this.worn };
+  }
+
+  /**
+   * Zieht die Verkleidung an: Jedes Teil liegt als Auflage auf seinem Körperteil und macht alle
+   * Posen mit. Zeichenreihenfolge: Umhang/Schwanz ganz hinten, dann je Körperteil erst das Teil,
+   * darüber Hose/Rock, darüber Oberteil bzw. Schuhe, beim Kopf Gesicht und dann Hut.
+   */
+  setOutfit(outfit: Outfit): this {
+    this.worn = { ...outfit };
+    this.overlays.forEach((o) => o.img.destroy());
+    this.overlays = [];
+    const byLayer = new Map<CostumeLayer, Phaser.GameObjects.Image[]>();
+    const make = (slot: Slot, layer: CostumeLayer, part: PartId) => {
+      const costume = this.worn[slot];
+      if (!costume) return;
+      for (const art of COSTUME_ART[costume][slot]) {
+        if (art.layer !== layer) continue;
+        const key = costumeKey(costume, slot, layer);
+        if (!this.scene.textures.exists(key)) continue;
+        const { width, height, originX, originY } = layerLayout(art);
+        const img = this.scene.add.image(0, 0, key).setOrigin(originX, originY);
+        this.overlays.push({ part, img, width, height, originX });
+        const list = byLayer.get(layer) ?? [];
+        list.push(img);
+        byLayer.set(layer, list);
+      }
+    };
+    // Reihenfolge der Stellen je Ebene (was weiter hinten steht, zuerst)
+    const order: Record<CostumeLayer, Slot[]> = { back: ['bottom', 'top'], leg: ['bottom', 'feet'], arm: ['top'], body: ['bottom', 'top'], head: ['head'] };
+    const layerOf: Record<PartId, CostumeLayer> = { 'leg-l': 'leg', 'leg-r': 'leg', 'arm-l': 'arm', 'arm-r': 'arm', body: 'body', head: 'head' };
+    // Alles aus dem Container nehmen und in der richtigen Reihenfolge wieder hinein
+    const faces = [...this.expressions.values()];
+    for (const child of [...this.list]) this.remove(child);
+    for (const slot of order.back) make(slot, 'back', 'body');
+    (byLayer.get('back') ?? []).forEach((img) => this.add(img));
+    for (const id of PART_ORDER) {
+      this.add(this.parts[id]);
+      if (id === 'head') faces.forEach((f) => this.add(f));
+      const layer = layerOf[id];
+      const before = this.overlays.length;
+      for (const slot of order[layer]) make(slot, layer, id);
+      this.overlays.slice(before).forEach((o) => this.add(o.img));
+    }
+    this.applyPose();
+    return this;
+  }
+
+  /** Legt die Verkleidung auf ihre Körperteile (nach jeder Pose). */
+  private placeOverlays(): void {
+    const s = this.def.size;
+    for (const o of this.overlays) {
+      const p = this.parts[o.part];
+      const scaleY = this.joints[o.part].scaleY;
+      o.img
+        .setPosition(p.x, p.y)
+        .setRotation(p.rotation)
+        .setFlipX(this.mirrored)
+        // Gespiegelt liegt der Drehpunkt auf der anderen Seite des Bildes
+        .setOrigin(this.mirrored ? 1 - o.originX : o.originX, o.img.originY)
+        .setScale((o.width * s) / o.img.width, (o.height * s * scaleY) / o.img.height)
+        .setVisible(p.visible);
     }
   }
 
@@ -475,11 +551,13 @@ export class Kid extends Phaser.GameObjects.Container {
   /** Färbt alle Teile ein (wie Image.setTint). */
   setTint(color: number): this {
     for (const id of PART_ORDER) this.parts[id].setTint(color);
+    this.overlays.forEach((o) => o.img.setTint(color));
     return this;
   }
 
   clearTint(): this {
     for (const id of PART_ORDER) this.parts[id].clearTint();
+    this.overlays.forEach((o) => o.img.clearTint());
     return this;
   }
 

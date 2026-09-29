@@ -7,7 +7,7 @@ export const FOOD_IDS: readonly FoodId[] = ['sausage', 'bun', 'baguette', 'chees
 export type Sauce = 'ketchup' | 'mustard';
 
 export interface FoodDef {
-  /** Sekunden pro Seite, bis sie gar ist (Garstufe 1). */
+  /** Sekunden auf dem Rost, bis es gar ist (Garstufe 1). Gewendet wird nicht. */
   cook: number;
   /** Muss gegrillt werden (roh = bäh). Brötchen darf auch ungetoastet gegessen werden. */
   mustCook: boolean;
@@ -18,14 +18,14 @@ export interface FoodDef {
 }
 
 export const FOODS: Record<FoodId, FoodDef> = {
-  sausage: { cook: 6, mustCook: true, fillsBun: true, width: 150, height: 42 },
-  bun: { cook: 2.5, mustCook: false, fillsBun: false, width: 140, height: 72 },
-  baguette: { cook: 3.5, mustCook: true, fillsBun: false, width: 176, height: 54 },
-  cheese: { cook: 4, mustCook: true, fillsBun: true, width: 112, height: 70 },
+  sausage: { cook: 10, mustCook: true, fillsBun: true, width: 150, height: 42 },
+  bun: { cook: 4, mustCook: false, fillsBun: false, width: 140, height: 72 },
+  baguette: { cook: 6, mustCook: true, fillsBun: false, width: 176, height: 54 },
+  cheese: { cook: 7, mustCook: true, fillsBun: true, width: 112, height: 70 },
 };
 
 /**
- * Garstufe einer Seite (in Vielfachen der Garzeit): 0 roh, 1 angebräunt (noch roh), 2 gar,
+ * Garstufe (in Vielfachen der Garzeit): 0 roh, 1 angebräunt (noch roh), 2 gar,
  * 3 kräftig gebräunt (noch gut), 4 verkohlt. Gegessen wird von 1,0 bis unter 2,5.
  */
 export const DONE = 1;
@@ -39,12 +39,23 @@ export function stageOf(level: number): number {
   return s;
 }
 
-/** Wie ein Stück Grillgut ist: roh, gut oder verbrannt (schlechteste Seite zählt). */
-export function quality(id: FoodId, sides: readonly number[]): 'raw' | 'good' | 'burnt' {
-  if (sides.some((l) => l >= BURNT)) return 'burnt';
-  if (FOODS[id].mustCook && sides.some((l) => l < DONE)) return 'raw';
+/** Wie weit es schon zur nächsten Garstufe ist (0..1), zum weichen Überblenden der Bilder. */
+export function stageProgress(level: number): number {
+  const s = stageOf(level);
+  if (s >= STAGE_LIMITS.length) return 0;
+  const lo = s === 0 ? 0 : STAGE_LIMITS[s - 1];
+  return (level - lo) / (STAGE_LIMITS[s] - lo);
+}
+
+/** Wie ein Stück Grillgut ist: roh, gut oder verbrannt. */
+export function quality(id: FoodId, level: number): 'raw' | 'good' | 'burnt' {
+  if (level >= BURNT) return 'burnt';
+  if (FOODS[id].mustCook && level < DONE) return 'raw';
   return 'good';
 }
+
+/** Ab so vielen Klecksen zählt eine Soße als drauf (kurz drüberhalten reicht). */
+export const SAUCE_MIN = 8;
 
 // --- Bestellungen --------------------------------------------------------------------
 

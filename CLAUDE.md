@@ -51,7 +51,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Zeichnungen in `src/scenes/placeholders/grill.ts` (Aufteilung in `GRILL`). Antippen auf dem Rost = wenden, Brötchen
   auf dem Teller antippen = aufschneiden, Flasche aufs Gericht = Soße, Teller zum Kind = servieren (roh/verbrannt →
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
-  Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Das Tor im Bild führt zurück.
+  Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
+  Holzschild mit Pfeil am Baum links führt zurück.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.

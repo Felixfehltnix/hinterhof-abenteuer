@@ -17,7 +17,7 @@ import { foodSize, GRILL } from './placeholders/grill';
 /** Was die Wiese dem Grill-Spiel mitgibt. */
 export interface GrillData {
   kids: { def: CharacterDef; outfit: Outfit }[];
-  /** Tor angetippt: zurück auf die Wiese. */
+  /** Holzschild angetippt: zurück auf die Wiese. */
   onDone(): void;
 }
 
@@ -77,7 +77,7 @@ const SIZZLE_EVERY = 1400;
  * Rost (Antippen = wenden, jede Seite gart für sich), links wird auf dem Teller angerichtet
  * (Brötchen antippen = aufschneiden, Würstchen/Käse ins Brötchen ziehen, Flasche aufs Gericht
  * ziehen = Soße). Hinter dem Grill bestellen die Kinder nacheinander (Karte oben, ohne Text);
- * Teller zum Kind ziehen = servieren. Kein Gewinnen, kein Verlieren; das Tor führt zurück.
+ * Teller zum Kind ziehen = servieren. Kein Gewinnen, kein Verlieren; das Holzschild am Baum führt zurück.
  */
 export class GrillScene extends Phaser.Scene {
   private params!: GrillData;
@@ -115,9 +115,9 @@ export class GrillScene extends Phaser.Scene {
     this.add.image(0, 0, 'grill-front').setOrigin(0).setDepth(DEPTH.grill);
     this.addEmbers();
 
-    // Ausgang: das grüne Tor im Hintergrund
+    // Ausgang: das Holzschild am Baum links (großzügige Touch-Fläche)
     const E = GRILL.exit;
-    this.add.zone(E.x, E.y, E.w, E.h).setOrigin(0).setInteractive({ useHandCursor: true }).setData('grab', 'exit');
+    this.add.zone(E.x - 20, E.y - 30, E.w + 40, E.h + 60).setOrigin(0).setInteractive({ useHandCursor: true }).setData('grab', 'exit');
 
     // Vorrat: aus jeder Schale beliebig viel herausziehen
     for (const id of Object.keys(GRILL.sources) as FoodId[]) {
@@ -713,7 +713,7 @@ export class GrillScene extends Phaser.Scene {
     }
   }
 
-  /** Tor angetippt: zurück auf die Wiese. */
+  /** Holzschild angetippt: zurück auf die Wiese. */
   private leave(): void {
     if (this.leaving) return;
     this.leaving = true;

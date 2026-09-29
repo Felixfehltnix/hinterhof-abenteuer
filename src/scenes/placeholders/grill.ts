@@ -27,8 +27,8 @@ export const GRILL = {
     baguette: { x: 1500, y: 935 },
     cheese: { x: 1760, y: 935 },
   } as Record<FoodId, { x: number; y: number }>,
-  /** Das grüne Gartentor im Hintergrund: zurück auf die Wiese. */
-  exit: { x: 40, y: 230, w: 210, h: 330 },
+  /** Holzschild mit Pfeil am Baum links: zurück auf die Wiese. */
+  exit: { x: 30, y: 300, w: 200, h: 110 },
   /** Wo das bestellende Kind steht (Fußpunkt) und die Warteschlange dahinter. */
   front: { x: 960, y: 690, scale: 1.3 },
   queue: [
@@ -41,52 +41,82 @@ export const GRILL = {
   card: { x: 960, y: 120, w: 400, h: 190 },
 };
 
-// --- Hintergrund: Felix' Garten --------------------------------------------------------
+// --- Hintergrund: Blick aus Felix' Garten auf die Wiese ------------------------------------
 
+/**
+ * Man steht in Felix' Garten unter der Pergola am Grill und schaut auf die Wiese: Himmel, am
+ * Horizont Hecke und die roten Backsteinhäuser, davor Rasen (dort stehen die Kinder). Links ein
+ * Stück vom dicken Baumstamm mit einem Holzschild (Pfeil) – der Weg zurück auf die Wiese.
+ */
 export function drawGrillBackground(g: G): void {
   const W = GAME_WIDTH;
+  const horizon = 430;
   // Himmel am späten Nachmittag
   g.fillGradientStyle(0x8ecdf7, 0x8ecdf7, 0xffe0b0, 0xffe0b0, 1);
-  g.fillRect(0, 0, W, 560);
-  // Zaun und schwarzer Schuppen
-  g.fillStyle(0x8e8174);
-  g.fillRect(0, 380, W, 200);
-  g.lineStyle(2, 0x6f6357, 0.6);
-  for (let y = 392; y < 580; y += 16) g.lineBetween(0, y, W, y);
-  g.fillStyle(0x2c2c2c);
-  g.fillRect(520, 250, 880, 330);
-  g.lineStyle(2, 0x404040);
-  for (let x = 540; x < 1400; x += 22) g.lineBetween(x, 256, x, 580);
-  g.fillStyle(0x161616);
-  g.fillRect(506, 236, 908, 22);
-  // Baumstamm rechts
-  g.fillStyle(0x6e6258);
-  g.fillRect(1820, 0, 110, 600);
-  g.lineStyle(3, 0x4a4038);
-  for (let x = 1830; x < 1920; x += 14) g.lineBetween(x, 0, x + 4, 600);
-  // Boden: Erde und Rindenmulch
-  g.fillStyle(0x6b4f3a);
-  g.fillRect(0, 560, W, GAME_HEIGHT - 560);
-  const bark = [0x8a6446, 0x5a3f2c, 0x7a5a40];
-  for (let i = 0; i < 700; i++) {
-    g.fillStyle(bark[i % 3]);
-    g.fillEllipse((i * 197) % W, 570 + ((i * 53) % 480), 12, 5);
+  g.fillRect(0, 0, W, horizon + 20);
+  // Weit hinten die roten Backsteinhäuser
+  const houses: [number, number, number][] = [
+    [120, 260, 180], [420, 300, 150], [700, 240, 200], [1000, 320, 140], [1260, 260, 190], [1560, 300, 160], [1800, 250, 180],
+  ];
+  for (const [x, w, h] of houses) {
+    const top = horizon - h;
+    g.fillStyle(0xb4533c);
+    g.fillRect(x - w / 2, top + 50, w, h - 50);
+    g.fillStyle(0x8a3a28);
+    g.fillTriangle(x - w / 2 - 12, top + 54, x + w / 2 + 12, top + 54, x, top);
+    g.fillStyle(0xf5f3ee);
+    for (let wx = x - w / 2 + 24; wx < x + w / 2 - 30; wx += 56) g.fillRect(wx, top + 76, 26, 32);
   }
-  // Grünes Gartentor links (der Weg zurück auf die Wiese): dahinter scheint die Wiese
+  // Hecke am Horizont
+  const hedge = [0x3f7d3a, 0x4f9444, 0x2c5e33, 0xc0392b, 0xe07b2a];
+  for (let i = 0; i < 90; i++) {
+    g.fillStyle(hedge[i % 7 === 0 ? 3 + (i % 2) : i % 3]);
+    g.fillCircle((i * 23) % W, horizon - 6 + ((i * 7) % 18), 28 + (i % 4) * 5);
+  }
+  // Wiese bis ganz nach vorn (dort stehen die Kinder)
+  g.fillStyle(0x6cbf55);
+  g.fillRect(0, horizon + 10, W, GAME_HEIGHT - horizon);
+  g.fillStyle(0x5fae4b);
+  g.fillRect(0, horizon + 10, W, 22);
+  g.fillStyle(0xa3bf66, 0.6);
+  for (const [x, y, w] of [[380, 520, 220], [1500, 500, 260], [1100, 560, 180], [250, 600, 160], [1750, 580, 200]]) g.fillEllipse(x, y, w, w * 0.2);
+  g.lineStyle(2, 0x58a844, 0.8);
+  for (let i = 0; i < 260; i++) {
+    const x = (i * 71) % W;
+    const y = horizon + 30 + ((i * 37) % 200);
+    g.lineBetween(x, y, x - 3, y - 7);
+    g.lineBetween(x, y, x + 3, y - 8);
+  }
+  g.fillStyle(0xffffff);
+  for (let i = 0; i < 30; i++) g.fillCircle((i * 131) % W, horizon + 40 + ((i * 53) % 180), 4);
+
+  // Links ein Stück vom dicken Baumstamm mit Efeu
+  g.fillStyle(0x6e6258);
+  g.fillRect(0, 0, 130, 720);
+  g.lineStyle(3, 0x4a4038);
+  for (let x = 12; x < 130; x += 16) g.lineBetween(x, 0, x + 4, 720);
+  const ivy = [0x2e6b3a, 0x3c8446, 0x4f9a52];
+  for (let y = 20; y < 700; y += 14) {
+    g.fillStyle(ivy[(y / 14) % 3 | 0]);
+    g.fillCircle(100 + Math.sin(y / 40) * 30, y, 9);
+    g.fillCircle(108 + Math.sin(y / 40) * 30, y + 6, 7);
+  }
+  // Holzschild mit gemaltem Pfeil nach links: hier geht es zurück auf die Wiese
   const E = GRILL.exit;
-  g.fillStyle(0x7cc96a);
-  g.fillRect(E.x + 18, E.y + 30, E.w - 36, E.h - 30);
-  g.fillStyle(0x9fd8ff);
-  g.fillRect(E.x + 18, E.y + 30, E.w - 36, 110);
-  g.fillStyle(0x1f4d2e);
-  g.fillRect(E.x, E.y + 10, 18, E.h - 10);
-  g.fillRect(E.x + E.w - 18, E.y + 10, 18, E.h - 10);
-  g.lineStyle(6, 0x2a5e3a);
-  g.strokeRect(E.x + 26, E.y + 34, E.w - 52, E.h - 44);
-  g.lineStyle(3, 0x2a5e3a);
-  for (let x = E.x + 38; x < E.x + E.w - 30; x += 12) g.lineBetween(x, E.y + 34, x, E.y + E.h - 10);
-  for (const y of [E.y + 90, E.y + 180, E.y + 260]) g.lineBetween(E.x + 26, y, E.x + E.w - 26, y);
-  // Pergola-Balken mit wildem Wein oben
+  g.lineStyle(4, 0x5a4636);
+  g.lineBetween(E.x + 40, E.y - 20, E.x + 40, E.y + 10);
+  g.lineBetween(E.x + E.w - 40, E.y - 20, E.x + E.w - 40, E.y + 10);
+  g.fillStyle(0x7a5536);
+  g.fillRoundedRect(E.x + 4, E.y + 6, E.w, E.h, 14);
+  g.fillStyle(0xb07f47);
+  g.fillRoundedRect(E.x, E.y, E.w, E.h, 14);
+  g.lineStyle(2, 0x8a5a2b, 0.7);
+  for (let y = E.y + 22; y < E.y + E.h - 10; y += 22) g.lineBetween(E.x + 12, y, E.x + E.w - 12, y);
+  g.fillStyle(0x2d6a4f);
+  const cy = E.y + E.h / 2;
+  g.fillPoints([v(E.x + 26, cy), v(E.x + 86, cy - 38), v(E.x + 86, cy - 16), v(E.x + E.w - 26, cy - 16), v(E.x + E.w - 26, cy + 16), v(E.x + 86, cy + 16), v(E.x + 86, cy + 38)], true);
+
+  // Pergola-Balken mit wildem Wein oben (der Grill steht darunter)
   g.fillStyle(0x9a7552);
   g.fillRect(0, 60, W, 30);
   const vine = [0xc0392b, 0xd9483b, 0xe67e22, 0xf39c12, 0x4f8a3c, 0x6a9a3a];

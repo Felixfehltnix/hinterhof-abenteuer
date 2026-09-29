@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { EquipmentDef } from '../data/playground';
 import { BIG_TREE } from '../scenes/placeholders/backdrop';
-import { HOUSE_AREA, PH, sidePoint, SLIDE_AREA } from '../scenes/placeholders/playhouse';
+import { HOUSE_AREA, PH, sidePoint, SLIDE_AREA, slideAngle, slidePoint } from '../scenes/placeholders/playhouse';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 import type { Toy } from './toys/Toy';
 import { windStrength } from '../world/environment';
@@ -275,27 +275,33 @@ export class PlayHouse extends Equipment implements Seat {
     });
   }
 
-  /** Von oben die Rutsche hinunter, vorne auf der Wiese landen. */
+  /** Von oben die Rutsche hinunter (entlang der Kurve, liegt dabei schräg), vorne auf der Wiese landen. */
   private slideDown(kid: Kid): void {
     this.kids.set(kid, { where: 'moving' });
-    const { top, bottom } = PH.slide;
-    const start = this.at(top.x, top.y);
-    const end = this.at(bottom.x, bottom.y);
-    const out = this.at(bottom.x + 80, bottom.y + 26);
+    const start = slidePoint(0);
+    const end = slidePoint(1);
+    const out = this.at(end.x + 80, end.y + 26);
     kid.exitPoint = out;
+    const ride = { t: 0 };
+    const placeOnSlide = () => {
+      const p = slidePoint(ride.t);
+      // Nach hinten gelehnt, im steilen Stück mit der Rutsche geneigt („Juhu“)
+      const tilt = Phaser.Math.Clamp(slideAngle(ride.t) * 0.5, 0, 0.5);
+      kid.setPosition(this.def.x + p.x, this.def.y + p.y + kid.sitHeight).setRotation(-0.3 + tilt);
+    };
     this.scene.tweens.chain({
       targets: kid,
       tweens: [
-        { x: start.x, y: start.y + kid.sitHeight, duration: 260, ease: 'Sine.easeInOut' },
+        { x: this.def.x + start.x, y: this.def.y + start.y + kid.sitHeight, duration: 260, ease: 'Sine.easeInOut' },
         {
-          x: end.x,
-          y: end.y + kid.sitHeight,
-          duration: 700,
+          targets: ride,
+          t: 1,
+          duration: 850,
           ease: 'Quad.easeIn',
           onStart: () => {
-            kid.setDepth(this.def.y + bottom.y + 1).setActivity('slide');
-            kid.setRotation(-0.3); // nach hinten lehnen, „Juhu“
+            kid.setDepth(this.def.y + end.y + 1).setActivity('slide');
           },
+          onUpdate: placeOnSlide,
         },
         {
           x: out.x,

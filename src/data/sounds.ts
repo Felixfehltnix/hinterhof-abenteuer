@@ -59,6 +59,13 @@ export const SOUNDS: Record<string, SoundDef> = {
   'weather-rain': { synth: 'splash', volume: 0.3 },
   'weather-wind': { synth: 'whoosh', volume: 0.35 },
   'weather-snow': { synth: 'chime', volume: 0.3 },
+  // Grill-Spiel (#66)
+  sizzle: { synth: 'splash', volume: 0.12 },
+  flip: { synth: 'click', volume: 0.35 },
+  cut: { synth: 'click', volume: 0.45 },
+  squirt: { synth: 'whoosh', volume: 0.35 },
+  yum: { synth: 'chime', volume: 0.45 },
+  yuck: { synth: 'honk', volume: 0.3 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

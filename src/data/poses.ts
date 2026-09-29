@@ -187,6 +187,12 @@ export const POSES = {
     'arm-r': { angle: -168 },
     head: { y: -3 },
   },
+  /** Bäh: Hände abwehrend nach vorn, Kopf weggedreht. */
+  yuck: {
+    'arm-l': { angle: -70 },
+    'arm-r': { angle: 70 },
+    head: { angle: -12, x: -4 },
+  },
   /** Böe: Arme schützend vors Gesicht, Kopf eingezogen. */
   brace: {
     'arm-l': { angle: 150 },

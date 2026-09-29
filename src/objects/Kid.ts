@@ -158,7 +158,7 @@ export class Kid extends Phaser.GameObjects.Container {
       this.add(part);
     }
     // Gesichter liegen deckungsgleich über dem Kopf und zeigen nur, was sich ändert.
-    for (const face of ['blink', 'joy', 'yawn'] as const) {
+    for (const face of ['blink', 'joy', 'yawn', 'yuck'] as const) {
       const key = `kid-${def.id}-face-${face}`;
       if (!scene.textures.exists(key)) continue;
       const img = scene.add.image(0, 0, key).setOrigin(KID_RIG.head.originX, KID_RIG.head.originY).setVisible(false);
@@ -714,6 +714,16 @@ export class Kid extends Phaser.GameObjects.Container {
   giggle(): void {
     if (this.mode !== 'idle' || this.gesture) return;
     this.playGesture('giggle');
+  }
+
+  /** Schüttelt den Kopf (z. B. falsches Essen, aber nicht eklig). */
+  shakeHead(): void {
+    this.playGesture('no');
+  }
+
+  /** Bäh! (z. B. verbranntes Würstchen): Kopf schütteln, abwehren, angewidertes Gesicht. */
+  yuck(onDone?: () => void): void {
+    this.playGesture('yuck', 1, onDone);
   }
 
   /** Gähnt (nachts): streckt die Arme hoch, Mund auf. */

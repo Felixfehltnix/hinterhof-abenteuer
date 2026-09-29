@@ -33,7 +33,7 @@ export interface ActivityParams {
   up?: number;
 }
 
-export type Face = 'blink' | 'joy' | 'yawn';
+export type Face = 'blink' | 'joy' | 'yawn' | 'yuck';
 
 /** Was die Bewegung pro Bild wissen muss. */
 export interface MotionContext {
@@ -225,7 +225,7 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
 }
 
 /** Kurze Gesten, die eine Tätigkeit für einen Moment überlagern. */
-export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow';
+export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow' | 'yuck' | 'no';
 
 export interface GestureDef {
   duration: number;
@@ -287,6 +287,21 @@ export const GESTURES: Record<GestureName, GestureDef> = {
     pose: 'wave',
     face: 'joy',
     motion: (_p, t) => ({ 'arm-r': { angle: Math.sin(t * 13) * 24 } }),
+  },
+  yuck: {
+    duration: 1300,
+    pose: 'yuck',
+    face: 'yuck',
+    // Angewidert: Kopf schütteln und sich leicht abwenden
+    motion: (p, t) => ({
+      head: { angle: Math.sin(t * 22) * 9 * env(p) },
+      body: { angle: -5 * env(p) },
+    }),
+  },
+  no: {
+    duration: 800,
+    // Kopfschütteln: das stimmt noch nicht
+    motion: (p, t) => ({ head: { angle: Math.sin(t * 20) * 10 * env(p) } }),
   },
   greet: {
     duration: 1600,

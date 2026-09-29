@@ -43,8 +43,16 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - **Felix' Garten** (`src/world/FelixGarden.ts`, `scene.felixGarden`, #64) ganz rechts: Pergola mit wildem Wein,
   Grill, Holzbrüstung, Schuppen, Baumstamm, Mulchboden (ab `FELIX_GARDEN.mulchFrom`), Maße in `FELIX_GARDEN`
   (`src/data/backdrop.ts`), Zeichnungen in `src/scenes/placeholders/garden.ts`. Die warmweiße Lichterkette hängt
-  nur hier (Antippen = an/aus, tagsüber gedimmt, Weltzustand `fairyLights`). Grill und grünes Tor
-  (`src/objects/FelixGate.ts`) sind reine Deko ohne Touch-Fläche – später der Eingang zum Grill-Spiel (#66).
+  nur hier (Antippen = an/aus, tagsüber gedimmt, Weltzustand `fairyLights`). Der Grill ist Deko; das grüne
+  Tor (`src/objects/FelixGate.ts`) öffnet das Grill-Spiel.
+- **Grill-Spiel** (#66, `src/scenes/GrillScene.ts`, `scene.openGrill()`): Die Wiese schläft, am Grill stehen die Kinder
+  von der Wiese (mindestens zwei, mit Verkleidung). Grillgut, Garzeiten und Bestellungen in `src/data/grill.ts`
+  (Garstufe je Seite in Vielfachen der Garzeit: gar ab 1,0, verkohlt ab 2,5, `stageOf` → 5 Bildstufen `food-<id>-<stufe>`),
+  Zeichnungen in `src/scenes/placeholders/grill.ts` (Aufteilung in `GRILL`). Antippen auf dem Rost = wenden, Brötchen
+  auf dem Teller antippen = aufschneiden, Flasche aufs Gericht = Soße, Teller zum Kind = servieren (roh/verbrannt →
+  `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
+  Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
+  Holzschild mit Pfeil am Baum links führt zurück.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -97,7 +105,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.setActivity('seesaw', { up })` (jedes Bild aufrufen ist in Ordnung). Die Gelenke steuert
   allein das Kind: Grundpose je Tätigkeit (`ACTIVITY_POSE`) + Bewegung (`activityMotion`, aus
   Zeit, zurückgelegtem Weg und Geschwindigkeit). Kurze Gesten: `hop`, `cheer`, `giggle`, `yawn`,
-  `brace`, `kick`, `wave` (`GESTURES`), Landen nach dem Loslassen: `land()`.
+  `brace`, `kick`, `wave`, `yuck` (bäh), `no` (Kopfschütteln) (`GESTURES`), Landen nach dem Loslassen: `land()`.
   Wer ein Kind auf einen Sitz setzt, legt die Hüfte auf den Sitz: `y = sitzY + kid.hipHeight()`
   (folgt der Pose, auch während des Überblendens), für Tweens `kid.sitHeight`.
   Gesichter (`kid-<id>-face-blink/-joy/-yawn`) liegen über dem Kopf; fehlen sie, bleibt das Gesicht gleich.
@@ -122,7 +130,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   deutsche Sprachausgabe (falls das Gerät eine hat), sonst n kurze Töne.
   Echte Kinderstimmen nur mit Okay der Eltern und nicht ins öffentliche Repo (#38).
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
-  `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`.
+  `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
+  Grill: `sizzle`, `flip`, `cut`, `squirt`, `yum`, `yuck`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

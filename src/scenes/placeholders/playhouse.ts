@@ -32,8 +32,11 @@ export const PH = {
   rungs: { u1: 0.78, u2: 0.94, from: 40, to: 240, step: 38 },
   /** Podest innen: Höhe, vorne ab Tiefe u, x-Bereich (vorn). */
   platform: { height: 200, u: 0.35, left: -40, right: 150 },
-  /** Rutsche: oben am Podest, unten vorne rechts auf der Wiese. */
-  slide: { top: v(150, -214), bottom: v(400, 58), width: 64 },
+  /**
+   * Rutsche: oben am Podest, geschwungen nach vorne rechts auf die Wiese. Mittellinie als
+   * Bézier-Kurve (flacher Einstieg, steile Mitte, flacher Auslauf), Breite oben/unten.
+   */
+  slide: { top: v(150, -214), c1: v(222, -216), c2: v(300, 52), bottom: v(430, 58), width: 60, widthBottom: 84 },
 };
 
 /** Punkt auf der linken Seitenwand: u = 0 vorn … 1 hinten, h = Höhe über dem Boden. */
@@ -44,7 +47,7 @@ export function sidePoint(u: number, h: number): Phaser.Math.Vector2 {
 /** Fläche der Haus-Bilder (Vorder- und Rückseite) relativ zum Fußpunkt. */
 export const HOUSE_AREA = { x: -290, y: -360, w: 460, h: 366 };
 /** Fläche der Rutsche relativ zum Fußpunkt. */
-export const SLIDE_AREA = { x: 110, y: -250, w: 330, h: 340 };
+export const SLIDE_AREA = { x: 110, y: -262, w: 390, h: 380 };
 
 const BLUE = 0x1d6fd6;
 const BLUE_DARK = 0x15539f;
@@ -54,8 +57,12 @@ const YELLOW = 0xffc93c;
 const YELLOW_DARK = 0xe0a800;
 const TURQUOISE = 0x19b3a6;
 const TURQUOISE_DARK = 0x118a80;
-const SLIDE = 0x9fd8f5;
-const SLIDE_RIM = 0x62b3e0;
+// Rutsche in kräftigem, dunklerem Blau
+const SLIDE_BED = 0x1c5aa8;
+const SLIDE_BED_LIGHT = 0x2b72c4;
+const SLIDE_RIM = 0x14427f;
+const SLIDE_RIM_TOP = 0x3f86d6;
+const SLIDE_SIDE = 0x0d2f5c;
 /** Innen ist es schattig. */
 const SHADE = 0x0f3b4a;
 
@@ -161,20 +168,84 @@ export function rungSlots(margin = 0): Phaser.Math.Vector2[][] {
   return slots;
 }
 
-/** Hellblaue Rutsche vom Podest schräg nach vorn auf die Wiese. */
+/** Punkt auf der Mittellinie der Rutsche (t = 0 oben am Podest … 1 unten auf der Wiese). */
+export function slidePoint(t: number): Phaser.Math.Vector2 {
+  const { top: a, c1: b, c2: c, bottom: d } = PH.slide;
+  const u = 1 - t;
+  return v(
+    u * u * u * a.x + 3 * u * u * t * b.x + 3 * u * t * t * c.x + t * t * t * d.x,
+    u * u * u * a.y + 3 * u * u * t * b.y + 3 * u * t * t * c.y + t * t * t * d.y,
+  );
+}
+
+/** Neigung der Rutsche an der Stelle t (Bogenmaß, 0 = waagerecht). */
+export function slideAngle(t: number): number {
+  const p = slidePoint(Math.max(0, t - 0.02));
+  const q = slidePoint(Math.min(1, t + 0.02));
+  return Math.atan2(q.y - p.y, q.x - p.x);
+}
+
+/**
+ * Geschwungene Rutsche in dunklem Blau: Liegefläche mit erhöhten Seitenrändern, sichtbarer
+ * Materialstärke, flachem Auslauf auf der Wiese, Stütze und Schatten. Die Breite der Rutsche
+ * zeigt nach vorne in die Wiese, deshalb liegt der Auslauf flach.
+ */
 export function drawPlayhouseSlide(g: G): void {
-  const { top, bottom, width } = PH.slide;
+  const { width, widthBottom } = PH.slide;
   g.save();
   origin(g, SLIDE_AREA);
-  const dir = bottom.clone().subtract(top).normalize();
-  const n = v(-dir.y, dir.x).scale(width / 2);
-  // Auslauf unten flach
-  const flat = v(bottom.x + 60, bottom.y + 6);
+  const N = 40;
+  // Richtung der Breite: nach vorne in die Wiese, leicht nach links (wir schauen von rechts vorn),
+  // so bleibt die Rutsche im steilen Stück breit und liegt unten flach
+  const across = v(-0.3, 0.95).normalize().scale(0.8);
+  const center: Phaser.Math.Vector2[] = [];
+  const half: number[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    center.push(slidePoint(t));
+    half.push((width + (widthBottom - width) * t) / 2);
+  }
+  const edge = (k: number, dy = 0) => center.map((c, i) => v(c.x + across.x * half[i] * k, c.y + across.y * half[i] * k + dy));
+  const band = (k: number, dy = 0) => [...edge(-k, dy), ...edge(k, dy).reverse()];
+  const end = center[N];
+
+  // Schatten auf der Wiese unter dem Auslauf
+  g.fillStyle(0x000000, 0.14);
+  g.fillEllipse(end.x - 30, end.y + 18, 200, 30);
+  // Stütze unter der Mitte
+  const mid = slidePoint(0.42);
+  g.fillStyle(0x8d99ae);
+  g.fillRect(mid.x - 6, mid.y + 10, 12, 60 - mid.y);
+  g.fillStyle(0x5c677d);
+  g.fillRect(mid.x + 2, mid.y + 10, 4, 60 - mid.y);
+  g.fillEllipse(mid.x, 62, 34, 10);
+
+  // Materialstärke (Unterkante, etwas tiefer), dann Ränder, dann Liegefläche
+  g.fillStyle(SLIDE_SIDE);
+  g.fillPoints(band(1.32, 12), true);
   g.fillStyle(SLIDE_RIM);
-  g.fillPoints([v(top.x - n.x * 1.25, top.y - n.y * 1.25), v(top.x + n.x * 1.25, top.y + n.y * 1.25), v(bottom.x + n.x * 1.25, bottom.y + n.y * 0.6), v(flat.x, flat.y + 14), v(flat.x, flat.y - 16), v(bottom.x - n.x * 1.25, bottom.y - n.y * 1.25)], true);
-  g.fillStyle(SLIDE);
-  g.fillPoints([v(top.x - n.x, top.y - n.y), v(top.x + n.x, top.y + n.y), v(bottom.x + n.x, bottom.y + n.y * 0.5), v(flat.x - 4, flat.y + 8), v(flat.x - 4, flat.y - 10), v(bottom.x - n.x, bottom.y - n.y)], true);
-  g.fillStyle(0xffffff, 0.45);
-  g.fillPoints([v(top.x - n.x * 0.5, top.y - n.y * 0.5), v(top.x - n.x * 0.2, top.y - n.y * 0.2), v(bottom.x - n.x * 0.2, bottom.y - n.y * 0.2), v(bottom.x - n.x * 0.5, bottom.y - n.y * 0.5)], true);
+  g.fillPoints(band(1.32), true);
+  g.fillStyle(SLIDE_BED);
+  g.fillPoints(band(0.95), true);
+  g.fillStyle(SLIDE_BED_LIGHT);
+  g.fillPoints(band(0.45), true);
+  // Glanzkanten auf den Rändern und ein Glanzstreifen auf der Liegefläche
+  g.lineStyle(4, SLIDE_RIM_TOP);
+  g.strokePoints(edge(-1.25));
+  g.strokePoints(edge(1.25));
+  g.lineStyle(5, 0xffffff, 0.3);
+  g.strokePoints(edge(-0.25).slice(4, N - 2));
+  // Vorderkante des Auslaufs
+  const a = edge(-1.32)[N];
+  const b = edge(1.32)[N];
+  g.lineStyle(6, SLIDE_SIDE);
+  g.lineBetween(a.x, a.y, b.x, b.y);
+  // Einstieg am Podest: Griffbügel an beiden Seiten
+  g.lineStyle(7, SLIDE_RIM);
+  for (const p of [edge(-1.3)[0], edge(1.3)[0]]) {
+    g.beginPath();
+    g.arc(p.x + 6, p.y - 22, 20, Math.PI * 0.55, Math.PI * 1.95, false);
+    g.strokePath();
+  }
   g.restore();
 }

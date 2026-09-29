@@ -101,7 +101,7 @@ export function drawKidPart(g: G, c: CharacterDef, part: PartTexture): void {
  * Gesichtsausdruck als Auflage für den Kopf (gleiche Fläche wie das Kopf-Bild): übermalt nur
  * Augen bzw. Mund, der Rest bleibt durchsichtig.
  */
-export function drawKidFace(g: G, c: CharacterDef, face: 'blink' | 'joy' | 'yawn'): void {
+export function drawKidFace(g: G, c: CharacterDef, face: 'blink' | 'joy' | 'yawn' | 'yuck'): void {
   const s = c.size;
   const k = (v: number) => v * s;
   const cx = k(FACE_X);
@@ -134,6 +134,25 @@ export function drawKidFace(g: G, c: CharacterDef, face: 'blink' | 'joy' | 'yawn
       g.fillStyle(0xe86a7a);
       g.fillCircle(cx, cy + k(19), k(4));
       break;
+    case 'yuck': {
+      // Zusammengekniffene Augen (> <), gewellter Mund, Zunge raus
+      g.fillStyle(c.skin);
+      g.fillCircle(cx - k(14), cy - k(2), k(7.5));
+      g.fillCircle(cx + k(14), cy - k(2), k(7.5));
+      g.lineStyle(k(3.5), 0x222222);
+      g.lineBetween(cx - k(20), cy - k(7), cx - k(9), cy - k(2));
+      g.lineBetween(cx - k(20), cy + k(3), cx - k(9), cy - k(2));
+      g.lineBetween(cx + k(20), cy - k(7), cx + k(9), cy - k(2));
+      g.lineBetween(cx + k(20), cy + k(3), cx + k(9), cy - k(2));
+      coverMouth();
+      g.lineStyle(k(3.5), 0x222222);
+      const pts: Phaser.Math.Vector2[] = [];
+      for (let i = 0; i <= 8; i++) pts.push(new Phaser.Math.Vector2(cx - k(13) + i * k(3.25), cy + k(16) + (i % 2 ? k(3) : -k(3))));
+      g.strokePoints(pts);
+      g.fillStyle(0xe86a7a);
+      g.fillEllipse(cx + k(4), cy + k(23), k(9), k(8));
+      break;
+    }
     case 'yawn':
       closedEyes();
       coverMouth();

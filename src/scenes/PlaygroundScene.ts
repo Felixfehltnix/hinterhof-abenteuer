@@ -24,6 +24,7 @@ import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
+import type { GrillData } from './GrillScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { CameraControl } from '../world/CameraControl';
@@ -362,6 +363,34 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('DressUp', data);
+      this.scene.sleep();
+    });
+  }
+
+  /**
+   * Grill-Spiel hinter Felix' grünem Tor (#66): Die Kinder von der Wiese stellen sich am Grill an
+   * (mindestens zwei, sonst kommen welche dazu). Die Wiese schläft solange.
+   */
+  openGrill(): void {
+    this.closeInventories();
+    const onMeadow = [...this.kids].filter((k) => k.visible && k.mode !== 'leaving');
+    const kids = onMeadow.map((k) => ({ def: k.def, outfit: k.outfit }));
+    for (const def of CHARACTERS) {
+      if (kids.length >= 2) break;
+      if (!kids.some((k) => k.def.id === def.id)) kids.push({ def, outfit: this.outfits.get(def.id) ?? {} });
+    }
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: GrillData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Grill');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Grill', data);
       this.scene.sleep();
     });
   }

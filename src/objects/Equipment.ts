@@ -504,13 +504,16 @@ export class DressBox extends Equipment implements Seat {
 
   constructor(scene: Phaser.Scene, def: EquipmentDef) {
     super(scene, def);
-    this.image = scene.add.image(def.x, def.y, 'dressbox').setOrigin(BOX.footX / BOX.width, BOX.footY / BOX.height).setDepth(def.y);
+    const origin = [BOX.footX / BOX.width, BOX.footY / BOX.height] as const;
+    // Das Innere liegt hinter der Vorderseite; dazwischen geht das Kind durch die Tür hinein
+    scene.add.image(def.x, def.y, 'dressbox-inside').setOrigin(...origin).setDepth(def.y - 2);
+    this.image = scene.add.image(def.x, def.y, 'dressbox').setOrigin(...origin).setDepth(def.y);
     const { front: F } = BOX;
     // Touch-Fläche: die Vorderseite mit den Klappen. Kinder davor haben Vorrang (Deko, touchRank).
     const area = new Phaser.Geom.Rectangle(BOX.footX + F.left, BOX.footY + F.top - 70, F.right - F.left + BOX.depth.x, -F.top + 70);
     this.image.setInteractive({ hitArea: area, hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
     this.image.setData('scenery', true);
-    this.image.setData('onTap', () => this.wobble());
+    this.image.setData('onTap', () => this.wobble(true));
   }
 
   /** Mitte der Tür in der Welt (Fußpunkt). */
@@ -518,11 +521,12 @@ export class DressBox extends Equipment implements Seat {
     return { x: this.def.x + BOX.door.x, y: this.def.y };
   }
 
-  private wobble(): void {
+  /** Klappen und Kiste wackeln (beim Antippen mit hohlem Klopfen, sonst mit Plopp). */
+  private wobble(knock = true): void {
     const img = this.image;
     if (this.scene.tweens.isTweening(img)) return;
     this.scene.tweens.add({ targets: img, scaleY: { from: 1, to: 1.04 }, duration: 110, yoyo: true, repeat: 1, ease: 'Sine.easeInOut', onComplete: () => img.setScale(1) });
-    this.scene.events.emit('sound', { kind: 'drum', x: this.def.x });
+    this.scene.events.emit('sound', { kind: knock ? 'drum' : 'pop', x: this.def.x });
   }
 
   override accepts(_kid: Kid, x: number, y: number): boolean {
@@ -533,49 +537,96 @@ export class DressBox extends Equipment implements Seat {
     return dx > F.left - 30 && dx < F.right + BOX.depth.x && dy > F.top - 100 && dy < 90;
   }
 
-  /** Kind geht zur Tür hinein, dann öffnet sich das Ankleide-Spiel. */
+  /**
+   * Kind geht in die Kiste: läuft zur Tür, freut sich kurz, duckt sich und verschwindet im
+   * dunklen Inneren (kleiner, dunkler, nur durch die Türöffnung zu sehen). Die Kiste wackelt,
+   * dann öffnet sich das Ankleide-Spiel.
+   */
   override use(kid: Kid): void {
     this.guest = kid;
     kid.mode = 'hiding';
     kid.seatedOn = this;
     const door = this.doorPoint;
-    kid.exitPoint = { x: door.x, y: door.y + 60 };
+    kid.exitPoint = { x: door.x, y: door.y + 70 };
+    const front = { x: door.x, y: door.y + 28 };
+    const walk = Phaser.Math.Clamp(Phaser.Math.Distance.Between(kid.x, kid.y, front.x, front.y) * 2.2, 250, 900);
     kid.setDepth(this.def.y + 1).setActivity('walk');
     this.scene.tweens.chain({
       targets: kid,
       tweens: [
-        { x: door.x, y: door.y + 20, duration: 300, ease: 'Sine.easeOut' },
-        // hinein: kleiner werden und in der Tür verschwinden (hinter der Vorderwand)
+        // hinlaufen (die Beine laufen mit dem Weg)
+        { x: front.x, y: front.y, duration: walk, ease: 'Sine.easeInOut' },
+        // kurz aufgeregt hüpfen
         {
-          y: door.y - 10,
-          scale: 0.85,
-          alpha: 0,
-          duration: 360,
-          ease: 'Sine.easeIn',
-          onStart: () => kid.setDepth(this.def.y - 1),
+          y: front.y - 18,
+          duration: 150,
+          yoyo: true,
+          ease: 'Quad.easeOut',
+          onStart: () => kid.setActivity('idle').giggle(),
         },
+        // ducken und hineingehen: hinter die Vorderseite, kleiner, ins Dunkle
+        {
+          y: door.y - 16,
+          scale: 0.7,
+          duration: 700,
+          ease: 'Sine.easeIn',
+          onStart: () => {
+            kid.setDepth(this.def.y - 1).setActivity('walk');
+            this.fadeTint(kid, 0, 1, 700);
+          },
+        },
+        { alpha: 0, duration: 220 },
       ],
       onComplete: () => {
-        kid.setVisible(false).setAlpha(1).setScale(1);
-        (this.scene as PlaygroundScene).openDressUp(kid, () => this.comeOut(kid));
+        kid.setVisible(false).setAlpha(1).setScale(1).clearTint();
+        this.wobble(false);
+        this.scene.time.delayedCall(260, () => (this.scene as PlaygroundScene).openDressUp(kid, () => this.comeOut(kid)));
       },
     });
   }
 
-  /** Nach dem Ankleiden: Das Kind kommt verkleidet aus der Tür und freut sich. */
+  /** Färbt das Kind weich von hell (0) nach dunkel (1) oder umgekehrt – wie im Schatten der Kiste. */
+  private fadeTint(kid: Kid, from: number, to: number, duration: number): void {
+    const light = Phaser.Display.Color.ValueToColor(0xffffff);
+    const dark = Phaser.Display.Color.ValueToColor(0x4a3a2e);
+    this.scene.tweens.addCounter({
+      from,
+      to,
+      duration,
+      onUpdate: (tw) => {
+        const c = Phaser.Display.Color.Interpolate.ColorWithColor(light, dark, 100, (tw.getValue() ?? 0) * 100);
+        kid.setTint(Phaser.Display.Color.GetColor(c.r, c.g, c.b));
+      },
+      onComplete: () => {
+        if (to === 0) kid.clearTint();
+      },
+    });
+  }
+
+  /** Nach dem Ankleiden: Das Kind kommt aus dem Dunkeln durch die Tür, verkleidet, und jubelt. */
   private comeOut(kid: Kid): void {
     if (this.guest !== kid || !kid.active) return;
     const door = this.doorPoint;
-    kid.setPosition(door.x, door.y - 10).setAlpha(0).setVisible(true).setDepth(this.def.y - 1).setActivity('walk');
+    kid.setPosition(door.x, door.y - 16).setScale(0.7).setAlpha(0).setVisible(true).setDepth(this.def.y - 1).setActivity('walk');
+    this.fadeTint(kid, 1, 1, 1);
+    this.wobble(false);
     this.scene.tweens.chain({
       targets: kid,
       tweens: [
-        { alpha: 1, y: door.y + 20, duration: 300, ease: 'Sine.easeOut', onStart: () => kid.setDepth(this.def.y + 1) },
-        { y: door.y + 70, duration: 300, ease: 'Sine.easeOut' },
+        { alpha: 1, duration: 200 },
+        {
+          y: door.y + 28,
+          scale: 1,
+          duration: 650,
+          ease: 'Sine.easeOut',
+          onStart: () => this.fadeTint(kid, 1, 0, 650),
+          onComplete: () => kid.setDepth(this.def.y + 1),
+        },
+        { y: door.y + 80, duration: 350, ease: 'Sine.easeOut' },
       ],
       onComplete: () => {
         this.unseat(kid);
-        kid.setDepth(kid.y);
+        kid.clearTint().setDepth(kid.y);
         kid.cheer();
       },
     });

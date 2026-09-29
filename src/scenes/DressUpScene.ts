@@ -4,7 +4,8 @@ import { COSTUMES, costumeKey, SLOTS, type CostumeId, type Outfit, type Slot } f
 import { KID_FRAME } from '../data/poses';
 import { Kid } from '../objects/Kid';
 import { COSTUME_ART, layerLayout } from './placeholders/costumes';
-import { ROOM } from './placeholders/dressup';
+import { ROOM, roomBulbs } from './placeholders/dressup';
+import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 
 /** Was die Wiese dem Ankleide-Spiel mitgibt. */
 export interface DressUpData {
@@ -24,13 +25,19 @@ interface Item {
   home: { x: number; y: number };
 }
 
+// Gedimmtes Licht: Einfärbung (Multiplizieren) und warme Lichtinseln darüber
+const DIM = 0xb9a08c;
+const WARM = 0xffd9a0;
+const DEPTH_DIM = 8000;
+const DEPTH_GLOW = 8100;
+
 // Wie groß ein Teil am Kleiderständer höchstens ist (px).
 const ITEM_W = 86;
 const ITEM_H = 150;
 const DRAG_THRESHOLD = 12;
 
 /**
- * Ankleide-Spiel in der Pappkiste (#70): Das Kind steht vor dem großen Spiegel, rechts hängen am
+ * Ankleide-Spiel in der Pappkiste (#70): Das Kind steht vor der Kuschelecke, rechts hängen am
  * Kleiderständer 10 Verkleidungen in 4 Reihen (Kopf, Oberteil, Hose/Rock, Schuhe).
  * Teil antippen oder aufs Kind ziehen = anziehen (nochmal antippen = ausziehen), am Kind ein Teil
  * antippen = ausziehen. Tür links antippen = zurück auf die Wiese. Kein Text.
@@ -39,7 +46,6 @@ export class DressUpScene extends Phaser.Scene {
   private params!: DressUpData;
   private outfit: Outfit = {};
   private kid!: Kid;
-  private mirrorKid!: Kid;
   private items: Item[] = [];
   private leaving = false;
 
@@ -52,7 +58,7 @@ export class DressUpScene extends Phaser.Scene {
     this.outfit = { ...data.outfit };
     this.items = [];
     this.leaving = false;
-    const { mirror: M, kid: K, door: D } = ROOM;
+    const { kid: K, door: D, lamp: L } = ROOM;
 
     // Töne spielt die Wiese (dort lebt der AudioContext)
     const playground = this.scene.get('Playground');
@@ -60,24 +66,11 @@ export class DressUpScene extends Phaser.Scene {
 
     this.add.image(0, 0, 'dressup-room').setOrigin(0);
 
-    // Spiegelbild: das Kind noch einmal, gespiegelt, etwas bläulich, nur im Glas zu sehen
-    this.mirrorKid = new Kid(this, data.def, M.x + M.w / 2, M.y + M.h - 24).setScale(1.35).setFlipX(true).setTint(0xdcecff);
-    this.mirrorKid.disableInteractive();
-    const glass = this.make.graphics({}, false);
-    glass.fillStyle(0xffffff);
-    glass.fillRoundedRect(M.x, M.y, M.w, M.h, 44);
-    this.mirrorKid.setMask(glass.createGeometryMask());
-    const shine = this.add.graphics().setDepth(this.mirrorKid.depth + 1);
-    shine.fillStyle(0xffffff, 0.35);
-    shine.fillPoints([new Phaser.Math.Vector2(M.x + 40, M.y + 120), new Phaser.Math.Vector2(M.x + 150, M.y + 30), new Phaser.Math.Vector2(M.x + 190, M.y + 30), new Phaser.Math.Vector2(M.x + 40, M.y + 180)], true);
-    shine.fillPoints([new Phaser.Math.Vector2(M.x + 40, M.y + 240), new Phaser.Math.Vector2(M.x + 260, M.y + 40), new Phaser.Math.Vector2(M.x + 280, M.y + 40), new Phaser.Math.Vector2(M.x + 40, M.y + 262)], true);
-
-    // Das Kind groß vor dem Spiegel
+    // Das Kind groß vor der Kuschelecke
     this.kid = new Kid(this, data.def, K.x, K.y).setScale(K.scale).setDepth(K.y);
     this.input.setDraggable(this.kid, false);
     this.kid.setData('onTap', (p: Phaser.Input.Pointer) => this.tapKid(p));
     this.kid.setOutfit(this.outfit);
-    this.mirrorKid.setOutfit(this.outfit);
 
     this.buildRack();
 
@@ -85,9 +78,20 @@ export class DressUpScene extends Phaser.Scene {
     const door = this.add.zone(D.x - 20, D.y - 30, D.w + 40, D.h + 60).setOrigin(0);
     door.setInteractive({ useHandCursor: true });
     door.setData('onTap', () => this.leave());
-    // Die Tür lädt zum Hinausgehen ein: das Sonnenlicht draußen pulsiert leicht
-    const light = this.add.rectangle(D.x, D.y + 60, D.w, D.h - 60, 0xffffff, 0).setOrigin(0).setBlendMode(Phaser.BlendModes.ADD);
-    this.tweens.add({ targets: light, fillAlpha: 0.18, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    // Gedimmtes, warmes Licht: alles wird etwas abgedunkelt, darüber leuchten Lampe und Lichterkette
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, DIM).setOrigin(0).setBlendMode(Phaser.BlendModes.MULTIPLY).setDepth(DEPTH_DIM);
+    const glow = (x: number, y: number, sx: number, sy: number, alpha: number) =>
+      this.add.image(x, y, 'glow-soft').setScale(sx, sy).setTint(WARM).setAlpha(alpha).setBlendMode(Phaser.BlendModes.ADD).setDepth(DEPTH_GLOW);
+    glow(L.x, L.y + 20, 5, 4, 0.5);
+    glow(L.x - 40, 1000, 9, 2.2, 0.35);
+    glow(ROOM.canopy.x, 560, 5, 6, 0.25);
+    const bulbs = roomBulbs().map((p, i) =>
+      this.add.image(p.x, p.y, 'bulb').setTint(i % 3 ? WARM : 0xffc0d8).setBlendMode(Phaser.BlendModes.ADD).setDepth(DEPTH_GLOW),
+    );
+    bulbs.forEach((b, i) => this.tweens.add({ targets: b, alpha: { from: 1, to: 0.55 }, duration: 900 + (i % 5) * 170, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }));
+    // Die Tür lädt zum Hinausgehen ein: das Tageslicht draußen bleibt hell und pulsiert leicht
+    const light = this.add.rectangle(D.x, D.y, D.w, D.h, 0xfff3d0, 0.25).setOrigin(0).setBlendMode(Phaser.BlendModes.ADD).setDepth(DEPTH_GLOW);
+    this.tweens.add({ targets: light, fillAlpha: 0.45, duration: 1200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     this.setupInput();
     this.cameras.main.fadeIn(350, 0, 0, 0);
@@ -167,7 +171,6 @@ export class DressUpScene extends Phaser.Scene {
     this.changed();
     this.sparkle(slot);
     this.kid.cheer();
-    this.mirrorKid.cheer();
     this.events.emit('sound', { kind: 'pop' });
   }
 
@@ -180,13 +183,11 @@ export class DressUpScene extends Phaser.Scene {
     this.changed();
     this.sparkle(slot);
     this.kid.giggle();
-    this.mirrorKid.giggle();
     this.events.emit('sound', { kind: 'bubble' });
   }
 
   private changed(): void {
     this.kid.setOutfit(this.outfit);
-    this.mirrorKid.setOutfit(this.outfit);
     this.refreshGlow();
     this.params.onChange({ ...this.outfit });
   }
@@ -212,7 +213,7 @@ export class DressUpScene extends Phaser.Scene {
     const y = this.kid.y - h * at[slot];
     for (let i = 0; i < 10; i++) {
       const a = (i / 10) * Math.PI * 2;
-      const s = this.add.image(this.kid.x, y, 'star').setDepth(this.kid.depth + 1).setScale(0.8);
+      const s = this.add.image(this.kid.x, y, 'star').setDepth(DEPTH_GLOW + 1).setScale(0.8);
       this.tweens.add({
         targets: s,
         x: this.kid.x + Math.cos(a) * 150,

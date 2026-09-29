@@ -4,7 +4,7 @@ import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../d
 import { CHARACTERS } from '../data/characters';
 import { COSTUMES, costumeKey, SLOTS } from '../data/costumes';
 import { COSTUME_ART, layerLayout } from './placeholders/costumes';
-import { BOX, drawDressBox, drawDressRoom, drawHanger, drawItemGlow } from './placeholders/dressup';
+import { BOX, boxDoorOutline, drawDressBox, drawDressBoxInside, drawDressRoom, drawHanger, drawItemGlow } from './placeholders/dressup';
 import { TOYS } from '../data/toys';
 import { drawKidFace, drawKidPart, drawPortrait, partSize, PORTRAIT_SIZE } from './placeholders/kids';
 import { BACK_TREE_SIZE, BIG_TREE, BUSH_SIZE, drawBackTree, drawBigTree, drawBush, drawFence, drawFenceSnow, drawMeadow, drawPergola, drawPergolaSnow, drawSmoke, drawWindowGlow, FENCE_TILE_HEIGHT, FENCE_TILE_TOP, HOUSE_SPECS, houseKey, MEADOW_TILE_HEIGHT, pergolaArea, TILE_COUNT, WINDOW_GLOW_SIZE } from './placeholders/backdrop';
@@ -421,7 +421,24 @@ export class BootScene extends Phaser.Scene {
 
   /** Ankleidekiste (#70): Kiste, Innenraum, Bügel und alle Verkleidungs-Teile. */
   private makeDressUp(): void {
-    this.makeTexture('dressbox', BOX.width, BOX.height, drawDressBox);
+    this.makeTexture('dressbox-inside', BOX.width, BOX.height, drawDressBoxInside);
+    // Vorderseite mit ausgestanzter Tür: dahinter sieht man das Innere (und das Kind, das hineingeht)
+    if (!this.textures.exists('dressbox')) {
+      this.makeTexture('dressbox-solid', BOX.width, BOX.height, drawDressBox);
+      const canvas = this.textures.createCanvas('dressbox', BOX.width, BOX.height);
+      if (canvas) {
+        const ctx = canvas.context;
+        ctx.drawImage(this.textures.get('dressbox-solid').getSourceImage() as CanvasImageSource, 0, 0);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        boxDoorOutline().forEach((p, i) => (i ? ctx.lineTo(p.x + BOX.footX, p.y + BOX.footY) : ctx.moveTo(p.x + BOX.footX, p.y + BOX.footY)));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        canvas.refresh();
+      }
+      this.textures.remove('dressbox-solid');
+    }
     this.makeTexture('dressup-room', GAME_WIDTH, GAME_HEIGHT, drawDressRoom);
     this.makeTexture('dressup-hanger', 80, 46, drawHanger);
     this.makeTexture('dressup-glow', 120, 120, drawItemGlow);

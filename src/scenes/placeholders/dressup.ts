@@ -59,16 +59,10 @@ export function drawDressBox(g: G): void {
   // Klebeband
   g.fillStyle(TAPE, 0.9);
   g.fillRect(-18, F.top - 70, 36, 110);
-  // Tür (Rundbogen, innen gemütliches Licht und ein Kissen)
+  // Tür (Rundbogen): Rand aus dunkler Pappe; die Öffnung stanzt BootScene aus (dahinter das Innere)
   const dl = D.x - D.width / 2;
   g.fillStyle(0x6b3f2a);
   g.fillRoundedRect(dl - 6, -D.height - 6, D.width + 12, D.height + 6, { tl: D.width / 2 + 6, tr: D.width / 2 + 6, bl: 0, br: 0 });
-  g.fillStyle(0xffd9a0);
-  g.fillRoundedRect(dl, -D.height, D.width, D.height, { tl: D.width / 2, tr: D.width / 2, bl: 0, br: 0 });
-  g.fillStyle(0xffc2d9);
-  g.fillEllipse(D.x + 20, -24, 90, 40);
-  g.fillStyle(0x9bf6ff);
-  g.fillEllipse(D.x - 34, -18, 60, 30);
   // Kritzeleien mit Wachsmalstiften: Sonne, Herz, Stern, Blume und ein T-Shirt
   g.lineStyle(5, 0xffc300);
   g.strokeCircle(80, -230, 22);
@@ -94,6 +88,56 @@ export function drawDressBox(g: G): void {
   g.restore();
 }
 
+/** Umriss der Türöffnung (relativ zum Fußpunkt), zum Ausstanzen. */
+export function boxDoorOutline(): Phaser.Math.Vector2[] {
+  const { door: D } = BOX;
+  const r = D.width / 2;
+  const pts = [v(D.x - r, 0), v(D.x - r, -D.height + r)];
+  for (let i = 0; i <= 16; i++) {
+    const a = Math.PI + (i / 16) * Math.PI;
+    pts.push(v(D.x + Math.cos(a) * r, -D.height + r + Math.sin(a) * r));
+  }
+  pts.push(v(D.x + r, 0));
+  return pts;
+}
+
+/**
+ * Das Innere der Kiste (liegt hinter der Vorderseite): dunkel und gemütlich, oben durch die offene
+ * Kiste und unten durch die Tür zu sehen – hier läuft das Kind hinein.
+ */
+export function drawDressBoxInside(g: G): void {
+  const { front: F, door: D, depth: P } = BOX;
+  g.save();
+  g.translateCanvas(BOX.footX, BOX.footY);
+  // Offene Oberseite: Blick auf die Innenwände
+  g.fillStyle(0x5a3d26);
+  g.fillPoints([v(F.left, F.top), v(F.right, F.top), v(F.right + P.x, F.top + P.y), v(F.left + P.x, F.top + P.y)], true);
+  g.fillStyle(0x7a5536);
+  g.fillPoints([v(F.left + P.x, F.top + P.y), v(F.right + P.x, F.top + P.y), v(F.right + P.x - 10, F.top + P.y + 30), v(F.left + P.x + 10, F.top + P.y + 30)], true);
+  // Hinter der Tür: dunkler Raum mit warmem Lichtschein, Kissen und Lichterkette
+  const r = D.width / 2;
+  g.fillStyle(0x3a2616);
+  g.fillRect(D.x - r - 10, -D.height - 10, D.width + 20, D.height + 10);
+  g.fillStyle(0xffc98a, 0.18);
+  g.fillEllipse(D.x + 10, -70, 170, 150);
+  g.fillStyle(0xffc98a, 0.18);
+  g.fillEllipse(D.x + 10, -60, 110, 90);
+  g.fillStyle(0xd87fa0);
+  g.fillEllipse(D.x + 26, -18, 96, 36);
+  g.fillStyle(0x6fb7c9);
+  g.fillEllipse(D.x - 36, -14, 66, 28);
+  g.lineStyle(2, 0x5a4030);
+  g.beginPath();
+  g.arc(D.x, -D.height + 20, r - 10, Math.PI * 0.15, Math.PI * 0.85, false);
+  g.strokePath();
+  [0xffe08a, 0xffb86b, 0xfff1c1, 0xffd27a, 0xffe08a].forEach((c, i) => {
+    const a = Math.PI * (0.2 + i * 0.15);
+    g.fillStyle(c);
+    g.fillCircle(D.x + Math.cos(a) * (r - 10), -D.height + 20 + Math.sin(a) * (r - 10) + 6, 4);
+  });
+  g.restore();
+}
+
 function starPoints(cx: number, cy: number, r: number, inner: number): Phaser.Math.Vector2[] {
   const pts: Phaser.Math.Vector2[] = [];
   for (let i = 0; i < 10; i++) {
@@ -110,19 +154,37 @@ export const ROOM = {
   floorY: 780,
   /** Ausgang: ausgeschnittene Tür in der linken Wand, draußen scheint die Sonne. */
   door: { x: 30, y: 360, w: 190, h: 460 },
-  /** Großer Spiegel im Hintergrund (Glasfläche). */
-  mirror: { x: 330, y: 90, w: 420, h: 640 },
+  /** Kuschelecke mit Stoffhimmel hinter dem Kind: Aufhängung oben, Breite unten. */
+  canopy: { x: 560, top: 70, bottom: 800, half: 250 },
   /** Wo das Kind steht (Fußpunkt) und wie groß es gezeigt wird. */
-  kid: { x: 790, y: 1010, scale: 1.9 },
+  kid: { x: 580, y: 1010, scale: 1.9 },
+  /** Stehlampe neben der Kuschelecke (Mitte des Schirms). */
+  lamp: { x: 860, y: 420 },
   /** Kleiderständer rechts: 4 Reihen (Kopf, Oberteil, Hose/Rock, Schuhe) mit je 10 Plätzen. */
   rack: { left: 955, right: 1885, rows: [200, 430, 660, 930], cell: 93 },
 };
 
-/** Innenraum der Kiste: Pappwände, Wimpelkette, Lampe, Bilder, Spiegel, Kissen, Kleiderständer, Tür. */
+/** Warme Lämpchen der Lichterkette im Raum (entlang des Stoffhimmels und quer über die Wand). */
+export function roomBulbs(): Phaser.Math.Vector2[] {
+  const { canopy: C } = ROOM;
+  const pts: Phaser.Math.Vector2[] = [];
+  // an beiden Rändern des Stoffhimmels hinunter
+  for (let i = 1; i <= 9; i++) {
+    const t = i / 10;
+    const sag = Math.sin(t * Math.PI) * 30;
+    pts.push(v(C.x - C.half * t - sag, C.top + (C.bottom - C.top) * t));
+    pts.push(v(C.x + C.half * t + sag, C.top + (C.bottom - C.top) * t));
+  }
+  // quer über die Wand über dem Kleiderständer
+  for (let x = 900; x <= 1900; x += 62) pts.push(v(x, 300 + Math.sin(((x - 900) / 1000) * Math.PI * 4) * 16 + 8));
+  return pts;
+}
+
+/** Innenraum der Kiste: Pappwände, Wimpelkette, Bilder, Kuschelecke, Stehlampe, Kissen, Kleiderständer, Tür. */
 export function drawDressRoom(g: G): void {
   const W = GAME_WIDTH;
   const H = GAME_HEIGHT;
-  const { floorY, door: D, mirror: M, rack: R } = ROOM;
+  const { floorY, door: D, canopy: C, lamp: L, rack: R } = ROOM;
   // Wände aus Pappe mit warmem Licht
   g.fillStyle(0xd9b27c);
   g.fillRect(0, 0, W, floorY);
@@ -138,7 +200,7 @@ export function drawDressRoom(g: G): void {
   const rug = [0xff8fab, 0xffc8dd, 0xbde0fe, 0xffe066, 0xcdb4db];
   rug.forEach((c, i) => {
     g.fillStyle(c);
-    g.fillEllipse(640, 985, 760 - i * 120, 180 - i * 30);
+    g.fillEllipse(560, 985, 760 - i * 120, 180 - i * 30);
   });
   // Wimpelkette oben
   const flags = [0xe63946, 0xffc300, 0x06d6a0, 0x4cc9f0, 0x9b5de5, 0xff70a6];
@@ -152,15 +214,6 @@ export function drawDressRoom(g: G): void {
     g.fillStyle(flags[(i / 3) % flags.length]);
     g.fillTriangle(p.x, p.y, q.x, q.y, (p.x + q.x) / 2, (p.y + q.y) / 2 + 46);
   }
-  // Hängelampe mit warmem Schein
-  g.fillStyle(0xffe8b0, 0.35);
-  g.fillCircle(820, 170, 110);
-  g.lineStyle(3, 0x5a4636);
-  g.lineBetween(820, 0, 820, 120);
-  g.fillStyle(0xff8fab);
-  g.fillPoints([v(780, 170), v(860, 170), v(840, 118), v(800, 118)], true);
-  g.fillStyle(0xfff3b0);
-  g.fillCircle(820, 178, 12);
   // Gemalte Bilder an der Wand (Regenbogen, Haus, Katze)
   const frame = (x: number, y: number, w: number, h: number, draw: () => void) => {
     g.fillStyle(0xffffff);
@@ -209,16 +262,29 @@ export function drawDressRoom(g: G): void {
   g.fillStyle(0x2d6a4f);
   g.fillCircle(D.x + 50, D.y + D.h * 0.62, 30);
 
-  // Spiegel auf Füßen mit goldenem Rahmen (die Glasfläche zeichnet die Szene darüber)
-  g.fillStyle(0xc9a227);
-  g.fillRoundedRect(M.x - 26, M.y - 26, M.w + 52, M.h + 52, 60);
-  g.fillStyle(0xe9c46a);
-  g.fillRoundedRect(M.x - 14, M.y - 14, M.w + 28, M.h + 28, 52);
-  g.fillStyle(0xc9a227);
-  g.fillRect(M.x + 40, M.y + M.h + 20, 20, 60);
-  g.fillRect(M.x + M.w - 60, M.y + M.h + 20, 20, 60);
-  g.fillStyle(0xdff3ff);
-  g.fillRoundedRect(M.x, M.y, M.w, M.h, 44);
+  // Kuschelecke: Stoffhimmel von einem Ring an der Decke, innen dunkler und weich
+  g.fillStyle(0xf3d9e4);
+  g.fillPoints([v(C.x - 20, C.top), v(C.x + 20, C.top), v(C.x + C.half + 40, C.bottom), v(C.x - C.half - 40, C.bottom)], true);
+  g.fillStyle(0x8a5a6e);
+  g.fillPoints([v(C.x, C.top + 60), v(C.x + C.half - 60, C.bottom), v(C.x - C.half + 60, C.bottom)], true);
+  g.fillStyle(0xe8b8cc);
+  for (let i = -3; i <= 3; i++) g.fillPoints([v(C.x + i * 6, C.top), v(C.x + i * 6 + 4, C.top), v(C.x + i * ((C.half + 40) / 3.5) + 10, C.bottom), v(C.x + i * ((C.half + 40) / 3.5) - 10, C.bottom)], true);
+  g.fillStyle(0xf3d9e4);
+  g.fillPoints([v(C.x, C.top + 60), v(C.x + 40, C.top + 60), v(C.x + C.half - 40, C.bottom), v(C.x + C.half - 90, C.bottom)], true);
+  g.fillPoints([v(C.x, C.top + 60), v(C.x - 40, C.top + 60), v(C.x - C.half + 40, C.bottom), v(C.x - C.half + 90, C.bottom)], true);
+  g.fillStyle(0xd4a017);
+  g.fillEllipse(C.x, C.top, 70, 18);
+  // Sterne innen an der Decke des Himmels
+  g.fillStyle(0xfff1c1, 0.8);
+  for (const [sx, sy] of [[-40, 260], [30, 220], [60, 340], [-70, 400], [10, 470], [80, 520], [-20, 560]]) g.fillCircle(C.x + sx, sy, 4);
+  // Stehlampe mit Stoffschirm
+  g.fillStyle(0x5a4636);
+  g.fillRect(L.x - 5, L.y + 30, 10, floorY + 120 - L.y - 30);
+  g.fillEllipse(L.x, floorY + 122, 90, 20);
+  g.fillStyle(0xffb86b);
+  g.fillPoints([v(L.x - 70, L.y + 40), v(L.x + 70, L.y + 40), v(L.x + 44, L.y - 40), v(L.x - 44, L.y - 40)], true);
+  g.fillStyle(0xffd9a0);
+  g.fillEllipse(L.x, L.y + 42, 136, 14);
 
   // Viele Kissen auf dem Boden
   const cushion = (x: number, y: number, w: number, h: number, c: number, dot: number) => {

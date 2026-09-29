@@ -5,14 +5,17 @@ import {
   FOODS,
   quality,
   randomOrder,
+  SAUCE_MIN,
   signature,
   stageOf,
+  stageProgress,
+  STAGES,
   type FoodId,
   type OrderItem,
   type Sauce,
 } from '../data/grill';
 import { Kid } from '../objects/Kid';
-import { foodSize, GRILL } from './placeholders/grill';
+import { BOTTLE_SIZE, drawOrderCard, drawSauce, foodSize, GRILL, sauceZigzag } from './placeholders/grill';
 
 /** Was die Wiese dem Grill-Spiel mitgibt. */
 export interface GrillData {
@@ -21,11 +24,10 @@ export interface GrillData {
   onDone(): void;
 }
 
-/** Ein Stück Grillgut: Garstufe je Seite (Vielfache der Garzeit), welche Seite oben liegt. */
+/** Ein Stück Grillgut: Garstufe (Vielfache der Garzeit). Gewendet wird nicht. */
 interface Food {
   id: FoodId;
-  sides: [number, number];
-  up: 0 | 1;
+  level: number;
   /** Brötchen aufgeschnitten. */
   cut: boolean;
 }
@@ -35,17 +37,25 @@ interface Piece {
   food: Food;
   view: Phaser.GameObjects.Container;
   img: Phaser.GameObjects.Image;
+  /** Nächste Garstufe darüber, blendet langsam ein (man sieht es braun werden). */
+  next: Phaser.GameObjects.Image;
   smoke: Phaser.GameObjects.Particles.ParticleEmitter;
   stage: number;
 }
 
-/** Ein Gericht auf dem Teller: Brötchen und/oder Füllung (bzw. Baguette), Soßen. */
+type Point = { x: number; y: number };
+/** Soßen-Kleckse in Koordinaten des Gerichts (Mitte = 0, 0). */
+type SaucePoints = Record<Sauce, Point[]>;
+
+/** Ein Gericht auf dem Teller: frei hingelegt (Versatz zur Tellermitte), Brötchen und/oder Füllung, Soßen. */
 interface Dish {
-  slot: number;
+  dx: number;
+  dy: number;
   bun?: Food;
   filling?: Food;
-  sauces: Sauce[];
+  sauce: SaucePoints;
   view: Phaser.GameObjects.Container;
+  sauceGfx: Phaser.GameObjects.Graphics;
 }
 
 interface QueueKid {
@@ -58,7 +68,8 @@ type Grab =
   | { kind: 'piece'; piece: Piece; fromGrill: boolean }
   | { kind: 'dish'; dish: Dish }
   | { kind: 'plate' }
-  | { kind: 'bottle'; sauce: Sauce; img: Phaser.GameObjects.Image };
+  | { kind: 'bottle'; sauce: Sauce; img: Phaser.GameObjects.Image }
+  | { kind: 'cloth' };
 
 interface Touch {
   pointer: Phaser.Input.Pointer;
@@ -68,15 +79,25 @@ interface Touch {
 }
 
 const DRAG_THRESHOLD = 12;
-const DEPTH = { kids: 100, grill: 300, embers: 305, pieces: 400, plate: 500, dishes: 510, bottles: 520, drag: 900, card: 950 };
+const DEPTH = { kids: 100, grill: 300, embers: 305, pieces: 400, plate: 500, dishes: 510, bottles: 520, cloth: 530, drag: 900, card: 950 };
 const SAUCE_COLOR: Record<Sauce, number> = { ketchup: 0xd62828, mustard: 0xf2c230 };
 const SIZZLE_EVERY = 1400;
+/** Höchstens so viele Gerichte auf dem Teller. */
+const MAX_DISHES = 5;
+/** Flasche kopfüber: alle so viele ms ein Klecks, höchstens so viele je Soße und Gericht. */
+const SQUIRT_EVERY = 30;
+const SAUCE_MAX = 260;
+/** Wie weit unter der Tülle die Soße auftrifft. */
+const SQUIRT_REACH = 34;
+/** Das Tuch wischt in diesem Umkreis ab. */
+const WIPE_RADIUS = 58;
 
 /**
  * Grill-Spiel hinter Felix' grünem Gartentor (#66). Rechts liegt der Vorrat, in der Mitte der
- * Rost (Antippen = wenden, jede Seite gart für sich), links wird auf dem Teller angerichtet
- * (Brötchen antippen = aufschneiden, Würstchen/Käse ins Brötchen ziehen, Flasche aufs Gericht
- * ziehen = Soße). Hinter dem Grill bestellen die Kinder nacheinander (Karte oben, ohne Text);
+ * Rost (gart von allein, ohne Wenden: man sieht, wie es langsam braun wird), links wird auf dem
+ * Teller frei angerichtet (Brötchen antippen = aufschneiden, Würstchen/Käse ins Brötchen ziehen).
+ * Soßenflasche hochheben = sie dreht sich um, über dem Essen kommt Soße heraus; das Tuch wischt
+ * sie wieder ab. Hinter dem Grill bestellen die Kinder nacheinander (Karte oben, ohne Text);
  * Teller zum Kind ziehen = servieren. Kein Gewinnen, kein Verlieren; das Holzschild am Baum führt zurück.
  */
 export class GrillScene extends Phaser.Scene {
@@ -91,6 +112,12 @@ export class GrillScene extends Phaser.Scene {
   private busy = false;
   private leaving = false;
   private nextSizzle = 0;
+  private cloth!: Phaser.GameObjects.Image;
+  /** Soßenstrahl aus der Flasche (nur solange etwas herauskommt). */
+  private stream!: Phaser.GameObjects.Graphics;
+  private squirtTimer = 0;
+  private nextSquirtSound = 0;
+  private nextWipeSound = 0;
 
   constructor() {
     super('Grill');
@@ -123,20 +150,23 @@ export class GrillScene extends Phaser.Scene {
     for (const id of Object.keys(GRILL.sources) as FoodId[]) {
       const p = GRILL.sources[id];
       for (let i = 0; i < 3; i++) {
-        this.add.image(p.x - 50 + i * 50, p.y + (i % 2) * 8 - 6, this.foodKey({ id, sides: [0, 0], up: 0, cut: false })).setScale(0.62).setDepth(DEPTH.grill + 1).setAngle(-8 + i * 8);
+        this.add.image(p.x - 50 + i * 50, p.y + (i % 2) * 8 - 6, this.foodKey({ id, level: 0, cut: false })).setScale(0.5).setDepth(DEPTH.grill + 1).setAngle(-8 + i * 8);
       }
       this.add.zone(p.x, p.y + 10, 240, 120).setInteractive({ useHandCursor: true }).setData('grab', `source:${id}`).setDepth(DEPTH.grill + 2);
     }
 
-    // Teller und Soßenflaschen
+    // Teller, Soßenflaschen (drehen sich um die Mitte) und Wischtuch
     const P = GRILL.plate;
     this.plate = this.add.image(P.x, P.y, 'grill-plate').setDepth(DEPTH.plate);
     this.plate.setInteractive(new Phaser.Geom.Ellipse(P.w / 2, P.h / 2, P.w, P.h), Phaser.Geom.Ellipse.Contains).setData('grab', 'plate');
     for (const sauce of ['ketchup', 'mustard'] as Sauce[]) {
-      const b = GRILL.bottles[sauce];
-      const img = this.add.image(b.x, b.y, `grill-bottle-${sauce}`).setOrigin(0.5, 1).setDepth(DEPTH.bottles);
+      const home = this.bottleHome(sauce);
+      const img = this.add.image(home.x, home.y, `grill-bottle-${sauce}`).setDepth(DEPTH.bottles);
       img.setInteractive({ useHandCursor: true }).setData('grab', `bottle:${sauce}`);
     }
+    this.stream = this.add.graphics().setDepth(DEPTH.drag - 1);
+    this.cloth = this.add.image(GRILL.cloth.x, GRILL.cloth.y, 'grill-cloth').setDepth(DEPTH.cloth);
+    this.cloth.setInteractive({ useHandCursor: true }).setData('grab', 'cloth');
 
     // Die Kinder stellen sich an (das erste kommt nach vorn und bestellt)
     data.kids.forEach(({ def, outfit }, i) => {
@@ -156,6 +186,7 @@ export class GrillScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.cook(delta / 1000);
+    this.squirt(delta);
   }
 
   // --- Kohle und Grillgut ------------------------------------------------------------
@@ -170,15 +201,15 @@ export class GrillScene extends Phaser.Scene {
     }
   }
 
-  private foodKey(food: Food): string {
-    const stage = stageOf(food.sides[food.up]);
+  private foodKey(food: Food, stage = stageOf(food.level)): string {
     return food.id === 'bun' && food.cut ? `food-buncut-${stage}` : `food-${food.id}-${stage}`;
   }
 
   private newPiece(food: Food, x: number, y: number): Piece {
     const img = this.add.image(0, 0, this.foodKey(food));
+    const next = this.add.image(0, 0, this.foodKey(food)).setAlpha(0);
     const { width, height } = foodSize(food.id);
-    const view = this.add.container(x, y, [img]).setDepth(DEPTH.pieces);
+    const view = this.add.container(x, y, [img, next]).setDepth(DEPTH.pieces);
     const w = Math.max(width, 120);
     const h = Math.max(height, 96);
     view.setSize(w, h).setInteractive(new Phaser.Geom.Rectangle(0, 0, w, h), Phaser.Geom.Rectangle.Contains);
@@ -192,8 +223,9 @@ export class GrillScene extends Phaser.Scene {
       emitting: false,
     });
     smoke.setDepth(DEPTH.pieces + 50);
-    const piece: Piece = { food, view, img, smoke, stage: stageOf(food.sides[food.up]) };
+    const piece: Piece = { food, view, img, next, smoke, stage: -1 };
     view.setData('grab', piece);
+    this.showStage(piece);
     return piece;
   }
 
@@ -204,24 +236,22 @@ export class GrillScene extends Phaser.Scene {
     piece.view.destroy();
   }
 
-  /** Auf dem Rost gart die untere Seite; ab kräftig gebräunt qualmt es, verkohlt stark. */
+  /** Auf dem Rost gart das Grillgut; ab kräftig gebräunt qualmt es, verkohlt stark. */
   private cook(dt: number): void {
     const R = GRILL.grate;
     for (const piece of this.pieces) {
       const f = piece.food;
       const onGrill = piece.view.x > R.left - 20 && piece.view.x < R.right + 20 && piece.view.y > R.top - 20 && piece.view.y < R.bottom + 20;
       if (!onGrill) continue;
-      f.sides[1 - f.up] += dt / FOODS[f.id].cook;
-      const stage = stageOf(f.sides[f.up]);
-      if (stage !== piece.stage) {
-        piece.stage = stage;
-        piece.img.setTexture(this.foodKey(f));
-      }
-      const worst = stageOf(Math.max(...f.sides));
+      f.level += dt / FOODS[f.id].cook;
+      const before = piece.stage;
+      const stage = this.showStage(piece);
+      // Gar geworden: kleiner Hüpfer
+      if (before === 1 && stage === 2) this.tweens.add({ targets: piece.img, scale: { from: 1, to: 1.12 }, duration: 140, yoyo: true });
       piece.smoke.setPosition(piece.view.x, piece.view.y - 10);
-      if (worst >= 3) {
-        piece.smoke.frequency = worst >= 4 ? 120 : 380;
-        piece.smoke.setParticleTint(worst >= 4 ? 0x333333 : 0xdddddd);
+      if (stage >= 3) {
+        piece.smoke.frequency = stage >= 4 ? 120 : 380;
+        piece.smoke.setParticleTint(stage >= 4 ? 0x333333 : 0xdddddd);
         if (!piece.smoke.emitting) piece.smoke.start();
       } else if (piece.smoke.emitting) piece.smoke.stop();
     }
@@ -231,24 +261,27 @@ export class GrillScene extends Phaser.Scene {
     }
   }
 
-  /** Wenden: kurz anheben, umdrehen (andere Seite oben). */
-  private flip(piece: Piece): void {
-    if (this.tweens.isTweening(piece.view)) return;
-    const y = piece.view.y;
-    this.events.emit('sound', { kind: 'flip' });
-    this.tweens.add({
-      targets: piece.view,
-      scaleY: 0,
-      y: y - 24,
-      duration: 110,
-      ease: 'Quad.easeOut',
-      onComplete: () => {
-        piece.food.up = piece.food.up === 0 ? 1 : 0;
-        piece.stage = stageOf(piece.food.sides[piece.food.up]);
-        piece.img.setTexture(this.foodKey(piece.food));
-        this.tweens.add({ targets: piece.view, scaleY: 1, y, duration: 130, ease: 'Quad.easeIn' });
-      },
-    });
+  /** Bild zur Garstufe, die nächste Stufe schimmert schon durch. */
+  private showStage(piece: Piece): number {
+    const f = piece.food;
+    const stage = stageOf(f.level);
+    if (stage !== piece.stage) {
+      piece.stage = stage;
+      piece.img.setTexture(this.foodKey(f));
+      if (stage < STAGES - 1) piece.next.setTexture(this.foodKey(f, stage + 1));
+    }
+    piece.next.setAlpha(stage < STAGES - 1 ? stageProgress(f.level) : 0);
+    return stage;
+  }
+
+  /** Antippen auf dem Rost: kurz wackeln (gewendet wird nicht). */
+  private wiggle(piece: Piece): void {
+    if (this.tweens.isTweening(piece.img)) return;
+    this.tweens.add({ targets: [piece.img, piece.next], angle: { from: -6, to: 6 }, duration: 70, yoyo: true, repeat: 1, onComplete: () => {
+      piece.img.setAngle(0);
+      piece.next.setAngle(0);
+    } });
+    this.events.emit('sound', { kind: 'sizzle' });
   }
 
   /** Weggeworfen: kleines Wölkchen. */
@@ -263,49 +296,62 @@ export class GrillScene extends Phaser.Scene {
 
   // --- Teller und Gerichte ------------------------------------------------------------
 
-  private slotPos(slot: number): { x: number; y: number } {
-    return { x: this.plate.x + GRILL.plateSlots[slot], y: this.plate.y - 6 };
-  }
-
-  private freeSlot(): number {
-    const used = new Set(this.dishes.map((d) => d.slot));
-    return GRILL.plateSlots.findIndex((_, i) => !used.has(i));
+  /** Gerichtsmitte auf dem Teller: innerhalb der Tellerform halten. */
+  private clampToPlate(dx: number, dy: number): Point {
+    const P = GRILL.plate;
+    const rx = P.w / 2 - 95;
+    const ry = P.h / 2 - 48;
+    const r = Math.hypot(dx / rx, dy / ry);
+    return r <= 1 ? { x: dx, y: dy } : { x: dx / r, y: dy / r };
   }
 
   /** Baut das Bild eines Gerichts: Brötchen (ggf. aufgeschnitten), Füllung hinein, Soßen drauf. */
-  private drawDish(view: Phaser.GameObjects.Container, bun: Food | undefined, filling: Food | undefined, sauces: Sauce[]): void {
+  private drawDish(view: Phaser.GameObjects.Container, bun: Food | undefined, filling: Food | undefined, sauce: SaucePoints): Phaser.GameObjects.Graphics {
     view.removeAll(true);
     if (bun) view.add(this.add.image(0, 0, this.foodKey(bun)));
     if (filling) {
       const img = this.add.image(0, bun ? -2 : 0, this.foodKey(filling));
       // Im Brötchen etwas kleiner, damit es darin liegt
-      if (bun) img.setScale(Math.min(1, 118 / img.width), 0.85);
+      if (bun) img.setScale(Math.min(1, (foodSize('buncut').width - 40) / img.width), 0.85);
       view.add(img);
     }
-    // Soßen als Zickzack-Linie (Ketchup und Senf versetzt)
-    sauces.forEach((sauce, i) => {
-      const line = this.add.graphics();
-      line.lineStyle(7, SAUCE_COLOR[sauce]);
-      const pts: Phaser.Math.Vector2[] = [];
-      for (let k = 0; k <= 8; k++) pts.push(new Phaser.Math.Vector2(-52 + k * 13, (k % 2 ? -7 : 7) + (i ? 6 : -4)));
-      line.strokePoints(pts);
-      view.add(line);
-    });
+    const gfx = this.add.graphics();
+    this.drawSauces(gfx, sauce);
+    view.add(gfx);
+    return gfx;
   }
 
-  private newDish(slot: number, bun: Food | undefined, filling: Food | undefined): Dish {
-    const pos = this.slotPos(slot);
-    const view = this.add.container(pos.x, pos.y).setDepth(DEPTH.dishes);
-    const dish: Dish = { slot, bun, filling, sauces: [], view };
-    view.setSize(140, 110).setInteractive(new Phaser.Geom.Rectangle(0, 0, 140, 110), Phaser.Geom.Rectangle.Contains);
+  private drawSauces(gfx: Phaser.GameObjects.Graphics, sauce: SaucePoints): void {
+    gfx.clear();
+    for (const s of ['ketchup', 'mustard'] as Sauce[]) drawSauce(gfx, sauce[s], SAUCE_COLOR[s]);
+  }
+
+  /** Halbe Größe der Essfläche eines Gerichts (dort landet Soße). */
+  private dishHalf(dish: Pick<Dish, 'bun' | 'filling'>): Point {
+    const size = dish.bun ? foodSize(dish.bun.cut ? 'buncut' : 'bun') : foodSize(dish.filling!.id);
+    return { x: size.width / 2, y: size.height / 2 };
+  }
+
+  private newDish(x: number, y: number, bun: Food | undefined, filling: Food | undefined): Dish {
+    const d = this.clampToPlate(x - this.plate.x, y - this.plate.y);
+    const view = this.add.container(this.plate.x + d.x, this.plate.y + d.y);
+    const dish: Dish = { dx: d.x, dy: d.y, bun, filling, sauce: { ketchup: [], mustard: [] }, view, sauceGfx: undefined! };
     view.setData('grab', dish);
     this.redrawDish(dish);
     this.dishes.push(dish);
+    this.followPlate();
     return dish;
   }
 
   private redrawDish(dish: Dish): void {
-    this.drawDish(dish.view, dish.bun, dish.filling, dish.sauces);
+    dish.sauceGfx = this.drawDish(dish.view, dish.bun, dish.filling, dish.sauce);
+    // Touch-Fläche so groß wie das Essen (etwas mehr), damit der Tellerrand frei zum Greifen bleibt
+    const half = this.dishHalf(dish);
+    const w = half.x * 2 + 16;
+    const h = Math.max(half.y * 2 + 20, 100);
+    dish.view.setSize(w, h);
+    if (dish.view.input) dish.view.input.hitArea = new Phaser.Geom.Rectangle(0, 0, w, h);
+    else dish.view.setInteractive(new Phaser.Geom.Rectangle(0, 0, w, h), Phaser.Geom.Rectangle.Contains);
   }
 
   private removeDish(dish: Dish): void {
@@ -313,9 +359,20 @@ export class GrillScene extends Phaser.Scene {
     dish.view.destroy();
   }
 
-  /** Gericht unter einem Punkt (großzügig). */
+  /** Gericht unter einem Punkt (großzügig, das nächste). */
   private dishAt(x: number, y: number, except?: Dish): Dish | undefined {
-    return this.dishes.find((d) => d !== except && Math.abs(d.view.x - x) < 80 && Math.abs(d.view.y - y) < 70);
+    let best: Dish | undefined;
+    let bestD = Infinity;
+    for (const d of this.dishes) {
+      if (d === except) continue;
+      const dx = Math.abs(d.view.x - x);
+      const dy = Math.abs(d.view.y - y);
+      if (dx < 110 && dy < 72 && dx + dy < bestD) {
+        best = d;
+        bestD = dx + dy;
+      }
+    }
+    return best;
   }
 
   private onPlate(x: number, y: number): boolean {
@@ -328,7 +385,12 @@ export class GrillScene extends Phaser.Scene {
     return x > R.left - 30 && x < R.right + 30 && y > R.top - 40 && y < R.bottom + 30;
   }
 
-  /** Grillgut auf den Teller: ins aufgeschnittene Brötchen, zur Füllung dazu oder als eigenes Gericht. */
+  /** Beide Soßen eines Gerichts in ein anderes übernehmen (beim Zusammenlegen). */
+  private mergeSauce(into: Dish, from: Dish): void {
+    for (const s of ['ketchup', 'mustard'] as Sauce[]) into.sauce[s] = [...into.sauce[s], ...from.sauce[s]].slice(-SAUCE_MAX);
+  }
+
+  /** Grillgut auf den Teller: ins aufgeschnittene Brötchen, zur Füllung dazu oder frei hingelegt. */
   private putOnPlate(food: Food, x: number, y: number): boolean {
     const target = this.dishAt(x, y);
     const def = FOODS[food.id];
@@ -346,11 +408,102 @@ export class GrillScene extends Phaser.Scene {
         return true;
       }
     }
-    const slot = this.freeSlot();
-    if (slot < 0) return false;
-    if (food.id === 'bun') this.newDish(slot, food, undefined);
-    else this.newDish(slot, undefined, food);
+    if (this.dishes.length >= MAX_DISHES) return false;
+    if (food.id === 'bun') this.newDish(x, y, food, undefined);
+    else this.newDish(x, y, undefined, food);
     return true;
+  }
+
+  // --- Soße und Tuch -------------------------------------------------------------------
+
+  private bottleHome(sauce: Sauce): Point {
+    const b = GRILL.bottles[sauce];
+    return { x: b.x, y: b.y - BOTTLE_SIZE.height / 2 };
+  }
+
+  /** Tülle der Flasche (oben in der Zeichnung), folgt der Drehung um die Mitte. */
+  private nozzle(img: Phaser.GameObjects.Image): Point {
+    const r = img.rotation;
+    const h = BOTTLE_SIZE.height / 2;
+    return { x: img.x + h * Math.sin(r), y: img.y - h * Math.cos(r) };
+  }
+
+  /** Flasche kopfüber über dem Essen: Soße kommt heraus (Kleckse auf das Gericht darunter). */
+  private squirt(delta: number): void {
+    this.stream.clear();
+    let squirting = false;
+    for (const t of this.touches.values()) {
+      const grab = t.dragging;
+      if (grab?.kind !== 'bottle' || Math.cos(grab.img.rotation) > -0.85) continue;
+      const tip = this.nozzle(grab.img);
+      const hit = { x: tip.x, y: tip.y + SQUIRT_REACH };
+      const dish = this.dishUnder(hit);
+      if (!dish) continue;
+      squirting = true;
+      this.stream.lineStyle(8, SAUCE_COLOR[grab.sauce]);
+      this.stream.lineBetween(tip.x, tip.y + 4, hit.x, hit.y);
+      this.squirtTimer += delta;
+      const pts = dish.sauce[grab.sauce];
+      let added = false;
+      while (this.squirtTimer >= SQUIRT_EVERY) {
+        this.squirtTimer -= SQUIRT_EVERY;
+        if (pts.length >= SAUCE_MAX) continue;
+        // Auf der Essfläche landen (großzügig gezielt, dann auf das Essen geschoben)
+        const half = this.dishHalf(dish);
+        const lx = Phaser.Math.Clamp(hit.x - dish.view.x + Phaser.Math.Between(-3, 3), -half.x + 14, half.x - 14);
+        const ly = Phaser.Math.Clamp(hit.y - dish.view.y + Phaser.Math.Between(-3, 3), -half.y + 8, half.y - 8);
+        pts.push({ x: lx, y: ly });
+        added = true;
+      }
+      if (added) this.drawSauces(dish.sauceGfx, dish.sauce);
+      if (this.time.now > this.nextSquirtSound) {
+        this.nextSquirtSound = this.time.now + 450;
+        this.events.emit('sound', { kind: 'squirt' });
+      }
+    }
+    if (!squirting) this.squirtTimer = 0;
+  }
+
+  /** Gericht, dessen Essfläche den Punkt (großzügig) enthält; das nächste zuerst. */
+  private dishUnder(p: Point): Dish | undefined {
+    let best: Dish | undefined;
+    let bestD = Infinity;
+    for (const d of this.dishes) {
+      const half = this.dishHalf(d);
+      const dx = Math.abs(p.x - d.view.x);
+      const dy = Math.abs(p.y - d.view.y);
+      if (dx < half.x - 4 && dy < half.y + 16 && dy < bestD) {
+        best = d;
+        bestD = dy;
+      }
+    }
+    return best;
+  }
+
+  /** Tuch über das Essen ziehen: Soße in der Nähe verschwindet. */
+  private wipe(): void {
+    let wiped = false;
+    for (const d of this.dishes) {
+      const cx = this.cloth.x - d.view.x;
+      const cy = this.cloth.y - d.view.y;
+      let changed = false;
+      for (const s of ['ketchup', 'mustard'] as Sauce[]) {
+        const before = d.sauce[s].length;
+        d.sauce[s] = d.sauce[s].filter((p) => Math.hypot(p.x - cx, p.y - cy) > WIPE_RADIUS);
+        if (d.sauce[s].length !== before) changed = true;
+      }
+      if (changed) {
+        this.drawSauces(d.sauceGfx, d.sauce);
+        wiped = true;
+      }
+    }
+    if (wiped) {
+      this.cloth.setAngle(Phaser.Math.Between(-10, 10));
+      if (this.time.now > this.nextWipeSound) {
+        this.nextWipeSound = this.time.now + 300;
+        this.events.emit('sound', { kind: 'wipe' });
+      }
+    }
   }
 
   // --- Kinder und Bestellungen ---------------------------------------------------------
@@ -389,21 +542,28 @@ export class GrillScene extends Phaser.Scene {
     q.kid.wave(() => {});
   }
 
-  /** Bestellkarte oben: Bilder der Gerichte (gar, mit Soßen), ohne Text. */
+  /**
+   * Bestellkarte oben, an einer Klammer: jedes Gericht (gar, mit Soßen) auf einem eigenen
+   * kleinen Teller, mit Abstand dazwischen. Ohne Text.
+   */
   private showCard(items: OrderItem[]): void {
     const C = GRILL.card;
     const card = this.add.container(C.x, C.y).setDepth(DEPTH.card);
-    card.add(this.add.image(0, 0, 'grill-card'));
-    const gap = C.w / (items.length + 1);
+    const bg = this.add.graphics();
+    const { centers, y } = drawOrderCard(bg, items.length);
+    card.add(bg);
     items.forEach((item, i) => {
-      const view = this.add.container(-C.w / 2 + gap * (i + 1), -8);
-      const perfect = (id: FoodId, cut = false): Food => ({ id, sides: [1.4, 1.4], up: 0, cut });
-      this.drawDish(view, item.bun ? perfect('bun', true) : undefined, perfect(item.main), item.sauces);
-      view.setScale(items.length > 1 ? 1.05 : 1.35);
+      const view = this.add.container(centers[i], y);
+      const perfect = (id: FoodId, cut = false): Food => ({ id, level: 1.4, cut });
+      const sauce: SaucePoints = { ketchup: [], mustard: [] };
+      item.sauces.forEach((s, k) => (sauce[s] = sauceZigzag(k ? 8 : item.sauces.length > 1 ? -8 : 0)));
+      this.drawDish(view, item.bun ? perfect('bun', true) : undefined, perfect(item.main), sauce);
       card.add(view);
     });
-    card.setScale(0);
-    this.tweens.add({ targets: card, scale: 1, duration: 320, ease: 'Back.easeOut' });
+    // Klappt an der Klammer herunter und pendelt aus
+    card.setScale(0.3).setAngle(-14);
+    this.tweens.add({ targets: card, scale: 1, duration: 300, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: card, angle: 0, duration: 1100, ease: 'Elastic.easeOut', easeParams: [1.2, 0.35] });
     this.order = { items, card };
     this.events.emit('sound', { kind: 'peekaboo' });
   }
@@ -419,7 +579,7 @@ export class GrillScene extends Phaser.Scene {
   private serve(): void {
     const q = this.queue[0];
     if (!q || !this.order || this.busy) return this.plateBack();
-    const bad = this.dishes.some((d) => (d.filling && quality(d.filling.id, d.filling.sides) !== 'good') || (d.bun && quality('bun', d.bun.sides) !== 'good'));
+    const bad = this.dishes.some((d) => (d.filling && quality(d.filling.id, d.filling.level) !== 'good') || (d.bun && quality('bun', d.bun.level) !== 'good'));
     if (bad) {
       // Roh oder verbrannt: bäh, Teller wird abgeräumt, das Kind bestellt neu
       this.busy = true;
@@ -450,7 +610,7 @@ export class GrillScene extends Phaser.Scene {
     this.time.delayedCall(1100, () => this.leaveHappy(q));
   }
 
-  /** Stimmt der Teller mit der Bestellung? (jedes bestellte Gericht einmal, Soßen genau) */
+  /** Stimmt der Teller mit der Bestellung? (jedes bestellte Gericht einmal, Soßen genau; ein paar Kleckse zählen) */
   private matches(items: OrderItem[]): boolean {
     const left = [...this.dishes];
     for (const item of items) {
@@ -459,7 +619,8 @@ export class GrillScene extends Phaser.Scene {
           d.filling?.id === item.main &&
           !!d.bun === item.bun &&
           (!d.bun || d.bun.cut) &&
-          [...d.sauces].sort().join() === [...item.sauces].sort().join(),
+          (['ketchup', 'mustard'] as Sauce[]).filter((s) => d.sauce[s].length >= SAUCE_MIN).join() ===
+            [...item.sauces].sort().join(),
       );
       if (i < 0) return false;
       left.splice(i, 1);
@@ -518,11 +679,9 @@ export class GrillScene extends Phaser.Scene {
     });
   }
 
+  /** Gerichte liegen fest auf dem Teller (weiter unten = weiter vorn). */
   private followPlate(): void {
-    for (const d of this.dishes) {
-      const p = this.slotPos(d.slot);
-      d.view.setPosition(p.x, p.y).setDepth(this.plate.depth + 10);
-    }
+    for (const d of this.dishes) d.view.setPosition(this.plate.x + d.dx, this.plate.y + d.dy).setDepth(this.plate.depth + 10 + (d.dy + 200) / 100);
   }
 
   // --- Eingabe -------------------------------------------------------------------------
@@ -534,9 +693,18 @@ export class GrillScene extends Phaser.Scene {
       // Aus dem Vorrat: sofort ein neues Stück in der Hand
       if (typeof grab === 'string' && grab.startsWith('source:')) {
         const id = grab.slice(7) as FoodId;
-        const piece = this.newPiece({ id, sides: [0, 0], up: 0, cut: false }, pointer.x, pointer.y);
+        const piece = this.newPiece({ id, level: 0, cut: false }, pointer.x, pointer.y);
         piece.view.setDepth(DEPTH.drag);
         this.touches.set(pointer.id, { pointer, target: piece.view, dragging: { kind: 'piece', piece, fromGrill: false }, offset: { x: 0, y: 0 } });
+        return;
+      }
+      // Soßenflasche: sofort hochheben und umdrehen (Tülle nach unten)
+      if (typeof grab === 'string' && grab.startsWith('bottle:')) {
+        const img = obj as Phaser.GameObjects.Image;
+        this.tweens.killTweensOf(img);
+        img.setDepth(DEPTH.drag);
+        this.tweens.add({ targets: img, angle: 180, duration: 220, ease: 'Back.easeOut' });
+        this.touches.set(pointer.id, { pointer, target: obj, dragging: { kind: 'bottle', sauce: grab.slice(7) as Sauce, img }, offset: { x: img.x - pointer.x, y: img.y - pointer.y } });
         return;
       }
       const o = obj as unknown as { x: number; y: number };
@@ -562,8 +730,11 @@ export class GrillScene extends Phaser.Scene {
           this.followPlate();
           break;
         case 'bottle':
-          // Flasche kippt zum Ausdrücken
-          t.dragging.img.setPosition(x, y).setAngle(150);
+          t.dragging.img.setPosition(x, y);
+          break;
+        case 'cloth':
+          this.cloth.setPosition(x, y);
+          this.wipe();
           break;
       }
     });
@@ -588,10 +759,10 @@ export class GrillScene extends Phaser.Scene {
       this.followPlate();
       return { kind: 'plate' };
     }
-    if (typeof grab === 'string' && grab.startsWith('bottle:')) {
-      const img = t.target as Phaser.GameObjects.Image;
-      img.setDepth(DEPTH.drag);
-      return { kind: 'bottle', sauce: grab.slice(7) as Sauce, img };
+    if (grab === 'cloth') {
+      this.tweens.killTweensOf(this.cloth);
+      this.cloth.setDepth(DEPTH.drag).setScale(0.9);
+      return { kind: 'cloth' };
     }
     if (grab && typeof grab === 'object' && 'food' in grab) {
       const piece = grab as Piece;
@@ -600,7 +771,7 @@ export class GrillScene extends Phaser.Scene {
       piece.view.setDepth(DEPTH.drag).setScale(1.08);
       return { kind: 'piece', piece, fromGrill: true };
     }
-    if (grab && typeof grab === 'object' && 'slot' in grab) {
+    if (grab && typeof grab === 'object' && 'sauce' in grab) {
       const dish = grab as Dish;
       dish.view.setDepth(DEPTH.drag);
       return { kind: 'dish', dish };
@@ -613,8 +784,12 @@ export class GrillScene extends Phaser.Scene {
     if (grab === 'exit') return this.leave();
     const onTap = target.getData('onTap');
     if (typeof onTap === 'function') return onTap();
-    if (grab && typeof grab === 'object' && 'food' in grab) return this.flip(grab as Piece);
-    if (grab && typeof grab === 'object' && 'slot' in grab) {
+    if (grab === 'cloth') {
+      this.tweens.add({ targets: this.cloth, angle: { from: -8, to: 8 }, duration: 80, yoyo: true, repeat: 1, onComplete: () => this.cloth.setAngle(0) });
+      return;
+    }
+    if (grab && typeof grab === 'object' && 'food' in grab) return this.wiggle(grab as Piece);
+    if (grab && typeof grab === 'object' && 'sauce' in grab) {
       // Brötchen auf dem Teller antippen: aufschneiden
       const dish = grab as Dish;
       if (dish.bun && !dish.bun.cut && !dish.filling) {
@@ -657,7 +832,7 @@ export class GrillScene extends Phaser.Scene {
         // Zwei Gerichte zusammenlegen: Füllung ins aufgeschnittene Brötchen
         if (other && dish.filling && !dish.bun && FOODS[dish.filling.id].fillsBun && other.bun?.cut && !other.filling) {
           other.filling = dish.filling;
-          other.sauces = [...new Set([...other.sauces, ...dish.sauces])];
+          this.mergeSauce(other, dish);
           this.redrawDish(other);
           this.removeDish(dish);
           this.events.emit('sound', { kind: 'pop' });
@@ -665,7 +840,7 @@ export class GrillScene extends Phaser.Scene {
         }
         if (other && dish.bun?.cut && !dish.filling && other.filling && !other.bun && FOODS[other.filling.id].fillsBun) {
           other.bun = dish.bun;
-          other.sauces = [...new Set([...other.sauces, ...dish.sauces])];
+          this.mergeSauce(other, dish);
           this.redrawDish(other);
           this.removeDish(dish);
           this.events.emit('sound', { kind: 'pop' });
@@ -673,7 +848,7 @@ export class GrillScene extends Phaser.Scene {
         }
         // Einzelnes Grillgut zurück auf den Rost
         const single = (dish.bun && !dish.filling) || (!dish.bun && dish.filling) ? (dish.bun ?? dish.filling) : undefined;
-        if (single && dish.sauces.length === 0 && this.onGrate(x, y)) {
+        if (single && !dish.sauce.ketchup.length && !dish.sauce.mustard.length && this.onGrate(x, y)) {
           const piece = this.newPiece(single, x, y);
           const R = GRILL.grate;
           piece.view.setPosition(Phaser.Math.Clamp(x, R.left + 40, R.right - 40), Phaser.Math.Clamp(y, R.top + 30, R.bottom - 30));
@@ -682,6 +857,10 @@ export class GrillScene extends Phaser.Scene {
           return;
         }
         if (this.onPlate(x, y)) {
+          // Frei hinlegen, wo man loslässt
+          const d = this.clampToPlate(dish.view.x - this.plate.x, dish.view.y - this.plate.y);
+          dish.dx = d.x;
+          dish.dy = d.y;
           this.followPlate();
           return;
         }
@@ -700,14 +879,15 @@ export class GrillScene extends Phaser.Scene {
         return;
       }
       case 'bottle': {
-        const dish = this.dishAt(x, y + 60) ?? this.dishAt(x, y);
-        if (dish && !dish.sauces.includes(grab.sauce)) {
-          dish.sauces.push(grab.sauce);
-          this.redrawDish(dish);
-          this.events.emit('sound', { kind: 'squirt' });
-        }
-        const home = GRILL.bottles[grab.sauce];
-        this.tweens.add({ targets: grab.img, x: home.x, y: home.y, angle: 0, duration: 260, ease: 'Sine.easeOut', onComplete: () => grab.img.setDepth(DEPTH.bottles) });
+        // Zurück an ihren Platz, wieder aufrecht
+        const home = this.bottleHome(grab.sauce);
+        this.tweens.killTweensOf(grab.img);
+        this.tweens.add({ targets: grab.img, x: home.x, y: home.y, angle: 0, duration: 300, ease: 'Sine.easeOut', onComplete: () => grab.img.setDepth(DEPTH.bottles) });
+        return;
+      }
+      case 'cloth': {
+        const C = GRILL.cloth;
+        this.tweens.add({ targets: this.cloth, x: C.x, y: C.y, angle: 0, scale: 1, duration: 280, ease: 'Sine.easeOut', onComplete: () => this.cloth.setDepth(DEPTH.cloth) });
         return;
       }
     }

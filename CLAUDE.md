@@ -47,9 +47,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Tor (`src/objects/FelixGate.ts`) öffnet das Grill-Spiel.
 - **Grill-Spiel** (#66, `src/scenes/GrillScene.ts`, `scene.openGrill()`): Die Wiese schläft, am Grill stehen die Kinder
   von der Wiese (mindestens zwei, mit Verkleidung). Grillgut, Garzeiten und Bestellungen in `src/data/grill.ts`
-  (Garstufe je Seite in Vielfachen der Garzeit: gar ab 1,0, verkohlt ab 2,5, `stageOf` → 5 Bildstufen `food-<id>-<stufe>`),
-  Zeichnungen in `src/scenes/placeholders/grill.ts` (Aufteilung in `GRILL`). Antippen auf dem Rost = wenden, Brötchen
-  auf dem Teller antippen = aufschneiden, Flasche aufs Gericht = Soße, Teller zum Kind = servieren (roh/verbrannt →
+  (eine Garstufe je Stück in Vielfachen der Garzeit, **kein Wenden**: gar ab 1,0, verkohlt ab 2,5, `stageOf` → 5 Bildstufen
+  `food-<id>-<stufe>`, die nächste blendet weich ein), Zeichnungen in `src/scenes/placeholders/grill.ts` (Aufteilung in
+  `GRILL`, Grillgut um `FOOD_SCALE` vergrößert). Gerichte liegen frei auf dem Teller (Versatz zur Tellermitte), Brötchen
+  auf dem Teller antippen = aufschneiden. Soßenflasche hochheben = dreht sich um; über dem Essen kommen Kleckse heraus
+  (Punkte je Gericht, zählt ab `SAUCE_MIN`), das karierte Tuch wischt sie weg. Teller zum Kind = servieren (roh/verbrannt →
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
@@ -131,7 +133,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Echte Kinderstimmen nur mit Okay der Eltern und nicht ins öffentliche Repo (#38).
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
-  Grill: `sizzle`, `flip`, `cut`, `squirt`, `yum`, `yuck`.
+  Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

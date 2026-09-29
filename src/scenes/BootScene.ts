@@ -3,7 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
 import { FOOD_IDS, STAGES } from '../data/grill';
-import { BOTTLE_SIZE, drawBottle, drawFood, drawGrillBackground, drawGrillFront, drawOrderCard, drawPlate, foodSize, GRILL } from './placeholders/grill';
+import { BOTTLE_SIZE, CLOTH_SIZE, drawBottle, drawCloth, drawFood, drawGrillBackground, drawGrillFront, drawPlate, foodSize, GRILL } from './placeholders/grill';
 import { COSTUMES, costumeKey, SLOTS } from '../data/costumes';
 import { COSTUME_ART, layerLayout } from './placeholders/costumes';
 import { BOX, boxDoorOutline, drawDressBox, drawDressBoxInside, drawDressRoom, drawHanger, drawItemGlow } from './placeholders/dressup';
@@ -421,7 +421,7 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('playhouse-front-solid');
   }
 
-  /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Karte. */
+  /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Tuch. */
   private makeGrill(): void {
     this.makeTexture('grill-bg', GAME_WIDTH, GAME_HEIGHT, drawGrillBackground);
     this.makeTexture('grill-front', GAME_WIDTH, GAME_HEIGHT, drawGrillFront);
@@ -432,7 +432,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('grill-plate', GRILL.plate.w, GRILL.plate.h, drawPlate);
     this.makeTexture('grill-bottle-ketchup', BOTTLE_SIZE.width, BOTTLE_SIZE.height, (g) => drawBottle(g, 0xd62828, 0xffffff));
     this.makeTexture('grill-bottle-mustard', BOTTLE_SIZE.width, BOTTLE_SIZE.height, (g) => drawBottle(g, 0xf2c230, 0x8a5a00));
-    this.makeTexture('grill-card', GRILL.card.w, GRILL.card.h, drawOrderCard);
+    this.makeTexture('grill-cloth', CLOTH_SIZE.width, CLOTH_SIZE.height, drawCloth);
   }
 
   /** Ankleidekiste (#70): Kiste, Innenraum, Bügel und alle Verkleidungs-Teile. */

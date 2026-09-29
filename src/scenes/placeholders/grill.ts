@@ -3,7 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
 import { FOODS, type FoodId } from '../../data/grill';
 
 // Grill-Spiel (#66): Hintergrund (Felix' Garten), Grill mit Rost und Ablagen, Grillgut in
-// 5 Garstufen, Teller, Soßenflaschen, Bestellkarte. Alles in Bildschirmkoordinaten 1920 × 1080.
+// 5 Garstufen, Teller, Soßenflaschen, Wischtuch, Bestellkarte. Alles in Bildschirmkoordinaten 1920 × 1080.
 
 type G = Phaser.GameObjects.Graphics;
 const v = (x: number, y: number) => new Phaser.Math.Vector2(x, y);
@@ -15,11 +15,12 @@ export const GRILL = {
   /** Linke Ablage zum Anrichten, rechte mit dem Vorrat. */
   shelfL: { left: 16, right: 560, top: 720, bottom: 1010 },
   shelfR: { left: 1360, right: 1904, top: 720, bottom: 1010 },
-  /** Teller (Mitte) und Plätze für bis zu 3 Gerichte darauf. */
-  plate: { x: 330, y: 880, w: 430, h: 180 },
-  plateSlots: [-125, 0, 125],
-  /** Soßenflaschen (Fußpunkt) hinten auf der linken Ablage. */
-  bottles: { ketchup: { x: 60, y: 800 }, mustard: { x: 128, y: 800 } },
+  /** Teller (Mitte); Gerichte liegen frei darauf. */
+  plate: { x: 330, y: 885, w: 460, h: 200 },
+  /** Soßenflaschen (Fußpunkt) hinten links auf der Ablage. */
+  bottles: { ketchup: { x: 62, y: 782 }, mustard: { x: 128, y: 782 } },
+  /** Wischtuch, hängt vorn über der linken Ablage (Mitte). */
+  cloth: { x: 470, y: 1034 },
   /** Vorratsschalen auf der rechten Ablage (Mitte). */
   sources: {
     sausage: { x: 1500, y: 800 },
@@ -37,8 +38,8 @@ export const GRILL = {
     { x: 1660, y: 624, scale: 0.88 },
     { x: 1800, y: 618, scale: 0.84 },
   ],
-  /** Bestellkarte oben. */
-  card: { x: 960, y: 120, w: 400, h: 190 },
+  /** Bestellkarte: hängt mit einer Klammer an der Pergola (Klammer oben Mitte). */
+  card: { x: 960, y: 96, h: 196, cell: 250, gap: 40, pad: 30 },
 };
 
 // --- Hintergrund: Blick aus Felix' Garten auf die Wiese ------------------------------------
@@ -233,14 +234,30 @@ function charred(g: G, w: number, h: number, stage: number): void {
   g.fillCircle(w * 0.7, h * 0.4, 2.5);
 }
 
-export function foodSize(id: FoodId | 'buncut'): { width: number; height: number } {
+/** Grillgut wird größer gezeichnet als in FOODS angegeben (gut zu greifen und zu erkennen). */
+export const FOOD_SCALE = 1.3;
+
+function baseSize(id: FoodId | 'buncut'): { width: number; height: number } {
   if (id === 'buncut') return { width: 150, height: 86 };
   return { width: FOODS[id].width, height: FOODS[id].height };
 }
 
+/** Größe der Grillgut-Textur (schon vergrößert). */
+export function foodSize(id: FoodId | 'buncut'): { width: number; height: number } {
+  const b = baseSize(id);
+  return { width: Math.ceil(b.width * FOOD_SCALE), height: Math.ceil(b.height * FOOD_SCALE) };
+}
+
 /** Grillgut von oben, Garstufe 0 (roh) bis 4 (verkohlt). */
 export function drawFood(g: G, id: FoodId | 'buncut', stage: number): void {
-  const { width: w, height: h } = foodSize(id);
+  g.save();
+  g.scaleCanvas(FOOD_SCALE, FOOD_SCALE);
+  drawFoodBase(g, id, stage);
+  g.restore();
+}
+
+function drawFoodBase(g: G, id: FoodId | 'buncut', stage: number): void {
+  const { width: w, height: h } = baseSize(id);
   const c = COLORS[id][stage];
   switch (id) {
     case 'sausage':
@@ -333,13 +350,104 @@ export function drawBottle(g: G, color: number, cap: number): void {
   g.fillCircle(w / 2, h * 0.62, 8);
 }
 
-export function drawOrderCard(g: G): void {
-  const { w, h } = GRILL.card;
-  g.fillStyle(0x000000, 0.2);
-  g.fillRoundedRect(6, 10, w - 6, h - 16, 22);
-  g.fillStyle(0xfffdf7);
-  g.fillRoundedRect(0, 0, w - 6, h - 16, 22);
-  g.fillTriangle(w / 2 - 22, h - 18, w / 2 + 22, h - 18, w / 2, h);
-  g.lineStyle(4, 0xf2c230);
-  g.strokeRoundedRect(4, 4, w - 14, h - 24, 18);
+/** Geschirrtuch (rot-weiß kariert), hängt über der Ablagekante; Mitte = Bildmitte. */
+export const CLOTH_SIZE = { width: 124, height: 96 };
+
+export function drawCloth(g: G): void {
+  const { width: w, height: h } = CLOTH_SIZE;
+  g.fillStyle(0x000000, 0.15);
+  g.fillRoundedRect(6, 6, w - 6, h - 6, 10);
+  g.fillStyle(0xffffff);
+  g.fillRoundedRect(0, 0, w - 6, h - 6, 10);
+  g.fillStyle(0xd9483b, 0.75);
+  const n = 6;
+  const cw = (w - 6) / n;
+  for (let i = 0; i < n; i++) g.fillRect(i * cw + cw * 0.25, 0, cw * 0.5, h - 6);
+  for (let j = 0; j < 4; j++) g.fillRect(0, j * ((h - 6) / 4) + 6, w - 6, (h - 6) / 8);
+  // Falte oben (hier hängt es über der Kante)
+  g.fillStyle(0x000000, 0.12);
+  g.fillRect(0, 16, w - 6, 5);
+  g.lineStyle(3, 0xb33a2e);
+  g.strokeRoundedRect(1.5, 1.5, w - 9, h - 9, 9);
+}
+
+/** Soße als Klecks-Spur: runde Tupfen, nahe Tupfen zu einer Linie verbunden. */
+export function drawSauce(g: G, pts: readonly { x: number; y: number }[], color: number): void {
+  if (!pts.length) return;
+  g.lineStyle(11, color);
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (Math.abs(a.x - b.x) + Math.abs(a.y - b.y) < 30) g.lineBetween(a.x, a.y, b.x, b.y);
+  }
+  g.fillStyle(color);
+  for (const p of pts) g.fillCircle(p.x, p.y, 6.5);
+  // Glanzpunkte
+  g.fillStyle(0xffffff, 0.35);
+  for (let i = 0; i < pts.length; i += 5) g.fillCircle(pts[i].x - 2, pts[i].y - 2, 2);
+}
+
+/** Soßen-Zickzack, wie es auf der Bestellkarte gezeigt wird (lokale Koordinaten eines Gerichts). */
+export function sauceZigzag(offset: number): { x: number; y: number }[] {
+  const pts: { x: number; y: number }[] = [];
+  for (let k = 0; k <= 20; k++) pts.push({ x: -70 + k * 7, y: Math.sin(k * 0.9) * 10 + offset });
+  return pts;
+}
+
+/**
+ * Bestellkarte wie ein Bon mit Klammer: Papier mit Picknick-Karo oben, gezackte Unterkante,
+ * für jedes Gericht ein eigener kleiner Teller mit Abstand. Oben Mitte (0, 0) sitzt die Klammer.
+ */
+export function drawOrderCard(g: G, items: number): { centers: number[]; y: number } {
+  const C = GRILL.card;
+  const w = items * C.cell + (items - 1) * C.gap + 2 * C.pad;
+  const h = C.h;
+  const top = 18;
+  const x0 = -w / 2;
+  // Schatten
+  g.fillStyle(0x000000, 0.18);
+  g.fillRoundedRect(x0 + 8, top + 12, w, h, 18);
+  // Papier mit gezackter Unterkante
+  g.fillStyle(0xfffaf0);
+  g.fillRoundedRect(x0, top, w, h - 12, { tl: 18, tr: 18, bl: 0, br: 0 });
+  const teeth = Math.round(w / 24);
+  const tw = w / teeth;
+  for (let i = 0; i < teeth; i++) g.fillTriangle(x0 + i * tw, top + h - 13, x0 + (i + 1) * tw, top + h - 13, x0 + (i + 0.5) * tw, top + h);
+  // Picknick-Karo oben
+  const band = 26;
+  g.fillStyle(0xffffff);
+  g.fillRoundedRect(x0, top, w, band, { tl: 18, tr: 18, bl: 0, br: 0 });
+  g.fillStyle(0xe63946, 0.55);
+  for (let x = x0; x < x0 + w - 1; x += 26) g.fillRect(x, top, 13, band);
+  g.fillStyle(0xe63946, 0.55);
+  g.fillRect(x0, top + band / 2 - 1, w, band / 2);
+  g.fillStyle(0xfffaf0);
+  g.fillRect(x0, top + band, w, 4);
+  // Für jedes Gericht ein Teller
+  const centers: number[] = [];
+  const y = top + band + (h - band - 12) / 2 + 2;
+  for (let i = 0; i < items; i++) {
+    const cx = x0 + C.pad + C.cell / 2 + i * (C.cell + C.gap);
+    centers.push(cx);
+    g.fillStyle(0x000000, 0.1);
+    g.fillEllipse(cx + 4, y + 20, C.cell - 4, 100);
+    g.fillStyle(0xffffff);
+    g.fillEllipse(cx, y + 14, C.cell - 8, 100);
+    g.lineStyle(3, 0x4d96ff, 0.55);
+    g.strokeEllipse(cx, y + 14, C.cell - 30, 82);
+    // Pünktchen-Trenner zwischen den Gerichten
+    if (i > 0) {
+      g.fillStyle(0xe0c9a6);
+      const dx = cx - C.cell / 2 - C.gap / 2;
+      for (let k = 0; k < 5; k++) g.fillCircle(dx, top + band + 24 + k * 30, 4);
+    }
+  }
+  // Holzklammer oben Mitte
+  g.fillStyle(0x8a5a2b);
+  g.fillRoundedRect(-13, -6, 26, 52, 6);
+  g.fillStyle(0xc9975c);
+  g.fillRoundedRect(-10, -4, 20, 48, 5);
+  g.fillStyle(0x9aa3ab);
+  g.fillRect(-12, 16, 24, 6);
+  return { centers, y };
 }

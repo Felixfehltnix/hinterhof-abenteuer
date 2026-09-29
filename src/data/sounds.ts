@@ -61,7 +61,7 @@ export const SOUNDS: Record<string, SoundDef> = {
   'weather-snow': { synth: 'chime', volume: 0.3 },
   // Grill-Spiel (#66)
   sizzle: { synth: 'splash', volume: 0.12 },
-  flip: { synth: 'click', volume: 0.35 },
+  wipe: { synth: 'whoosh', volume: 0.2 },
   cut: { synth: 'click', volume: 0.45 },
   squirt: { synth: 'whoosh', volume: 0.35 },
   yum: { synth: 'chime', volume: 0.45 },

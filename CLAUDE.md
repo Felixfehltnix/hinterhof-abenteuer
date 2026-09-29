@@ -61,6 +61,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   (`src/scenes/placeholders/playhouse.ts`). Rückseite, Kinder/Bälle drinnen und Vorderseite mit ausgestanzten
   Löchern liegen nach Tiefe übereinander, die Rutsche davor. Ein `Seat` kann mit `tap(kid)` auf Antippen
   des Kindes reagieren (dann hüpft es nicht), z. B. oben antippen = rutschen.
+- **Ankleidekiste** (#70): große Pappkiste (`DressBox` in `Equipment.ts`, Zeichnung `src/scenes/placeholders/dressup.ts`).
+  Kind hineinziehen → `scene.openDressUp(kid, back)`: Die Wiese schläft (`scene.sleep()`), das Ankleide-Spiel
+  `DressUpScene` läuft (eigene Kid-Instanz groß vor dem Spiegel, Spiegelbild per Maske). Tür antippen → zurück,
+  das Kind kommt aus der Kiste. Töne leitet die DressUpScene an die Wiese weiter (dort lebt der AudioContext).
+  **Verkleidungen**: 10 Kostüme × 4 Stellen (`head`/`top`/`bottom`/`feet`), frei mischbar, Daten in
+  `src/data/costumes.ts`, Zeichnungen in `src/scenes/placeholders/costumes.ts` (Ebenen `head`/`body`/`arm`/`leg`/`back`
+  in Koordinaten der Körperteile). `kid.setOutfit(outfit)` legt sie als Auflagen auf die Körperteile (machen alle Posen
+  mit). Gespeichert je Kind im Weltzustand `outfits` (`scene.setKidOutfit`), bleibt auch nach dem Heimgehen.
 - Tippen: `obj.setData('onTap', fn)`. Die Szene ruft `fn(pointer)` auf, wenn nicht gezogen wurde.
 - **Vorrang beim Antippen/Ziehen** (`touchRank` in `PlaygroundScene`): Kinder und kleine Spielzeuge
   gehen vor großen Spielgeräten (`large: true` im Katalog, z. B. Korb, Tor, Pool, Fahrzeuge) und vor

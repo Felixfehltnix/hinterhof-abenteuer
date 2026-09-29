@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from './config';
 import { BootScene } from './scenes/BootScene';
+import { DressUpScene } from './scenes/DressUpScene';
 import { PlaygroundScene } from './scenes/PlaygroundScene';
 
 new Phaser.Game({
@@ -18,5 +19,5 @@ new Phaser.Game({
   input: {
     activePointers: 3, // mehrere Kinderfinger gleichzeitig
   },
-  scene: [BootScene, PlaygroundScene],
+  scene: [BootScene, PlaygroundScene, DressUpScene],
 });

@@ -91,7 +91,9 @@ export class Snow {
         hat = this.scene.add.image(kid.x, kid.y, 'beanie').setOrigin(0.5, 1).setTint(kid.def.shirt).setAlpha(0);
         this.hats.set(kid, hat);
       }
-      hat.setAlpha(Phaser.Math.Clamp(hat.alpha + (wear ? 0.05 : -0.05), 0, 1));
+      // Wer schon einen Hut der Verkleidung trägt (#70), braucht keine Mütze
+      const on = wear && !kid.outfit.head;
+      hat.setAlpha(Phaser.Math.Clamp(hat.alpha + (on ? 0.05 : -0.05), 0, 1));
       // Mütze sitzt auf dem Kopf und folgt ihm (Sitzen, Kopf neigen, Salto)
       const s = kid.def.size * kid.scaleY;
       const top = kid.headTop();

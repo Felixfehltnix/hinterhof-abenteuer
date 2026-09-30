@@ -101,10 +101,10 @@ export class Garden {
   }
 }
 
-/** Sand fliegt in kleinen Körnchen auf (Buddeln, Zerbröseln, Ausschütten). */
-export function sandSpray(scene: Phaser.Scene, x: number, y: number, count = 6): void {
+/** Sand fliegt in kleinen Körnchen auf (Buddeln, Zerbröseln, Ausschütten). color: z. B. Erde statt Sand. */
+export function sandSpray(scene: Phaser.Scene, x: number, y: number, count = 6, color = 0xe9c46a): void {
   for (let i = 0; i < count; i++) {
-    const grain = scene.add.circle(x, y, Phaser.Math.Between(3, 6), 0xe9c46a).setDepth(y + 1);
+    const grain = scene.add.circle(x, y, Phaser.Math.Between(3, 6), color).setDepth(y + 1);
     const a = -Math.PI / 2 + Phaser.Math.FloatBetween(-1.2, 1.2);
     const r = Phaser.Math.Between(30, 90);
     scene.tweens.add({

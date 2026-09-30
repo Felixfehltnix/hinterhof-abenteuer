@@ -60,7 +60,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Holzschild mit Pfeil am Baum links führt zurück.
 - **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
   4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
-  (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht). Loslassen = sinkt
+  (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei
+  in Flugrichtung (`toy.spin`, im Flug runde Touch-Fläche). Loslassen = sinkt, richtet sich auf
   (`ROCKET` in `src/data/space.ts`), landet auf der Linie, wo es gestartet ist. Der Himmel darüber
   (`src/world/Space.ts`, `scene.space`): dunkler (`dayCycle.setSpace`), Wolkenschicht `CLOUD_LAYER` (Regen/Schnee
   darüber aus: `weather.setHighUp`), Weltall mit Sternen, Sternschnuppen, Planeten und Ufo (`SPACE_BODIES`,
@@ -145,7 +146,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `planet` (pitch), `ufo`, `shooting-star`.
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

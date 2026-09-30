@@ -5,6 +5,7 @@ import {
   CLOUD_LAYER,
   PLANET_PARALLAX,
   SPACE_BODIES,
+  SPACE_FULL,
   spaceAmount,
   type SpaceBody,
 } from '../data/space';
@@ -30,6 +31,8 @@ export class Space {
   private readonly backClouds: Phaser.GameObjects.Image[] = [];
   private readonly bodies: Phaser.GameObjects.GameObject[] = [];
   private nextShootingStar = 0;
+  /** Wo die Kamera gerade ist: 0 Wiese/Himmel, 1 in den Wolken, 2 Weltall (für je einen Ton beim Hineinfliegen). */
+  private zone = 0;
 
   constructor(private readonly scene: PlaygroundScene) {
     // Sterne stehen fest im Bild und erscheinen, je weiter oben man ist
@@ -133,6 +136,18 @@ export class Space {
     for (const c of [...this.backClouds, ...this.frontClouds]) c.setVisible(high).setTint(tint);
     for (const b of this.bodies) (b as Phaser.GameObjects.Image).setVisible(space > 0).setAlpha(space);
     this.maybeShootingStar(space);
+    this.announceZone(altitude);
+  }
+
+  /** Einmal „wusch“ beim Eintauchen in die Wolken und „pling“ beim Ankommen im Weltall. */
+  private announceZone(altitude: number): void {
+    const bounds = [-CLOUD_LAYER.bottom - GAME_HEIGHT / 2, SPACE_FULL];
+    let zone = 0;
+    while (zone < bounds.length && altitude >= bounds[zone]) zone++;
+    // Zurück erst ein Stück darunter (kein Flattern an der Grenze)
+    if (zone < this.zone && altitude > bounds[zone] - 300) return;
+    if (zone > this.zone) this.scene.events.emit('sound', { kind: zone === 2 ? 'space' : 'clouds' });
+    this.zone = zone;
   }
 
   /** Ab und zu zieht eine Sternschnuppe schräg durchs Bild. */

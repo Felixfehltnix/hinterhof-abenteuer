@@ -128,7 +128,7 @@ Querformat, Vollbild und „Bildschirm bleibt an“ stehen in `AndroidManifest.x
 | Kind ins Zelt ziehen, Zelt antippen | Kind verschwindet, guckt heraus, kommt heraus |
 | Taschenlampe antippen / aufs Kind ziehen | Licht an und aus / Kind hält sie |
 | Kinder in den Whirlpool ziehen / Whirlpool antippen | Kinder zählen reihum mit (bis 6) / neu zählen |
-| Kinder in die Rakete ziehen (bis 4), Rakete festhalten und ziehen | sie fliegt dem Finger nach; nach oben geht es durch die Wolken ins Weltall (Mond, Planeten, Ufo, Sternschnuppen), die Kinder schweben und winken |
+| Kinder in die Rakete ziehen (bis 4), Rakete festhalten und ziehen | sie fliegt dem Finger nach, die Spitze zeigt immer zum Finger (auch seitwärts und nach unten); nach oben geht es durch die Wolken ins Weltall (Mond, Planeten, Ufo, Sternschnuppen), die Kinder schweben und winken |
 | Rakete loslassen / nach unten ziehen | sinkt langsam zurück auf die Wiese / fliegt schnell hinunter; Finger still drauflassen = schwebt |
 | Planet oder Ufo im Weltall antippen | Planet wackelt und klingt, der Alien winkt |
 | Über die freie Wiese wischen | die Welt scrollt nach links und rechts (3 Bildschirme breit) |

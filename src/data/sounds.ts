@@ -30,7 +30,8 @@ export type SynthId =
   | 'chime'
   | 'whoosh'
   | 'kick'
-  | 'beep';
+  | 'beep'
+  | 'rise';
 
 export interface SoundDef {
   synth: SynthId;
@@ -67,9 +68,12 @@ export const SOUNDS: Record<string, SoundDef> = {
   yum: { synth: 'chime', volume: 0.45 },
   yuck: { synth: 'honk', volume: 0.3 },
   // Rakete und Weltall (#75)
-  liftoff: { synth: 'whoosh', volume: 0.55 },
-  rocket: { synth: 'whoosh', volume: 0.22 },
+  // Kein Dauer-Triebwerk (nervt): ein fröhliches „Fiuuu“ beim Start, sonst nur Ereignisse
+  liftoff: { synth: 'rise', volume: 0.4 },
+  rocket: { synth: 'rise', volume: 0.22 },
   'rocket-land': { synth: 'kick', volume: 0.45 },
+  clouds: { synth: 'whoosh', volume: 0.2 },
+  space: { synth: 'chime', volume: 0.3 },
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },

@@ -23,6 +23,7 @@ const SYNTH_LENGTH: Record<SynthId, number> = {
   chime: 0.62,
   whoosh: 0.7,
   beep: 0.08,
+  rise: 0.75,
 };
 
 /**
@@ -235,6 +236,11 @@ export class SoundSystem {
         break;
       case 'beep':
         this.tone({ freq: 880, type: 'sine', dur: 0.08, vol, pan });
+        break;
+      case 'rise':
+        // Aufsteigendes „Fiuuu“ (Rakete startet), weich und kurz
+        this.tone({ freq: 260, to: 1040, type: 'sine', dur: 0.7, vol, pan, attack: 0.08 });
+        this.tone({ freq: 390, to: 1560, type: 'triangle', dur: 0.55, vol: vol * 0.25, pan, attack: 0.08 });
         break;
     }
     this.note(`synth:${id}`);

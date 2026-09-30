@@ -7,10 +7,8 @@ import type { Kid } from '../../Kid';
 import { ToySeats } from '../seats';
 import type { BehaviorFactory } from './types';
 
-// So viele ms zwischen zwei Triebwerks-Tönen
-const ENGINE_SOUND_EVERY = 520;
-// So schnell folgt die Neigung (1/s)
-const TILT_RATE = 5;
+// Touch-Fläche im Flug: ein Kreis um die Mitte (die Rakete dreht sich in alle Richtungen)
+const FLY_HIT_RADIUS = 300;
 
 /**
  * Rakete (#75): Bis zu 4 Kinder sitzen in der Kabine (Kind auf die Rakete ziehen). Festhalten und
@@ -44,7 +42,6 @@ export const rocket: BehaviorFactory = (toy) => {
   let tilt = 0;
   // Auf dieser Bodenlinie landet sie (wo sie zuletzt über der Wiese war)
   let landY = toy.y;
-  let nextEngineSound = 0;
   // Finger liegt still auf der fliegenden Rakete (noch nicht gezogen): sie schwebt auf der Stelle
   let holdPointer: number | undefined;
   // Kinder, deren Touch-Fläche im Flug aus ist (beim Aussteigen wieder an)
@@ -60,6 +57,17 @@ export const rocket: BehaviorFactory = (toy) => {
   scene.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, onPointerUp);
 
   const groundLine = (y: number) => Phaser.Math.Clamp(y, GROUND_MIN_Y, GROUND_MAX_Y);
+
+  // Am Boden: die Rakete selbst; im Flug ein Kreis um die Mitte (sie kann quer oder kopfüber liegen)
+  const groundHit = toy.input?.hitArea as Phaser.Geom.Rectangle;
+  const flyHit = new Phaser.Geom.Circle(toy.width / 2, toy.height / 2, FLY_HIT_RADIUS);
+  let flyingHit = false;
+  const setHitArea = (flying: boolean) => {
+    if (!toy.input || flying === flyingHit) return;
+    flyingHit = flying;
+    toy.input.hitArea = flying ? flyHit : groundHit;
+    toy.input.hitAreaCallback = flying ? Phaser.Geom.Circle.Contains : Phaser.Geom.Rectangle.Contains;
+  };
 
   /** Punkt an der Rakete (relativ zum Fußpunkt, ungeneigt) in der Welt – mit Neigung um die Mitte. */
   const at = (dx: number, dy: number) => {
@@ -102,8 +110,14 @@ export const rocket: BehaviorFactory = (toy) => {
     let gx = 0;
     let gy: number = holdPointer !== undefined ? 0 : ROCKET.sinkSpeed;
     if (steering) {
-      gx = Phaser.Math.Clamp((target.x - toy.x) * ROCKET.pull, -ROCKET.maxSpeed, ROCKET.maxSpeed);
-      gy = Phaser.Math.Clamp((target.y - toy.y) * ROCKET.pull, -ROCKET.maxSpeed, ROCKET.maxSpeedDown);
+      // Direkt auf den Finger zu, in jede Richtung gleich schnell
+      gx = (target.x - toy.x) * ROCKET.pull;
+      gy = (target.y - toy.y) * ROCKET.pull;
+      const speed = Math.hypot(gx, gy);
+      if (speed > ROCKET.maxSpeed) {
+        gx *= ROCKET.maxSpeed / speed;
+        gy *= ROCKET.maxSpeed / speed;
+      }
     }
     const k = 1 - Math.exp(-ROCKET.response * dt);
     vx += (gx - vx) * k;
@@ -135,7 +149,7 @@ export const rocket: BehaviorFactory = (toy) => {
   /** Flamme und Rauch an der Düse, je nach Schub. */
   const engine = () => {
     const t = scene.time.now / 1000;
-    const thrust = steering ? 0.55 + 0.7 * Phaser.Math.Clamp(-vy / ROCKET.maxSpeed, 0, 1) : 0.3;
+    const thrust = steering ? 0.5 + 0.8 * Phaser.Math.Clamp(Math.hypot(vx, vy) / ROCKET.maxSpeed, 0, 1) : 0.3;
     const n = at(ROCKET_ART.nozzle.dx, ROCKET_ART.nozzle.dy);
     flame
       .setVisible(airborne)
@@ -150,10 +164,6 @@ export const rocket: BehaviorFactory = (toy) => {
       if (!smoke.emitting) smoke.start();
       smoke.setPosition(n.x, n.y + 30);
     } else if (smoke.emitting) smoke.stop();
-    if (airborne && steering && scene.time.now > nextEngineSound) {
-      nextEngineSound = scene.time.now + ENGINE_SOUND_EVERY;
-      scene.events.emit('sound', { kind: 'rocket', x: toy.x });
-    }
   };
 
   /** Kinder in der Kabine: sitzen, im Weltall schweben sie (Arme hoch, leicht auf und ab). */
@@ -223,12 +233,18 @@ export const rocket: BehaviorFactory = (toy) => {
       toy.restY = airborne ? landY : undefined;
       toy.physics.stop();
 
-      // Neigung beim Seitwärtsfliegen, im Weltall schaukelt sie sanft
+      // Gesteuert zeigt die Spitze immer in Flugrichtung (zum Finger), auch zur Seite und nach unten.
+      // Losgelassen richtet sie sich wieder auf, im Weltall schaukelt sie dabei sanft.
       const altitude = GROUND_MAX_Y - toy.y;
-      let goal = airborne ? Phaser.Math.Clamp((vx / ROCKET.maxSpeed) * ROCKET.maxTilt * 1.4, -ROCKET.maxTilt, ROCKET.maxTilt) : 0;
-      if (airborne && !steering && altitude > WEIGHTLESS_FROM) goal += Math.sin(scene.time.now / 900) * 0.07;
-      tilt += (goal - tilt) * (1 - Math.exp(-TILT_RATE * dt));
+      let goal = 0;
+      if (airborne && steering) {
+        goal = Math.hypot(vx, vy) > ROCKET.turnFromSpeed ? Math.atan2(vx, -vy) : tilt;
+      } else if (airborne && altitude > WEIGHTLESS_FROM) {
+        goal = Math.sin(scene.time.now / 900) * 0.07;
+      }
+      tilt = Phaser.Math.Angle.Wrap(tilt + Phaser.Math.Angle.Wrap(goal - tilt) * (1 - Math.exp(-ROCKET.turnRate * dt)));
       toy.spin = tilt;
+      setHitArea(airborne);
 
       toy.setDepth(airborne ? ROCKET_FLY_DEPTH : toy.y);
       front

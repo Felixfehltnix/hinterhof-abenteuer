@@ -60,17 +60,18 @@ export const CLOUD_FRONT_DEPTH = 6300;
 
 /** Rakete: Fluggefühl. */
 export const ROCKET = {
-  /** Höchstgeschwindigkeit nach oben/zur Seite und nach unten (px/s). */
-  maxSpeed: 1100,
-  maxSpeedDown: 1600,
+  /** Höchstgeschwindigkeit, in jede Richtung gleich (px/s). */
+  maxSpeed: 1400,
   /** So stark zieht es die Rakete zum Finger (1/s). */
-  pull: 4,
-  /** So schnell passt sie ihre Geschwindigkeit an (1/s): etwas träge wie ein Raumschiff. */
-  response: 4,
-  /** Losgelassen in der Luft: sinkt langsam. */
+  pull: 6,
+  /** So schnell passt sie ihre Geschwindigkeit an (1/s): folgt dem Finger dicht, aber weich. */
+  response: 7,
+  /** Losgelassen in der Luft: sinkt langsam (Spitze wieder nach oben). */
   sinkSpeed: 190,
-  /** Größte Neigung beim Seitwärtsfliegen (rad). */
-  maxTilt: 0.32,
+  /** So schnell dreht sie die Spitze in Flugrichtung (1/s). */
+  turnRate: 7,
+  /** Ab dieser Geschwindigkeit zeigt die Spitze in Flugrichtung (px/s), langsamer bleibt sie, wie sie ist. */
+  turnFromSpeed: 160,
   /** Kinder sitzen verkleinert in der Kabine. */
   kidScale: 0.55,
   seats: 4,

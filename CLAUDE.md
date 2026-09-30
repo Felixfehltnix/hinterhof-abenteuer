@@ -128,6 +128,17 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
 
+## Hund
+- Der Hund (schwarzer Labrador, `src/objects/Dog.ts`, `scene.dog`) lebt immer auf der Wiese (kein Kind, nicht im Gartentor).
+  Werte in `src/data/dog.ts` (`DOG`), Zeichnungen der Teile in `src/scenes/placeholders/dog.ts`
+  (`dog-body`, `dog-leg`, `dog-tail`, `dog-head`, `dog-head-open`, `dog-head-sleep`). Teile an Gelenken wie beim Kind,
+  Posen `stand`/`sit`/`lie`/`jump`, Sprünge über `lift` (y bleibt die Bodenlinie). Gespeichert als Weltzustand `dog`.
+- Von selbst: streunt, schnüffelt, sitzt, liegt, stupst Kinder an (`giggle`), schläft nachts. Antippen = bellen,
+  ziehen = Beine baumeln.
+- Apportieren: Toy sendet beim Werfen `scene.events.emit('toy-thrown', toy)`; zusätzlich jagt er schnell Fliegendes/Rollendes.
+  Bälle (`tags: ['ball']`), `glide` und `boomerang` fängt er im Sprung oder hebt sie auf und bringt sie dem nächsten Kind.
+- Wasser: `dog.soak(jump?)` (Gießkanne, Sprenger), Pfützen, ins Planschbecken ziehen → danach schüttelt er sich, Kinder daneben kichern.
+
 ## Töne
 - Alles, was klingen soll, sendet `scene.events.emit('sound', { kind, pitch?, value?, voice?, x? })`
   (Typ `SoundEvent` in `src/data/sounds.ts`). `x` ist die Weltposition (leichtes Stereo).
@@ -146,7 +157,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
+  Hund: `bark`, `dog-catch`, `dog-shake`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

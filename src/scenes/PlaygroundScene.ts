@@ -12,7 +12,9 @@ import {
 import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
 import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
 import { getToyDef, TOYS, type ToyDef } from '../data/toys';
+import { DOG } from '../data/dog';
 import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
+import { Dog } from '../objects/Dog';
 import { Garden } from '../objects/Garden';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
@@ -50,6 +52,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private gate!: GardenGate;
   /** Blumen und Sandkuchen */
   garden!: Garden;
+  /** Der Hund (schwarzer Labrador), lebt immer auf der Wiese */
+  dog!: Dog;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
@@ -114,6 +118,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);
     this.space = new Space(this);
+    this.dog = new Dog(this, DOG.start.x, DOG.start.y);
     this.audio = new SoundSystem(this);
 
     this.setupInput();
@@ -440,7 +445,7 @@ export class PlaygroundScene extends Phaser.Scene {
     };
 
     this.input.on('dragstart', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-      if (!(obj instanceof Toy) && !(obj instanceof Kid)) return;
+      if (!(obj instanceof Toy) && !(obj instanceof Kid) && !(obj instanceof Dog)) return;
       obj.handleDragStart();
       this.beginDrag(p, obj, (pp, x, y) => obj.handleDrag(pp, x, y));
     });
@@ -455,6 +460,7 @@ export class PlaygroundScene extends Phaser.Scene {
         return;
       }
       if (obj instanceof Kid) this.releaseKid(obj, p);
+      if (obj instanceof Dog) obj.release();
     });
 
     // Tippen auf eine freie Stelle schließt offene Leisten.
@@ -483,6 +489,7 @@ export class PlaygroundScene extends Phaser.Scene {
  */
 function touchRank(obj: Phaser.GameObjects.GameObject): number {
   if (obj instanceof Kid) return obj.mode === 'riding' ? 1 : 0;
+  if (obj instanceof Dog) return 0;
   if (obj instanceof Toy) return obj.def.large ? 1 : 0;
   if (obj.getData('scenery') === true) return 2;
   return -1;

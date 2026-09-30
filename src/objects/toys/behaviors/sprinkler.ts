@@ -43,6 +43,8 @@ export const sprinkler: BehaviorFactory = (toy) => {
         .kidsOnMeadow()
         .filter((k) => Math.abs(k.x - toy.x) < NEAR_X && Math.abs(k.y - toy.y) < NEAR_Y)
         .forEach((k, i) => scene.time.delayedCall(i * 120, () => k.hop()));
+      // Der Hund springt nach dem Wasser
+      if (Math.abs(scene.dog.x - toy.x) < NEAR_X && Math.abs(scene.dog.y - toy.y) < NEAR_Y) scene.dog.soak(true);
     },
     onRemove: () => emitter.stop(),
     onDestroy: () => emitter.destroy(),

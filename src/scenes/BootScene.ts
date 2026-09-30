@@ -42,6 +42,7 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { DOG_BODY_SIZE, DOG_HEAD_SIZE, DOG_LEG_SIZE, DOG_TAIL_SIZE, drawDogBody, drawDogHead, drawDogLeg, drawDogTail } from './placeholders/dog';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -568,6 +569,14 @@ export class BootScene extends Phaser.Scene {
     this.makeSpace();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
+
+    // Hund (schwarzer Labrador) aus Einzelteilen
+    this.makeTexture('dog-body', DOG_BODY_SIZE.width, DOG_BODY_SIZE.height, drawDogBody);
+    this.makeTexture('dog-leg', DOG_LEG_SIZE.width, DOG_LEG_SIZE.height, drawDogLeg);
+    this.makeTexture('dog-tail', DOG_TAIL_SIZE.width, DOG_TAIL_SIZE.height, drawDogTail);
+    this.makeTexture('dog-head', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'normal'));
+    this.makeTexture('dog-head-open', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'open'));
+    this.makeTexture('dog-head-sleep', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'sleep'));
   }
 
   private makeTexture(

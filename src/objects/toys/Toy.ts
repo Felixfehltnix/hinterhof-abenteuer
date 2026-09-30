@@ -44,6 +44,8 @@ export class Toy extends Phaser.GameObjects.Image {
    * `rotation` bleibt frei für Wackeln & Co. (dreht um den Fußpunkt).
    */
   spin = 0;
+  /** Wo es beim Speichern liegt, falls es gerade selbst fliegt (Rakete: ihre Landelinie). */
+  restY?: number;
 
   constructor(scene: Phaser.Scene, def: ToyDef, x: number, y: number) {
     super(scene, x, y, def.id);
@@ -87,7 +89,10 @@ export class Toy extends Phaser.GameObjects.Image {
   }
 
   handleDrag(pointer: Phaser.Input.Pointer, x: number, y: number): void {
-    this.setPosition(x, y);
+    // Steuert ein Baustein selbst (Rakete), fliegt das Spielzeug nur in Richtung Finger.
+    const steered = this.behaviors.filter((b) => b.onSteer);
+    if (steered.length) steered.forEach((b) => b.onSteer!(x, y));
+    else this.setPosition(x, y);
     // Zeitstempel des Touch-Ereignisses, nicht des Frames: bleibt auch bei Rucklern genau.
     // Wurfgeschwindigkeit = Bewegung des Fingers auf dem Bildschirm. So zählt das Mitscrollen
     // am Bildschirmrand nicht als Wurf, nur ein echter Schwung des Fingers.
@@ -156,7 +161,7 @@ export class Toy extends Phaser.GameObjects.Image {
 
   /** Position fürs Speichern: ein fliegendes Spielzeug liegt schon dort, wo es landen wird. */
   restPosition(): { x: number; y: number } {
-    const y = this.physics.active ? this.physics.groundY : this.y;
+    const y = this.restY ?? (this.physics.active ? this.physics.groundY : this.y);
     return {
       x: Phaser.Math.Clamp(this.x, this.width / 2, WORLD_WIDTH - this.width / 2),
       y: Phaser.Math.Clamp(y, GROUND_MIN_Y, GROUND_MAX_Y),

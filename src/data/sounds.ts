@@ -66,6 +66,13 @@ export const SOUNDS: Record<string, SoundDef> = {
   squirt: { synth: 'whoosh', volume: 0.35 },
   yum: { synth: 'chime', volume: 0.45 },
   yuck: { synth: 'honk', volume: 0.3 },
+  // Rakete und Weltall (#75)
+  liftoff: { synth: 'whoosh', volume: 0.55 },
+  rocket: { synth: 'whoosh', volume: 0.22 },
+  'rocket-land': { synth: 'kick', volume: 0.45 },
+  planet: { synth: 'mallet', pitched: true, volume: 0.45 },
+  ufo: { synth: 'beep', volume: 0.3 },
+  'shooting-star': { synth: 'chime', volume: 0.18 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

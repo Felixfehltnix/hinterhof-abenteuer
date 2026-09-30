@@ -80,7 +80,7 @@ export class Weather {
       [1180, 90, 1.2],
       [1750, 250, 0.9],
     ]) {
-      this.extraClouds.push(scene.add.image(x, y, 'cloud').setDepth(-1039).setScale(s).setAlpha(0).setScrollFactor(CLOUD_PARALLAX, 0));
+      this.extraClouds.push(scene.add.image(x, y, 'cloud').setDepth(-1039).setScale(s).setAlpha(0).setScrollFactor(CLOUD_PARALLAX, 1));
     }
     // Alle Wolken sind der Wetter-Knopf
     for (const cloud of [...dayCycle.clouds, ...this.extraClouds]) {
@@ -92,7 +92,7 @@ export class Weather {
       cloud.setData('onTap', () => this.next());
     }
 
-    this.rainbow = scene.add.image(GAME_WIDTH / 2, GROUND_TOP, 'rainbow').setOrigin(0.5, 1).setDepth(-1060).setAlpha(0).setScrollFactor(0);
+    this.rainbow = scene.add.image(GAME_WIDTH / 2, GROUND_TOP, 'rainbow').setOrigin(0.5, 1).setDepth(-1060).setAlpha(0).setScrollFactor(0, 1);
 
     this.puddles = PUDDLES.map((p) => ({ img: scene.add.image(p.x, p.y, 'puddle').setOrigin(0.5, 0.5).setDepth(-985).setScale(0), size: 0 }));
 
@@ -231,6 +231,17 @@ export class Weather {
         { alpha: 0, duration: 1500, delay: RAINBOW_MS - 3000, ease: 'Sine.easeInOut' },
       ],
     });
+  }
+
+  /**
+   * Hoch über der Wiese (Rakete, #75): Über der Wolkenschicht regnet und schneit es nicht mehr.
+   * amount 0 = auf der Wiese, 1 = über den Wolken.
+   */
+  setHighUp(amount: number): void {
+    const a = 1 - Phaser.Math.Clamp(amount, 0, 1);
+    this.rain.setAlpha(a);
+    this.leaves.setAlpha(a);
+    this.snow.flakes.setAlpha(a);
   }
 
   private update(delta: number): void {

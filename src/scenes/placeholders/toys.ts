@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { ToyId } from '../../data/toys';
+import { drawRocket } from './space';
 
 // Platzhalter-Zeichnungen für die Spielzeuge aus src/data/toys.ts, gezeichnet in die
 // Fläche width × height aus dem Katalog. Fehlt eine Zeichnung, meckert tsc.
@@ -414,6 +415,7 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
   },
 
   whirlpool: (g) => drawWhirlpool(g, false),
+  rocket: (g) => drawRocket(g, 'back'),
 
   snowball: (g) => {
     g.fillStyle(0xffffff);

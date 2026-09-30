@@ -152,5 +152,6 @@ export class LightLayer {
 function worldBounds(o: Drawable, cam: Phaser.Cameras.Scene2D.Camera): Phaser.Geom.Rectangle {
   const b = (o as unknown as Phaser.GameObjects.Image).getBounds();
   b.x += cam.scrollX * (1 - o.scrollFactorX);
+  b.y += cam.scrollY * (1 - o.scrollFactorY);
   return b;
 }

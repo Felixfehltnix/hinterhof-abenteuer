@@ -21,6 +21,7 @@ export type Activity =
   | 'bathe'
   | 'walk'
   | 'sit'
+  | 'rocket'
   | 'hidden';
 
 /** Zusatzwerte, die ein Spielgerät mitgeben kann (z. B. Sprunghöhe, oben/unten). */
@@ -31,6 +32,8 @@ export interface ActivityParams {
   salto?: boolean;
   /** Wippe: −1 ganz unten … 1 ganz oben. */
   up?: number;
+  /** Rakete: schwerelos 0..1 (Arme und Beine schweben, winken). */
+  float?: number;
 }
 
 export type Face = 'blink' | 'joy' | 'yawn' | 'yuck';
@@ -71,6 +74,7 @@ export const ACTIVITY_POSE: Record<Activity, PoseName> = {
   bathe: 'bathe',
   walk: 'stand',
   sit: 'sit',
+  rocket: 'sit',
   hidden: 'stand',
 };
 
@@ -79,6 +83,7 @@ export const ACTIVITY_FACE: Partial<Record<Activity, Face>> = {
   drag: 'joy',
   slide: 'joy',
   bounce: 'joy',
+  rocket: 'joy',
 };
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
@@ -219,6 +224,19 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
     case 'sit':
       // Sitzt und schaut sich um (Spielhaus)
       return merge(breathe(c, 0.7), { head: { angle: c.look } });
+    case 'rocket': {
+      // In der Rakete: sitzt, im Weltall schweben Arme und Beine, eine Hand winkt
+      const f = clamp(c.params.float ?? 0, 0, 1);
+      const drift = Math.sin(t * 1.6 + c.seed);
+      const wave = Math.sin(t * 9 + c.seed) * 22;
+      return merge(breathe(c, 0.6 * (1 - f)), {
+        'arm-l': { angle: f * (110 + 20 * drift) },
+        'arm-r': { angle: -f * (140 + wave) },
+        'leg-l': { angle: f * (25 + 12 * drift) },
+        'leg-r': { angle: f * (10 - 12 * drift) },
+        head: { angle: c.look * (1 - f) + f * 8 * drift },
+      });
+    }
     case 'hidden':
       return {};
   }

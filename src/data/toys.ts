@@ -54,7 +54,8 @@ export type BehaviorId =
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
-  | 'whirlpool';
+  | 'whirlpool'
+  | 'rocket';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
 export type ToyTag = 'ball' | 'snow';
@@ -424,6 +425,16 @@ export const TOYS = [
     width: 380,
     height: 230,
     behaviors: ['draggable', 'whirlpool'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Rakete (#75): bis zu 4 Kinder in der Kabine. Festhalten und ziehen = fliegen (bis ins Weltall),
+    // loslassen = sinkt langsam zurück auf die Wiese.
+    id: 'rocket',
+    large: true,
+    width: 300,
+    height: 620,
+    behaviors: ['draggable', 'rocket'],
     params: { bounce: 0, rollFriction: 20 },
   },
   // --- Schnee (nicht in der Kiste: entsteht durch Tippen auf die Schneedecke) ---

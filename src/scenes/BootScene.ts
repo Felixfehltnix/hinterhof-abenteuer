@@ -42,6 +42,23 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import {
+  ALIEN_ARM_SIZE,
+  ALIEN_SIZE,
+  drawAlien,
+  drawAlienArm,
+  drawFlame,
+  drawPlanet,
+  drawRocket,
+  drawRocketGlass,
+  drawShootingStar,
+  drawUfo,
+  FLAME_SIZE,
+  PLANET_SIZE,
+  ROCKET_ART,
+  SHOOTING_STAR_SIZE,
+  UFO_SIZE,
+} from './placeholders/space';
 
 // Erzeugt Platzhalter-Grafiken per Code, damit das Spiel ohne Asset-Dateien läuft.
 // Sobald echte Grafiken da sind: PNGs nach public/assets/ legen, hier in preload()
@@ -421,6 +438,44 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('playhouse-front-solid');
   }
 
+  /** Rakete und Weltall (#75): Vorderseite mit ausgestanztem Fenster, Flamme, Planeten, Ufo. */
+  private makeSpace(): void {
+    this.makeTexture('rocket-flame', FLAME_SIZE.width, FLAME_SIZE.height, drawFlame);
+    for (const kind of Object.keys(PLANET_SIZE) as (keyof typeof PLANET_SIZE)[]) {
+      this.makeTexture(`planet-${kind}`, PLANET_SIZE[kind].width, PLANET_SIZE[kind].height, (g) => drawPlanet(g, kind));
+    }
+    this.makeTexture('ufo-dome', UFO_SIZE.width, UFO_SIZE.height, (g) => drawUfo(g, 'dome'));
+    this.makeTexture('ufo', UFO_SIZE.width, UFO_SIZE.height, (g) => drawUfo(g, 'saucer'));
+    this.makeTexture('alien', ALIEN_SIZE.width, ALIEN_SIZE.height, drawAlien);
+    this.makeTexture('alien-arm', ALIEN_ARM_SIZE.width, ALIEN_ARM_SIZE.height, drawAlienArm);
+    this.makeTexture('shooting-star', SHOOTING_STAR_SIZE.width, SHOOTING_STAR_SIZE.height, drawShootingStar);
+
+    if (this.textures.exists('rocket-front')) return; // echte Grafik (mit durchsichtigem Fenster)
+    const { width: w, height: h, window: win } = ROCKET_ART;
+    this.makeTexture('rocket-front-solid', w, h, (g) => drawRocket(g, 'front'));
+    this.makeTexture('rocket-glass', w, h, drawRocketGlass);
+    const canvas = this.textures.createCanvas('rocket-front', w, h);
+    if (!canvas) return;
+    const ctx = canvas.context;
+    ctx.drawImage(this.textures.get('rocket-front-solid').getSourceImage() as CanvasImageSource, 0, 0);
+    // Fenster ausstanzen (abgerundetes Rechteck), dann das Glas darüber
+    ctx.globalCompositeOperation = 'destination-out';
+    const { x, y, w: ww, h: wh, r } = win;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + ww, y, x + ww, y + wh, r);
+    ctx.arcTo(x + ww, y + wh, x, y + wh, r);
+    ctx.arcTo(x, y + wh, x, y, r);
+    ctx.arcTo(x, y, x + ww, y, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(this.textures.get('rocket-glass').getSourceImage() as CanvasImageSource, 0, 0);
+    canvas.refresh();
+    this.textures.remove('rocket-front-solid');
+    this.textures.remove('rocket-glass');
+  }
+
   /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Tuch. */
   private makeGrill(): void {
     this.makeTexture('grill-bg', GAME_WIDTH, GAME_HEIGHT, drawGrillBackground);
@@ -510,6 +565,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('glow-soft', 128, 128, drawSoftGlow);
     this.makeDressUp();
     this.makeGrill();
+    this.makeSpace();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
   }

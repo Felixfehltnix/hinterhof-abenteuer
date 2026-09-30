@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { DRAG_THRESHOLD, GAME_WIDTH, WORLD_WIDTH } from '../config';
+import { DRAG_THRESHOLD, GAME_HEIGHT, GAME_WIDTH, WORLD_WIDTH } from '../config';
+import { ALTITUDE_MAX } from '../data/space';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 
 // Wie weit man über den Weltrand hinaus ziehen kann (federt dann zurück), px.
@@ -8,17 +9,36 @@ const RUBBER = 140;
 const FRICTION = 3.5;
 // Wie schnell die Kamera vom Rand zurückfedert (pro Sekunde).
 const SPRING = 10;
+// So schnell folgt die Kamera einem fliegenden Objekt (1/s).
+const FOLLOW_RATE = 9;
+// Ein verfolgtes Objekt bleibt in diesem Bereich des Bildschirms (Anteile von Breite/Höhe).
+const FOLLOW_TOP = 0.14;
+const FOLLOW_BOTTOM = 0.9;
+const FOLLOW_SIDE = 0.22;
+
+/** Was die Kamera verfolgen kann (z. B. die Rakete): Fußpunkt und Größe. */
+export interface CameraTarget {
+  x: number;
+  y: number;
+  displayWidth: number;
+  displayHeight: number;
+  active: boolean;
+}
 
 /**
  * Kamera über der breiten Wiese: Ein Finger auf der freien Wiese und waagerecht ziehen
  * scrollt die Welt, mit Schwung und weichem Rand. Die Position wird mitgespeichert.
  * Tippen ohne Ziehen bleibt ein Tippen (die Szene prüft dafür die Zieh-Distanz).
+ * Nach oben geht es nur mit etwas Fliegendem (Rakete, #75): `follow(obj)` hält es im Bild,
+ * auch hoch über der Wiese bis ins Weltall; ohne Ziel sinkt die Kamera zurück auf die Wiese.
  */
 export class CameraControl {
   private readonly cam: Phaser.Cameras.Scene2D.Camera;
   private gesture?: { id: number; startX: number; startScroll: number; lastX: number; lastT: number; moved: boolean };
   private velocity = 0; // px/s Kamera-Bewegung
   private scroll = 0; // eigene Position (darf beim Ziehen über den Rand hinaus)
+  private scrollUp = 0; // senkrecht: 0 = Wiese, negativ = darüber
+  private target?: CameraTarget;
 
   constructor(scene: PlaygroundScene) {
     this.cam = scene.cameras.main;
@@ -47,6 +67,20 @@ export class CameraControl {
 
   get scrollX(): number {
     return this.scroll;
+  }
+
+  /** Wie hoch die Kamera über der Wiese steht (px, 0 = auf der Wiese). */
+  get altitude(): number {
+    return -this.scrollUp;
+  }
+
+  /** Verfolgt ein fliegendes Objekt (undefined = keins mehr, die Kamera sinkt zurück). */
+  follow(target: CameraTarget | undefined): void {
+    this.target = target;
+  }
+
+  isFollowing(target: CameraTarget): boolean {
+    return this.target === target;
   }
 
   /** Wird gerade mit dem Finger gescrollt? */
@@ -94,8 +128,13 @@ export class CameraControl {
   }
 
   private update(delta: number): void {
-    if (this.gesture?.moved) return;
     const dt = delta / 1000;
+    this.updateVertical(dt);
+    if (this.gesture?.moved) {
+      this.apply();
+      return;
+    }
+    this.followSideways(dt);
     const max = CameraControl.maxScroll;
     if (Math.abs(this.velocity) > 5) {
       this.scroll += this.velocity * dt;
@@ -114,6 +153,34 @@ export class CameraControl {
     this.apply();
   }
 
+  /** Senkrecht: das verfolgte Objekt im Bild halten, sonst zurück auf die Wiese. */
+  private updateVertical(dt: number): void {
+    const t = this.target;
+    if (t && !t.active) this.target = undefined;
+    let goal = 0;
+    if (this.target) {
+      const top = this.target.y - this.target.displayHeight;
+      const lowest = this.target.y - FOLLOW_BOTTOM * GAME_HEIGHT;
+      const highest = top - FOLLOW_TOP * GAME_HEIGHT;
+      goal = Phaser.Math.Clamp(this.scrollUp, lowest, Math.max(lowest, highest));
+    }
+    goal = Phaser.Math.Clamp(goal, -ALTITUDE_MAX, 0);
+    this.scrollUp += (goal - this.scrollUp) * (1 - Math.exp(-FOLLOW_RATE * dt));
+    if (Math.abs(goal - this.scrollUp) < 0.5) this.scrollUp = goal;
+  }
+
+  /** Waagerecht: fliegt das verfolgte Objekt an den Rand, scrollt die Welt mit. */
+  private followSideways(dt: number): void {
+    const t = this.target;
+    if (!t) return;
+    const left = t.x - t.displayWidth / 2 - FOLLOW_SIDE * GAME_WIDTH;
+    const right = t.x + t.displayWidth / 2 - (1 - FOLLOW_SIDE) * GAME_WIDTH;
+    const goal = this.clamped(Phaser.Math.Clamp(this.scroll, right, Math.max(right, left)));
+    if (goal === this.scroll) return;
+    this.velocity = 0;
+    this.scroll += (goal - this.scroll) * (1 - Math.exp(-FOLLOW_RATE * dt));
+  }
+
   /** Über den Rand hinaus nur gebremst (Gummiband). */
   private rubber(x: number): number {
     const max = CameraControl.maxScroll;
@@ -128,5 +195,6 @@ export class CameraControl {
 
   private apply(): void {
     this.cam.scrollX = Math.round(this.scroll * 10) / 10;
+    this.cam.scrollY = Math.round(this.scrollUp * 10) / 10;
   }
 }

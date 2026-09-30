@@ -73,7 +73,7 @@ export class Backdrop {
       const key = houseKey(h.kind);
       const scale = h.scale ?? 1;
       const place = (img: Phaser.GameObjects.Image, depth: number) =>
-        img.setOrigin(0.5, 1).setScale(scale).setScrollFactor(HOUSE_PARALLAX, 0).setDepth(depth);
+        img.setOrigin(0.5, 1).setScale(scale).setScrollFactor(HOUSE_PARALLAX, 1).setDepth(depth);
       const house = place(scene.add.image(h.x, HOUSE_BASE_Y, key), HOUSE_DEPTH);
       house.setData('baseTint', h.tint ?? 0xffffff).setTint(h.tint ?? 0xffffff);
       this.houses.push(flagOccluder(house));
@@ -87,7 +87,7 @@ export class Backdrop {
           .image(left + w.x * scale, top + w.y * scale, 'window-glow')
           .setOrigin(0)
           .setDisplaySize(w.w * scale, w.h * scale)
-          .setScrollFactor(HOUSE_PARALLAX, 0)
+          .setScrollFactor(HOUSE_PARALLAX, 1)
           .setTint(WINDOW_COLORS[i % WINDOW_COLORS.length])
           .setAlpha(0)
           .setVisible(false);
@@ -107,7 +107,7 @@ export class Backdrop {
           frequency: 380,
           emitting: false,
         });
-        smoke.setScrollFactor(HOUSE_PARALLAX, 0).setDepth(SMOKE_DEPTH);
+        smoke.setScrollFactor(HOUSE_PARALLAX, 1).setDepth(SMOKE_DEPTH);
         this.smoke.push(smoke);
       }
     });
@@ -123,7 +123,7 @@ export class Backdrop {
         .image(t.x, BACK_TREE_BASE_Y, `bg-${t.kind}`)
         .setOrigin(0.5, 1)
         .setScale(t.scale ?? 1)
-        .setScrollFactor(BACK_TREE_PARALLAX, 0)
+        .setScrollFactor(BACK_TREE_PARALLAX, 1)
         .setDepth(BACK_TREE_DEPTH);
       this.swaying.push({ img: flagOccluder(img), phase: i * 1.3, amount: t.kind === 'fir' ? 0.8 : 1.4 });
     });

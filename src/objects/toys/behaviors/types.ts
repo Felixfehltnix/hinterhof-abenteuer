@@ -30,6 +30,11 @@ export interface ToyBehavior {
   onDragStart?(): void;
   /** Während des Ziehens, nachdem das Spielzeug an den Finger gesetzt wurde. */
   onDrag?(x: number, y: number): void;
+  /**
+   * Ziehen steuert nur (z. B. Rakete): Das Spielzeug wird nicht an den Finger gesetzt, sondern
+   * bekommt das Ziel (x, y) und bewegt sich selbst dorthin.
+   */
+  onSteer?(x: number, y: number): void;
   onDragEnd?(release: Release): void;
   /** Ein Kind wurde auf dem Spielzeug losgelassen. true = angenommen. */
   onKidDropped?(kid: Kid): boolean;

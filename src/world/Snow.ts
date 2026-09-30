@@ -19,7 +19,8 @@ export class Snow {
   private active = false;
   private cover = 0;
   private readonly blanket: Phaser.GameObjects.Rectangle;
-  private readonly flakes: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** Fallende Flocken (stehen fest im Bild; über den Wolken ausgeblendet). */
+  readonly flakes: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly hats = new Map<Kid, Phaser.GameObjects.Image>();
   private readonly melt = new Map<Toy, number>();
 

@@ -27,6 +27,7 @@ import type { DressUpData } from './DressUpScene';
 import type { GrillData } from './GrillScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
+import { Space } from '../world/Space';
 import { CameraControl } from '../world/CameraControl';
 import { SoundSystem } from '../audio/Sound';
 import { loadSave, SAVE_VERSION, type SaveData } from '../save/storage';
@@ -53,8 +54,10 @@ export class PlaygroundScene extends Phaser.Scene {
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
   weather!: Weather;
-  /** Kamera über der breiten Wiese (Wischen zum Scrollen) */
+  /** Kamera über der breiten Wiese (Wischen zum Scrollen, folgt der Rakete nach oben) */
   cameraControl!: CameraControl;
+  /** Himmel über der Wiese: Wolkenschicht und Weltall (Rakete, #75) */
+  space!: Space;
   /** Tonausgabe (hört auf 'sound'-Ereignisse) */
   audio!: SoundSystem;
   /** Felix' Garten mit Lichterkette und Gartentor (#64) */
@@ -69,6 +72,8 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Der Finger, der gerade das Scrollen am Rand steuert. */
   private edgePointer?: number;
   private savedWorld: Record<string, unknown> = {};
+  /** Kamera-Stand im letzten Bild (bewegt sie sich, folgen gezogene Objekte dem Finger neu). */
+  private lastScroll = { x: 0, y: 0 };
 
   constructor() {
     super('Playground');
@@ -108,6 +113,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);
+    this.space = new Space(this);
     this.audio = new SoundSystem(this);
 
     this.setupInput();
@@ -117,6 +123,12 @@ export class PlaygroundScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     this.equipment.forEach((e) => e.update());
     this.updateEdgeScroll(delta);
+    // Folgt die Kamera z. B. der Rakete, steht der Finger an einer neuen Weltstelle
+    const cam = this.cameras.main;
+    if (cam.scrollX !== this.lastScroll.x || cam.scrollY !== this.lastScroll.y) {
+      this.lastScroll = { x: cam.scrollX, y: cam.scrollY };
+      for (const d of this.drags.values()) this.followDrag(d.pointer);
+    }
   }
 
   // --- Gezogene Objekte folgen dem Finger (auch beim Scrollen) ---------------

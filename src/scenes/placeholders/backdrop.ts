@@ -694,15 +694,26 @@ export function drawSmoke(g: G): void {
 }
 
 /** Großer Laubbaum mit breiter, lichter Krone (Spielgerät „tree“, Platzhalter 560 × 660). */
+// Platz über der Krone, damit die obersten Blätterbüschel nicht abgeschnitten werden
+// (von der Rakete aus sieht man den Baum auch von oben, #75).
+const BIG_TREE_TOP = 70;
+
 export const BIG_TREE = {
   width: 560,
-  height: 660,
+  height: 660 + BIG_TREE_TOP,
   /** Stamm und unterer Kronenbereich: dort wackelt er beim Antippen. */
-  trunk: new Phaser.Geom.Rectangle(235, 360, 90, 300),
-  lowerCrown: new Phaser.Geom.Rectangle(70, 250, 420, 130),
+  trunk: new Phaser.Geom.Rectangle(235, 360 + BIG_TREE_TOP, 90, 300),
+  lowerCrown: new Phaser.Geom.Rectangle(70, 250 + BIG_TREE_TOP, 420, 130),
 };
 
 export function drawBigTree(g: G): void {
+  g.save();
+  g.translateCanvas(0, BIG_TREE_TOP);
+  drawBigTreeBody(g);
+  g.restore();
+}
+
+function drawBigTreeBody(g: G): void {
   const r = rng(230);
   // Äste zuerst: Zwischen den Blätterbüscheln sieht man sie (lichte Krone)
   const branches: [number, number, number, number, number][] = [
@@ -732,6 +743,8 @@ export function drawBigTree(g: G): void {
     [140, 220, 62], [90, 300, 50], [220, 170, 66], [300, 110, 64], [390, 170, 62],
     [460, 250, 56], [490, 320, 42], [60, 250, 40], [180, 110, 48], [420, 90, 46],
     [300, 230, 52], [220, 280, 44], [380, 290, 46], [130, 150, 44], [300, 40, 44],
+    // Kuppe oben: rund statt flach
+    [240, 30, 36], [362, 42, 34],
   ];
   const shades = [0x3d8040, 0x4a9446, 0x5aa650];
   for (const [cx, cy, rad] of clusters) {

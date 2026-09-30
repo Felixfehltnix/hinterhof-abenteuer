@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DEPTH_TINT, GAME_HEIGHT, GAME_WIDTH, GROUND_TOP, WORLD_WIDTH } from '../config';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
+import { SPACE_SKY } from '../data/space';
 import { environment, type TimeOfDay } from './environment';
 
 const ORDER: TimeOfDay[] = ['morning', 'noon', 'evening', 'night'];
@@ -145,6 +146,8 @@ export class DayCycle {
   private shown: Look = LOOKS.noon;
   private progress = { t: 1 };
   private weatherGrey = 0;
+  /** Wie weit oben im Weltall (0..1, Rakete #75): Himmel wird dunkel. */
+  private space = 0;
   private nextYawn = 0;
 
   constructor(private readonly scene: PlaygroundScene) {
@@ -180,7 +183,7 @@ export class DayCycle {
       [1400, 240],
     ]) {
       // Wolken ziehen beim Scrollen nur leicht mit (Tiefenwirkung)
-      this.clouds.push(scene.add.image(x, y, 'cloud').setDepth(-1040).setScrollFactor(CLOUD_PARALLAX, 0));
+      this.clouds.push(scene.add.image(x, y, 'cloud').setDepth(-1040).setScrollFactor(CLOUD_PARALLAX, 1));
     }
 
     // Tau glitzert morgens auf der Wiese
@@ -241,6 +244,16 @@ export class DayCycle {
     this.progress.t = 1;
   }
 
+  /** Hoch über der Wiese (0 = Wiese, 1 = Weltall): der Himmel wird dunkelblau bis schwarz. */
+  setSpace(amount: number): void {
+    this.space = Phaser.Math.Clamp(amount, 0, 1);
+  }
+
+  /** Farbe der Wolken gerade (Tageszeit und Wetter), auch für die Wolkenschicht hoch oben. */
+  get cloudTint(): number {
+    return this.shown.cloudTint;
+  }
+
   /** Wetter macht den Himmel grauer und die Welt etwas dunkler (0 = gar nicht, 1 = stark). */
   setWeatherGrey(amount: number): void {
     this.weatherGrey = Phaser.Math.Clamp(amount, 0, 1);
@@ -272,8 +285,11 @@ export class DayCycle {
     this.shown = look;
     const t = this.scene.time.now / 1000;
     this.sky.clear();
-    this.sky.fillGradientStyle(look.skyTop, look.skyTop, look.skyBottom, look.skyBottom, 1);
-    this.sky.fillRect(0, 0, GAME_WIDTH, GROUND_TOP);
+    // Hoch oben (Rakete) oben schneller dunkel als unten; der Himmel füllt dann den ganzen Bildschirm.
+    const top = lerpColor(look.skyTop, SPACE_SKY.top, Math.min(1, this.space * 1.3));
+    const bottom = lerpColor(look.skyBottom, SPACE_SKY.bottom, this.space);
+    this.sky.fillGradientStyle(top, top, bottom, bottom, 1);
+    this.sky.fillRect(0, 0, GAME_WIDTH, this.scene.cameras.main.scrollY < 0 ? GAME_HEIGHT : GROUND_TOP);
 
     this.sun.setPosition(look.sunX, look.sunY).setTint(look.sunColor).setAlpha(look.sunAlpha);
     // Der Mond am Himmel ist unter der Einfärbung nur schwach, das Leuchten kommt von der Lichtebene.

@@ -13,6 +13,9 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 ## Konventionen
 - Feste Auflösung 1920×1080 (`GAME_WIDTH`), Querformat. Die Welt ist breiter (`WORLD_WIDTH`,
   3 Bildschirme) und scrollt waagerecht (`src/world/CameraControl.ts`, `scene.cameraControl`).
+  Nach oben geht es nur mit der Rakete (#75): `cameraControl.follow(obj)` hält etwas Fliegendes im Bild
+  (bis `ALTITUDE_MAX`, y negativ), `cameraControl.altitude` = Höhe; ohne Ziel sinkt die Kamera zurück.
+  Hintergrund-Ebenen mit Parallaxe scrollen darum senkrecht voll mit (`setScrollFactor(p, 1)`).
 - **Welt- vs. Bildschirm-Koordinaten:** Objekte auf der Wiese leben in Weltkoordinaten; Grenzen
   (Bande, Klemmen) benutzen `WORLD_WIDTH`. Zeiger für Welt-Prüfungen immer über
   `scene.worldPoint(pointer)`, nie `pointer.x`. Fest stehende Dinge (Himmel, Sonne/Mond, Sterne,
@@ -55,6 +58,15 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
+- **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
+  4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
+  (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei
+  in Flugrichtung (`toy.spin`, im Flug runde Touch-Fläche). Loslassen = sinkt, richtet sich auf
+  (`ROCKET` in `src/data/space.ts`), landet auf der Linie, wo es gestartet ist. Der Himmel darüber
+  (`src/world/Space.ts`, `scene.space`): dunkler (`dayCycle.setSpace`), Wolkenschicht `CLOUD_LAYER` (Regen/Schnee
+  darüber aus: `weather.setHighUp`), Weltall mit Sternen, Sternschnuppen, Planeten und Ufo (`SPACE_BODIES`,
+  Parallaxe `PLANET_PARALLAX`), Zeichnungen in `src/scenes/placeholders/space.ts`. Bewegt sich die Kamera,
+  setzt die Szene gezogene Objekte neu unter den Finger.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -133,7 +145,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Echte Kinderstimmen nur mit Okay der Eltern und nicht ins öffentliche Repo (#38).
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
-  Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`.
+  Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

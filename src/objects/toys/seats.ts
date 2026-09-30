@@ -42,13 +42,16 @@ export class ToySeats {
     kid.setAngle(0).setFlipX(false).setVisible(true);
   }
 
-  /** Kinder, die inzwischen woanders sind (weggezogen, nach Hause), austragen. */
-  cleanup(): void {
+  /**
+   * Kinder, die inzwischen woanders sind (weggezogen, nach Hause), austragen.
+   * groundY: wo das Spielzeug auf der Wiese steht (fliegt es gerade, dort, wo es landen wird).
+   */
+  cleanup(groundY = this.toy.y): void {
     this.riders.forEach((kid, i) => {
       if (kid && (!kid.active || kid.seatedOn !== this.seat)) this.riders[i] = undefined;
     });
     // Beim Speichern steht jedes Kind neben dem Spielzeug.
-    const exit = this.exitPoint();
+    const exit = this.exitPoint(groundY);
     this.riders.forEach((kid) => kid && (kid.exitPoint = exit));
   }
 
@@ -57,8 +60,8 @@ export class ToySeats {
   }
 
   /** Alle absteigen lassen (z. B. weil das Spielzeug weggeräumt wird). */
-  dismountAll(): void {
-    const exit = this.exitPoint();
+  dismountAll(groundY = this.toy.y): void {
+    const exit = this.exitPoint(groundY);
     this.riders.forEach((kid, i) => {
       if (!kid) return;
       this.release(kid);
@@ -67,10 +70,10 @@ export class ToySeats {
     });
   }
 
-  private exitPoint(): { x: number; y: number } {
+  private exitPoint(groundY: number): { x: number; y: number } {
     return {
       x: Phaser.Math.Clamp(this.toy.x + this.toy.displayWidth / 2 + 60, 60, WORLD_WIDTH - 60),
-      y: Phaser.Math.Clamp(this.toy.y + 10, GROUND_MIN_Y, GROUND_MAX_Y),
+      y: Phaser.Math.Clamp(groundY + 10, GROUND_MIN_Y, GROUND_MAX_Y),
     };
   }
 }

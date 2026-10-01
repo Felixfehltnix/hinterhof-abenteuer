@@ -25,6 +25,7 @@ import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
 import type { GrillData } from './GrillScene';
+import type { SnackData } from './SnackScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { Space } from '../world/Space';
@@ -403,6 +404,31 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Grill', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Snackbox-Spiel: das Kind mit der Box und ein zweites (von der Wiese oder aus den Figuren) halten die Zahlen hoch. */
+  openSnack(holder: Kid): void {
+    this.closeInventories();
+    const others = [...this.kids].filter((k) => k !== holder && k.visible && k.mode !== 'leaving');
+    const kids = [holder, ...others].slice(0, 2).map((k) => ({ def: k.def, outfit: k.outfit }));
+    for (const def of CHARACTERS) {
+      if (kids.length >= 2) break;
+      if (!kids.some((k) => k.def.id === def.id)) kids.push({ def, outfit: this.outfits.get(def.id) ?? {} });
+    }
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: SnackData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Snack');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Snack', data);
       this.scene.sleep();
     });
   }

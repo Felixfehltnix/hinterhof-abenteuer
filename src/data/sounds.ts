@@ -77,6 +77,12 @@ export const SOUNDS: Record<string, SoundDef> = {
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },
+  // Snackbox-Spiel
+  'snack-take': { synth: 'pop', volume: 0.4 },
+  'snack-put': { synth: 'mallet', pitched: true, volume: 0.5 },
+  'snack-back': { synth: 'click', volume: 0.35 },
+  'snack-nope': { synth: 'honk', volume: 0.15 },
+  'snack-win': { synth: 'chime', volume: 0.55 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

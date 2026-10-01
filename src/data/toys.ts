@@ -51,6 +51,7 @@ export type BehaviorId =
   | 'drum'
   | 'xylophone'
   | 'tent'
+  | 'snackbox'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -136,6 +137,15 @@ export const TOYS = [
     height: 80,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
     params: { bounce: 0.55, rollFriction: 3, spin: true },
+  },
+  {
+    // Ein Kind hält sie, Kind antippen: Zahlenspiel (Snacks für zwei Kinder abzählen und zusammenzählen).
+    id: 'snackbox',
+    width: 110,
+    height: 80,
+    hold: { pose: 'hang', dx: 4, dy: 62 },
+    behaviors: ['draggable', 'fling', 'handheld', 'snackbox'],
+    params: { bounce: 0.2, rollFriction: 12 },
   },
   {
     id: 'bucket',

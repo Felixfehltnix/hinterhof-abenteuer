@@ -58,6 +58,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
+- **Snackbox** (`src/scenes/SnackScene.ts`, `scene.openSnack(kid)`, `src/data/snacks.ts`): Spielzeug `snackbox` (Bausteine `handheld`,
+  `snackbox`): Hält ein Kind sie und wird angetippt (`onUse`), öffnet sich das Zahlenspiel; die Wiese schläft solange. Zwei Kinder
+  (das haltende + ein weiteres) halten Karten mit Zahl + Snack hoch; aus den vier Fächern der Box zieht man so viele Snacks auf den
+  Teller, wie beide Zahlen zusammen ergeben (Addition, Summe ≤ 10, mit den Runden wachsend: `maxNumber`). Stimmt die Menge, jubeln die
+  Kinder, die Rechnung erscheint (Ziffern und Zeichen sind wie beim Whirlpool die bewusste Ausnahme von „kein Text“) und jedes Kind
+  bekommt seine Snacks. Falscher Snack oder zu viele: Kopfschütteln, Snack vom Teller ziehen = zurück in die Box. Zeichnungen in
+  `src/scenes/placeholders/snack.ts`.
 - **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
   4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
   (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei

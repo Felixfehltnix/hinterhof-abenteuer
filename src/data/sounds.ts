@@ -77,6 +77,9 @@ export const SOUNDS: Record<string, SoundDef> = {
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },
+  // Steinterrasse mit Straßenmalkreide
+  chalk: { synth: 'whoosh', volume: 0.12 },
+  'chalk-pick': { synth: 'click', volume: 0.4 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

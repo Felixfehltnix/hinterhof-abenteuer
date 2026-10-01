@@ -42,6 +42,25 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { CHALK_COLORS } from '../data/chalk';
+import {
+  BUCKET_SIZE,
+  CHALK_DOT_SIZE,
+  CHALK_LAYOUT,
+  CHALK_STICK_SIZE,
+  drawBucket,
+  drawChalkDot,
+  drawChalkGround,
+  drawChalkStick,
+  drawChalkTray,
+  drawEraser,
+  drawExitSign,
+  drawSponge,
+  drawTerraceGate,
+  ERASER_SIZE,
+  SPONGE_SIZE,
+  TERRACE_GATE_SIZE,
+} from './placeholders/chalk';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -568,6 +587,19 @@ export class BootScene extends Phaser.Scene {
     this.makeSpace();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
+
+    // Steinterrasse mit Straßenmalkreide (Tor auf der Wiese, Malspiel dahinter)
+    this.makeTexture('terrace-gate', TERRACE_GATE_SIZE.width, TERRACE_GATE_SIZE.height, drawTerraceGate);
+    this.makeTexture('chalk-ground', GAME_WIDTH, GAME_HEIGHT, drawChalkGround);
+    this.makeTexture('chalk-dot', CHALK_DOT_SIZE, CHALK_DOT_SIZE, drawChalkDot);
+    this.makeTexture('chalk-eraser', ERASER_SIZE, ERASER_SIZE, drawEraser);
+    this.makeTexture('chalk-tray', CHALK_LAYOUT.tray.w + 10, CHALK_LAYOUT.tray.h + 16, drawChalkTray);
+    this.makeTexture('chalk-sponge', SPONGE_SIZE.width, SPONGE_SIZE.height, drawSponge);
+    this.makeTexture('chalk-bucket', BUCKET_SIZE.width, BUCKET_SIZE.height, drawBucket);
+    this.makeTexture('chalk-sign', CHALK_LAYOUT.exit.w + 10, CHALK_LAYOUT.exit.h + 12, drawExitSign);
+    CHALK_COLORS.forEach((color, i) => {
+      this.makeTexture(`chalk-stick-${i}`, CHALK_STICK_SIZE.width, CHALK_STICK_SIZE.height, (g) => drawChalkStick(g, color));
+    });
   }
 
   private makeTexture(

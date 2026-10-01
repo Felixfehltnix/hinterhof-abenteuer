@@ -14,6 +14,7 @@ import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../da
 import { getToyDef, TOYS, type ToyDef } from '../data/toys';
 import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
 import { Garden } from '../objects/Garden';
+import { Photos } from '../objects/Photos';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { LightLayer } from '../world/LightLayer';
@@ -50,6 +51,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private gate!: GardenGate;
   /** Blumen und Sandkuchen */
   garden!: Garden;
+  /** Fotos der Kamera an der Fotoleine */
+  photos!: Photos;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
@@ -110,6 +113,7 @@ export class PlaygroundScene extends Phaser.Scene {
     }
 
     this.garden = new Garden(this);
+    this.photos = new Photos(this);
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);

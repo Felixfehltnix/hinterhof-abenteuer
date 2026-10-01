@@ -20,6 +20,7 @@ export interface HoldDef {
 
 export type BehaviorId =
   | 'draggable'
+  | 'camera'
   | 'fling'
   | 'kick'
   | 'wobble'
@@ -408,6 +409,15 @@ export const TOYS = [
     height: 180,
     behaviors: ['draggable', 'tent'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Kind hält sie: Kind antippen = Foto (Sofortbild an der Fotoleine). Auf der Wiese antippen: löst aus.
+    id: 'camera',
+    width: 72,
+    height: 52,
+    hold: { pose: 'forward', dx: 10, dy: 28 },
+    behaviors: ['draggable', 'fling', 'camera', 'handheld'],
+    params: { bounce: 0.2, rollFriction: 8 },
   },
   {
     // Antippen: an/aus mit Lichtkegel. Auf ein Kind ziehen: Es hält sie.

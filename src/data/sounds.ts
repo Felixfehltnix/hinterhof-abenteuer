@@ -77,6 +77,9 @@ export const SOUNDS: Record<string, SoundDef> = {
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },
+  // Kamera: Auslöser, Foto hängt an der Leine
+  camera: { synth: 'click', volume: 0.8 },
+  photo: { synth: 'pop', volume: 0.3 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

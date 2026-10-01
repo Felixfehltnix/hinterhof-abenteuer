@@ -42,6 +42,7 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { drawPhotoLine, drawPhotoPeg, PHOTO_LINE_SIZE, PHOTO_PEG_SIZE } from './placeholders/photos';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -568,6 +569,10 @@ export class BootScene extends Phaser.Scene {
     this.makeSpace();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
+
+    // Fotoleine für die Kamera
+    this.makeTexture('photo-line', PHOTO_LINE_SIZE.width, PHOTO_LINE_SIZE.height, drawPhotoLine);
+    this.makeTexture('photo-peg', PHOTO_PEG_SIZE.width, PHOTO_PEG_SIZE.height, drawPhotoPeg);
   }
 
   private makeTexture(

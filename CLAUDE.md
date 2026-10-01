@@ -60,7 +60,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Holzschild mit Pfeil am Baum links führt zurück.
 - **Snackbox** (`src/scenes/SnackScene.ts`, `scene.openSnack(kid)`, `src/data/snacks.ts`): Spielzeug `snackbox` (Bausteine `handheld`,
   `snackbox`): Hält ein Kind sie und wird angetippt (`onUse`), öffnet sich das Zahlenspiel; die Wiese schläft solange. Zwei Kinder
-  (das haltende + ein weiteres) halten Karten mit Zahl + Snack hoch; aus den vier Fächern der Box zieht man so viele Snacks auf den
+  (das haltende + ein weiteres) halten Karten mit Zahl + Snack hoch (ab Runde 2 oft verschiedene Früchte: je Art genau so viele auf den Teller, `needed()`); aus den vier Fächern der Box zieht man so viele Snacks auf den
   Teller, wie beide Zahlen zusammen ergeben (Addition, Summe ≤ 10, mit den Runden wachsend: `maxNumber`). Stimmt die Menge, jubeln die
   Kinder, die Rechnung erscheint (Ziffern und Zeichen sind wie beim Whirlpool die bewusste Ausnahme von „kein Text“) und jedes Kind
   bekommt seine Snacks. Falscher Snack oder zu viele: Kopfschütteln, Snack vom Teller ziehen = zurück in die Box. Zeichnungen in

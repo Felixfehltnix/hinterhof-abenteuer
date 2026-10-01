@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import type { CharacterDef } from '../data/characters';
 import type { Outfit } from '../data/costumes';
-import { compartmentX, newRound, SNACK, SNACKS, type Round, type SnackId } from '../data/snacks';
+import { compartmentX, needed, newRound, SNACK, SNACKS, type Hold, type Round, type SnackId } from '../data/snacks';
 import { Kid } from '../objects/Kid';
 
 /** Was die Wiese dem Snackbox-Spiel mitgibt. */
@@ -101,16 +101,16 @@ export class SnackScene extends Phaser.Scene {
   private startRound(): void {
     this.round = newRound(this.roundIndex, this.round);
     this.cards.forEach((c) => c.destroy());
-    this.cards = [this.round.a, this.round.b].map((n, i) => this.makeCard(i, n));
+    this.cards = [this.round.a, this.round.b].map((h, i) => this.makeCard(i, h));
     this.busy = false;
   }
 
   /** Zahlenkarte über dem Kopf des Kindes: große Zahl und der Snack darunter. */
-  private makeCard(i: number, n: number): Phaser.GameObjects.Container {
+  private makeCard(i: number, hold: Hold): Phaser.GameObjects.Container {
     const spot = SNACK.kids[i];
     const card = this.add.container(spot.x, SNACK.cardY).setDepth(DEPTH.ui);
-    const text = this.add.text(0, -55, String(n), { fontFamily: 'sans-serif', fontSize: '130px', fontStyle: 'bold', color: '#264653' }).setOrigin(0.5);
-    const snack = this.add.image(0, 70, `snack-${this.round.snack}`).setScale(1.1);
+    const text = this.add.text(0, -55, String(hold.n), { fontFamily: 'sans-serif', fontSize: '130px', fontStyle: 'bold', color: '#264653' }).setOrigin(0.5);
+    const snack = this.add.image(0, 70, `snack-${hold.snack}`).setScale(1.1);
     card.add([this.add.image(0, 0, 'snack-card'), text, snack]);
     card.setScale(0.1);
     this.tweens.add({ targets: card, scale: 1, duration: 320, ease: 'Back.easeOut' });
@@ -118,7 +118,7 @@ export class SnackScene extends Phaser.Scene {
   }
 
   private get total(): number {
-    return this.round.a + this.round.b;
+    return this.round.a.n + this.round.b.n;
   }
 
   // --- Ziehen ----------------------------------------------------------------------
@@ -162,7 +162,7 @@ export class SnackScene extends Phaser.Scene {
       this.checkWin();
       return;
     }
-    if (s.id !== this.round.snack) {
+    if (!needed(this.round).has(s.id)) {
       // Falscher Snack: Kopfschütteln, zurück ins Fach
       this.kids.forEach((k) => k.shakeHead());
       this.events.emit('sound', { kind: 'snack-nope' });
@@ -178,12 +178,16 @@ export class SnackScene extends Phaser.Scene {
     s.img.setDepth(DEPTH.snacks + this.plateSnacks.length);
     this.layoutPlate();
     this.events.emit('sound', { kind: 'snack-put', pitch: Math.min(this.plateSnacks.length - 1, 7) });
-    if (this.plateSnacks.length > this.total) {
-      // Zu viele: die Kinder schütteln den Kopf, man kann einfach einen herausnehmen
+    if (this.count(s.id) > (needed(this.round).get(s.id) ?? 0)) {
+      // Zu viele von einer Art: die Kinder schütteln den Kopf, man kann einfach einen herausnehmen
       this.kids.forEach((k) => k.shakeHead());
       this.events.emit('sound', { kind: 'snack-nope' });
     }
     this.checkWin();
+  }
+
+  private count(id: SnackId): number {
+    return this.plateSnacks.filter((o) => o.id === id).length;
   }
 
   /** Snack verschwindet (optional fliegt er erst ins Fach zurück). */
@@ -212,6 +216,7 @@ export class SnackScene extends Phaser.Scene {
 
   private checkWin(): void {
     if (this.busy || this.plateSnacks.length !== this.total) return;
+    for (const [id, n] of needed(this.round)) if (this.count(id) !== n) return;
     this.busy = true;
     this.plateSnacks.forEach((s) => s.img.disableInteractive());
     this.kids.forEach((k) => k.cheer());
@@ -219,7 +224,7 @@ export class SnackScene extends Phaser.Scene {
 
     const { a, b } = this.round;
     const sum = this.add
-      .text(960, 560, `${a} + ${b} = ${a + b}`, { fontFamily: 'sans-serif', fontSize: '110px', fontStyle: 'bold', color: '#ffffff', stroke: '#2d6a4f', strokeThickness: 16 })
+      .text(960, 560, `${a.n} + ${b.n} = ${this.total}`, { fontFamily: 'sans-serif', fontSize: '110px', fontStyle: 'bold', color: '#ffffff', stroke: '#2d6a4f', strokeThickness: 16 })
       .setOrigin(0.5)
       .setDepth(DEPTH.ui)
       .setScale(0.2);
@@ -227,8 +232,15 @@ export class SnackScene extends Phaser.Scene {
 
     // Nach kurzer Pause bekommt jedes Kind seine Snacks (erst links, dann rechts)
     this.time.delayedCall(1300, () => {
-      this.plateSnacks.forEach((s, i) => {
-        const kid = this.kids[i < a ? 0 : 1];
+      // Jedes Kind bekommt seine Art und Zahl (bei gleicher Art zuerst das linke)
+      const pool = [...this.plateSnacks];
+      const share = [a, b].flatMap((h, k) =>
+        Array.from({ length: h.n }, () => {
+          const at = pool.findIndex((o) => o.id === h.snack);
+          return { s: pool.splice(at, 1)[0], kid: this.kids[k] };
+        }),
+      );
+      share.forEach(({ s, kid }, i) => {
         this.time.delayedCall(i * 150, () => {
           const hand = kid.handPoint();
           this.tweens.add({

@@ -25,6 +25,7 @@ import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
 import type { GrillData } from './GrillScene';
+import type { CircuitData } from './CircuitScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { Space } from '../world/Space';
@@ -72,6 +73,8 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Der Finger, der gerade das Scrollen am Rand steuert. */
   private edgePointer?: number;
   private savedWorld: Record<string, unknown> = {};
+  /** Geschaffte Level der Strom-Werkstatt. */
+  private circuitSolved = new Set<number>();
   /** Kamera-Stand im letzten Bild (bewegt sie sich, folgen gezogene Objekte dem Finger neu). */
   private lastScroll = { x: 0, y: 0 };
 
@@ -98,6 +101,13 @@ export class PlaygroundScene extends Phaser.Scene {
           if (Object.keys(outfit).length) this.outfits.set(id, outfit);
         }
         for (const kid of this.kids) kid.setOutfit(this.outfits.get(kid.def.id) ?? {});
+      },
+    });
+
+    this.registerWorldState('circuit', {
+      save: () => [...this.circuitSolved].sort(),
+      load: (v) => {
+        if (Array.isArray(v)) v.forEach((n) => Number.isInteger(n) && n >= 0 && n < 20 && this.circuitSolved.add(n));
       },
     });
 
@@ -403,6 +413,26 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Grill', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Strom-Werkstatt (Elektro-Baukasten). Die Wiese schläft solange; geschaffte Level werden gespeichert. */
+  openCircuit(): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: CircuitData = {
+        solved: [...this.circuitSolved],
+        onSolved: (level) => this.circuitSolved.add(level),
+        onDone: () => {
+          this.scene.stop('Circuit');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Circuit', data);
       this.scene.sleep();
     });
   }

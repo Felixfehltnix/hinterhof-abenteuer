@@ -317,6 +317,32 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillEllipse(200, 52, 40, 8);
   },
 
+  circuitkit: (g) => {
+    // Kasten mit Deckelbild: Glühbirne, Blitz; oben schauen bunte Drähte heraus
+    g.lineStyle(6, 0xe63946);
+    g.beginPath();
+    g.arc(30, 22, 18, Math.PI, 0, false);
+    g.strokePath();
+    g.lineStyle(6, 0x1d70b8);
+    g.beginPath();
+    g.arc(86, 20, 16, Math.PI * 1.1, -0.1, false);
+    g.strokePath();
+    g.fillStyle(0x264653);
+    g.fillRoundedRect(0, 20, 120, 64, 10);
+    g.fillStyle(0x2a9d8f);
+    g.fillRoundedRect(6, 26, 108, 52, 8);
+    g.fillStyle(0xffe066);
+    g.fillCircle(40, 46, 15);
+    g.fillRect(34, 58, 12, 10);
+    g.fillStyle(0x868e96);
+    g.fillRect(34, 66, 12, 5);
+    g.fillStyle(0xffd60a);
+    g.fillPoints(
+      [new Phaser.Math.Vector2(84, 32), new Phaser.Math.Vector2(72, 54), new Phaser.Math.Vector2(82, 54), new Phaser.Math.Vector2(76, 72), new Phaser.Math.Vector2(94, 46), new Phaser.Math.Vector2(84, 46)],
+      true,
+    );
+  },
+
   shovel: (g) => {
     g.fillStyle(0xfb8500);
     g.fillRoundedRect(20, 0, 10, 72, 4); // Stiel

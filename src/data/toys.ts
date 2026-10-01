@@ -20,6 +20,7 @@ export interface HoldDef {
 
 export type BehaviorId =
   | 'draggable'
+  | 'circuit'
   | 'fling'
   | 'kick'
   | 'wobble'
@@ -408,6 +409,14 @@ export const TOYS = [
     height: 180,
     behaviors: ['draggable', 'tent'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Elektro-Baukasten: Antippen öffnet die Strom-Werkstatt (Stromkreis-Rätsel mit Logikgattern).
+    id: 'circuitkit',
+    width: 120,
+    height: 84,
+    behaviors: ['draggable', 'fling', 'circuit'],
+    params: { bounce: 0.15, rollFriction: 12 },
   },
   {
     // Antippen: an/aus mit Lichtkegel. Auf ein Kind ziehen: Es hält sie.

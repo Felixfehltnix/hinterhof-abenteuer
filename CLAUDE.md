@@ -58,6 +58,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
+- **Strom-Werkstatt** (`src/scenes/CircuitScene.ts`, `scene.openCircuit()`): Spielzeug `circuitkit` (Elektro-Baukasten, Baustein
+  `circuit`) antippen öffnet das Spiel; die Wiese schläft solange. Lochplatte mit Batterie, Kippschaltern (mit Pflaster: klemmt),
+  Logikgattern UND/ODER/NICHT (Bildzeichen statt Text) und Lampe mit Gesicht. Drähte von Anschluss zu Anschluss ziehen
+  (Ausgang = voller Stecker, Eingang = Buchse; je Anschluss ein Draht, Draht antippen = ab), Gatter aus der Ablage auf den
+  gestrichelten Platz ziehen. Strom: Drähte leuchten gelb mit Funken; ein Gatter mit offenem Eingang gibt nichts aus (NICHT
+  braucht einen angeschlossenen Eingang). 5 Level in `src/data/circuit.ts` (`LEVELS`: Teile, feste Drähte, Ablage), geschafft =
+  Lampe leuchtet; oben ein Lämpchen je Level (antippen = Level wählen). Geschaffte Level: Weltzustand `circuit`.
+  Zeichnungen in `src/scenes/placeholders/circuit.ts`.
 - **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
   4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
   (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei
@@ -146,7 +154,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
+  Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

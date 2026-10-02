@@ -41,6 +41,19 @@ import {
   rungSlots,
   SLIDE_AREA,
 } from './placeholders/playhouse';
+import {
+  BOX_SIZE,
+  CARD_SIZE,
+  drawCard,
+  drawSnack,
+  drawSnackBg,
+  drawSnackBoxOpen,
+  drawSnackPlate,
+  drawSnackSign,
+  PLATE_SIZE,
+  SNACK_SIZE,
+} from './placeholders/snack';
+import { SNACK, SNACKS } from '../data/snacks';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 import { DOG_BODY_SIZE, DOG_HEAD_SIZE, DOG_LEG_SIZE, DOG_TAIL_SIZE, drawDogBody, drawDogHead, drawDogLeg, drawDogTail } from './placeholders/dog';
 import {
@@ -619,6 +632,14 @@ export class BootScene extends Phaser.Scene {
     this.makeDressUp();
     this.makeGrill();
     this.makeSpace();
+
+    // Snackbox-Spiel
+    this.makeTexture('snack-bg', GAME_WIDTH, GAME_HEIGHT, drawSnackBg);
+    this.makeTexture('snack-plate', PLATE_SIZE.width, PLATE_SIZE.height, drawSnackPlate);
+    this.makeTexture('snack-box', BOX_SIZE.width, BOX_SIZE.height, drawSnackBoxOpen);
+    this.makeTexture('snack-card', CARD_SIZE.width, CARD_SIZE.height, drawCard);
+    this.makeTexture('snack-sign', SNACK.exit.w + 10, SNACK.exit.h + 12, drawSnackSign);
+    for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

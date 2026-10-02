@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { drawSnackboxToy } from './snack';
 import type { ToyId } from '../../data/toys';
 import { drawRocket } from './space';
 
@@ -17,6 +18,8 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0xffffff, 0.5);
     g.fillCircle(26, 24, 8);
   },
+
+  snackbox: drawSnackboxToy,
 
   bucket: (g) => {
     g.lineStyle(5, 0x023047);

@@ -76,6 +76,26 @@ import {
 } from './placeholders/chalk';
 import { drawPhotoLine, drawPhotoPeg, PHOTO_LINE_SIZE, PHOTO_PEG_SIZE } from './placeholders/photos';
 import {
+  BANDAID_SIZE,
+  BATTERY_SIZE,
+  drawBandaid,
+  drawBattery,
+  drawBoard,
+  drawCircuitSign,
+  drawGate as drawLogicGate,
+  drawGlow,
+  drawLamp,
+  drawSlot,
+  drawSwitch,
+  drawTray as drawCircuitTray,
+  GATE_SIZE as LOGIC_GATE_SIZE,
+  GLOW_SIZE,
+  LAMP_SIZE,
+  SWITCH_SIZE,
+  TRAY_SIZE,
+} from './placeholders/circuit';
+import { CIRCUIT } from '../data/circuit';
+import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
   drawAlien,
@@ -630,6 +650,23 @@ export class BootScene extends Phaser.Scene {
     // Fotoleine für die Kamera
     this.makeTexture('photo-line', PHOTO_LINE_SIZE.width, PHOTO_LINE_SIZE.height, drawPhotoLine);
     this.makeTexture('photo-peg', PHOTO_PEG_SIZE.width, PHOTO_PEG_SIZE.height, drawPhotoPeg);
+
+    // Strom-Werkstatt (Elektro-Baukasten)
+    this.makeTexture('circuit-board', GAME_WIDTH, GAME_HEIGHT, drawBoard);
+    this.makeTexture('circuit-battery', BATTERY_SIZE.width, BATTERY_SIZE.height, drawBattery);
+    this.makeTexture('circuit-lamp', LAMP_SIZE.width, LAMP_SIZE.height, (g) => drawLamp(g, false));
+    this.makeTexture('circuit-lamp-on', LAMP_SIZE.width, LAMP_SIZE.height, (g) => drawLamp(g, true));
+    this.makeTexture('circuit-glow', GLOW_SIZE, GLOW_SIZE, drawGlow);
+    this.makeTexture('circuit-switch', SWITCH_SIZE.width, SWITCH_SIZE.height, (g) => drawSwitch(g, false));
+    this.makeTexture('circuit-switch-on', SWITCH_SIZE.width, SWITCH_SIZE.height, (g) => drawSwitch(g, true));
+    this.makeTexture('circuit-bandaid', BANDAID_SIZE.width, BANDAID_SIZE.height, drawBandaid);
+    for (const kind of ['and', 'or', 'not'] as const) {
+      this.makeTexture(`circuit-${kind}`, LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawLogicGate(g, kind));
+    }
+    this.makeTexture('circuit-slot-1', LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawSlot(g, 1));
+    this.makeTexture('circuit-slot-2', LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawSlot(g, 2));
+    this.makeTexture('circuit-tray', TRAY_SIZE.width, TRAY_SIZE.height, drawCircuitTray);
+    this.makeTexture('circuit-sign', CIRCUIT.exit.w + 10, CIRCUIT.exit.h + 12, drawCircuitSign);
   }
 
   private makeTexture(

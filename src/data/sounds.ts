@@ -92,6 +92,14 @@ export const SOUNDS: Record<string, SoundDef> = {
   // Kamera: Auslöser, Foto hängt an der Leine
   camera: { synth: 'click', volume: 0.8 },
   photo: { synth: 'pop', volume: 0.3 },
+  // Strom-Werkstatt
+  'circuit-switch': { synth: 'click', volume: 0.6 },
+  'circuit-wire': { synth: 'pop', volume: 0.45 },
+  'circuit-unwire': { synth: 'click', volume: 0.35 },
+  'circuit-gate': { synth: 'kick', volume: 0.5 },
+  'circuit-nope': { synth: 'honk', volume: 0.15 },
+  'circuit-lamp': { synth: 'rise', volume: 0.35 },
+  'circuit-win': { synth: 'chime', volume: 0.55 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

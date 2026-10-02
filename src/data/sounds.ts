@@ -77,6 +77,10 @@ export const SOUNDS: Record<string, SoundDef> = {
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },
+  // Bunker: buddeln, Luke gefunden, Luke klappert
+  dig: { synth: 'whoosh', volume: 0.18 },
+  'bunker-found': { synth: 'chime', volume: 0.5 },
+  hatch: { synth: 'drum', volume: 0.5 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

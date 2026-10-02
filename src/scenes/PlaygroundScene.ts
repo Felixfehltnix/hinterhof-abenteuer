@@ -13,6 +13,7 @@ import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from
 import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
 import { getToyDef, TOYS, type ToyDef } from '../data/toys';
 import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
+import { Bunker } from '../objects/Bunker';
 import { Garden } from '../objects/Garden';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
@@ -50,6 +51,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private gate!: GardenGate;
   /** Blumen und Sandkuchen */
   garden!: Garden;
+  /** Bunker-Eingang, den ein Kind mit Schaufel ausgräbt */
+  bunker!: Bunker;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
@@ -110,6 +113,7 @@ export class PlaygroundScene extends Phaser.Scene {
     }
 
     this.garden = new Garden(this);
+    this.bunker = new Bunker(this);
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);
@@ -342,6 +346,8 @@ export class PlaygroundScene extends Phaser.Scene {
       // Neu angekommene Kinder freuen sich mit einem Hüpfer; in einer Pfütze spritzt es.
       this.weather.onKidLanded(kid);
       if (arriving) kid.hop();
+      // Mit Schaufel weit links im Gras: buddelt nach dem Bunker
+      else this.bunker.onKidLanded(kid);
     });
   }
 

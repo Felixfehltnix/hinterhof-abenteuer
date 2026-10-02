@@ -67,6 +67,11 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   darüber aus: `weather.setHighUp`), Weltall mit Sternen, Sternschnuppen, Planeten und Ufo (`SPACE_BODIES`,
   Parallaxe `PLANET_PARALLAX`), Zeichnungen in `src/scenes/placeholders/space.ts`. Bewegt sich die Kamera,
   setzt die Szene gezogene Objekte neu unter den Finger.
+- **Bunker** (`src/objects/Bunker.ts`, `scene.bunker`): Ein Kind mit Schaufel (Baustein `dig`), weit links im Gras
+  abgestellt (`BUNKER.zone` in `src/data/bunker.ts`), buddelt (Tätigkeit `dig` mit `scoop`, Loch und Erdhaufen wachsen)
+  und findet eine Stahlluke mit Handrad (Zeichnungen `src/scenes/placeholders/bunker.ts`). Es gibt nur eine Luke;
+  jedes weitere Loch schüttet sich wieder zu. Antippen = Handrad dreht, Luke klappert (bleibt zu – die Unterwelt
+  dahinter kommt später). Weltzustand `bunker` (`{ x, y, dir }`). Auslöser: `releaseKid` → `bunker.onKidLanded(kid)`.
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -146,7 +151,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
+  Bunker: `dig`, `bunker-found`, `hatch`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

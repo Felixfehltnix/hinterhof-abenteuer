@@ -43,6 +43,18 @@ import {
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
 import {
+  BUNKER_FRAME_SIZE,
+  BUNKER_LID_SIZE,
+  BUNKER_WHEEL_SIZE,
+  DIG_HOLE_SIZE,
+  DIRT_PILE_SIZE,
+  drawBunkerFrame,
+  drawBunkerLid,
+  drawBunkerWheel,
+  drawDigHole,
+  drawDirtPile,
+} from './placeholders/bunker';
+import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
   drawAlien,
@@ -568,6 +580,13 @@ export class BootScene extends Phaser.Scene {
     this.makeSpace();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
+
+    // Bunker (Buddeln mit der Schaufel)
+    this.makeTexture('dig-hole', DIG_HOLE_SIZE.width, DIG_HOLE_SIZE.height, drawDigHole);
+    this.makeTexture('dirt-pile', DIRT_PILE_SIZE.width, DIRT_PILE_SIZE.height, drawDirtPile);
+    this.makeTexture('bunker-frame', BUNKER_FRAME_SIZE.width, BUNKER_FRAME_SIZE.height, drawBunkerFrame);
+    this.makeTexture('bunker-lid', BUNKER_LID_SIZE.width, BUNKER_LID_SIZE.height, drawBunkerLid);
+    this.makeTexture('bunker-wheel', BUNKER_WHEEL_SIZE.width, BUNKER_WHEEL_SIZE.height, drawBunkerWheel);
   }
 
   private makeTexture(

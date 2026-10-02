@@ -41,7 +41,75 @@ import {
   rungSlots,
   SLIDE_AREA,
 } from './placeholders/playhouse';
+import {
+  BOX_SIZE,
+  CARD_SIZE,
+  drawCard,
+  drawSnack,
+  drawSnackBg,
+  drawSnackBoxOpen,
+  drawSnackPlate,
+  drawSnackSign,
+  PLATE_SIZE,
+  SNACK_SIZE,
+} from './placeholders/snack';
+import { SNACK, SNACKS } from '../data/snacks';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { DOG_BODY_SIZE, DOG_HEAD_SIZE, DOG_LEG_SIZE, DOG_TAIL_SIZE, drawDogBody, drawDogHead, drawDogLeg, drawDogTail } from './placeholders/dog';
+import {
+  BUNKER_FRAME_SIZE,
+  BUNKER_LID_SIZE,
+  BUNKER_WHEEL_SIZE,
+  DIG_HOLE_SIZE,
+  DIRT_PILE_SIZE,
+  drawBunkerFrame,
+  drawBunkerLid,
+  drawBunkerWheel,
+  drawDigHole,
+  drawDirtPile,
+} from './placeholders/bunker';
+import { CHALK_COLORS } from '../data/chalk';
+import {
+  BUCKET_SIZE,
+  CHALK_DOT_SIZE,
+  CHALK_LAYOUT,
+  CHALK_STICK_SIZE,
+  drawBucket,
+  drawChalkDot,
+  drawChalkGround,
+  drawChalkStick,
+  drawChalkTray,
+  drawEraser,
+  drawExitSign,
+  drawSponge,
+  drawTerraceGate,
+  ERASER_SIZE,
+  SPONGE_SIZE,
+  TERRACE_GATE_SIZE,
+} from './placeholders/chalk';
+import { drawPhotoLine, drawPhotoPeg, PHOTO_LINE_SIZE, PHOTO_PEG_SIZE } from './placeholders/photos';
+import {
+  BANDAID_SIZE,
+  BATTERY_SIZE,
+  drawBandaid,
+  drawBattery,
+  drawBoard,
+  drawCircuitSign,
+  drawGate as drawLogicGate,
+  drawGlow,
+  drawLamp,
+  drawSlot,
+  drawSwitch,
+  drawTray as drawCircuitTray,
+  GATE_SIZE as LOGIC_GATE_SIZE,
+  GLOW_SIZE,
+  LAMP_SIZE,
+  SWITCH_SIZE,
+  TRAY_SIZE,
+} from './placeholders/circuit';
+import { CIRCUIT } from '../data/circuit';
+import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
+import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -476,6 +544,17 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
+  private makeAsteroids(): void {
+    for (const size of [0, 1, 2] as RockSize[]) {
+      const d = rockTextureSize(size);
+      for (let shape = 0; shape < ROCK_SHAPES; shape++) this.makeTexture(`rock-${size}-${shape}`, d, d, (g) => drawRock(g, size, shape));
+    }
+    this.makeTexture('astro-shot', SHOT_SIZE.width, SHOT_SIZE.height, drawShot);
+    this.makeTexture('gold-star', GOLD_STAR_SIZE, GOLD_STAR_SIZE, drawGoldStar);
+    this.makeTexture('earth', EARTH_SIZE, EARTH_SIZE, drawEarth);
+  }
+
   /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Tuch. */
   private makeGrill(): void {
     this.makeTexture('grill-bg', GAME_WIDTH, GAME_HEIGHT, drawGrillBackground);
@@ -566,8 +645,63 @@ export class BootScene extends Phaser.Scene {
     this.makeDressUp();
     this.makeGrill();
     this.makeSpace();
+
+    // Snackbox-Spiel
+    this.makeTexture('snack-bg', GAME_WIDTH, GAME_HEIGHT, drawSnackBg);
+    this.makeTexture('snack-plate', PLATE_SIZE.width, PLATE_SIZE.height, drawSnackPlate);
+    this.makeTexture('snack-box', BOX_SIZE.width, BOX_SIZE.height, drawSnackBoxOpen);
+    this.makeTexture('snack-card', CARD_SIZE.width, CARD_SIZE.height, drawCard);
+    this.makeTexture('snack-sign', SNACK.exit.w + 10, SNACK.exit.h + 12, drawSnackSign);
+    for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
+    this.makeAsteroids();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
+
+    // Bunker (Buddeln mit der Schaufel)
+    this.makeTexture('dig-hole', DIG_HOLE_SIZE.width, DIG_HOLE_SIZE.height, drawDigHole);
+    this.makeTexture('dirt-pile', DIRT_PILE_SIZE.width, DIRT_PILE_SIZE.height, drawDirtPile);
+    this.makeTexture('bunker-frame', BUNKER_FRAME_SIZE.width, BUNKER_FRAME_SIZE.height, drawBunkerFrame);
+    this.makeTexture('bunker-lid', BUNKER_LID_SIZE.width, BUNKER_LID_SIZE.height, drawBunkerLid);
+    this.makeTexture('bunker-wheel', BUNKER_WHEEL_SIZE.width, BUNKER_WHEEL_SIZE.height, drawBunkerWheel);
+    // Hund (schwarzer Labrador) aus Einzelteilen
+    this.makeTexture('dog-body', DOG_BODY_SIZE.width, DOG_BODY_SIZE.height, drawDogBody);
+    this.makeTexture('dog-leg', DOG_LEG_SIZE.width, DOG_LEG_SIZE.height, drawDogLeg);
+    this.makeTexture('dog-tail', DOG_TAIL_SIZE.width, DOG_TAIL_SIZE.height, drawDogTail);
+    this.makeTexture('dog-head', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'normal'));
+    this.makeTexture('dog-head-open', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'open'));
+    this.makeTexture('dog-head-sleep', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'sleep'));
+    // Steinterrasse mit Straßenmalkreide (Tor auf der Wiese, Malspiel dahinter)
+    this.makeTexture('terrace-gate', TERRACE_GATE_SIZE.width, TERRACE_GATE_SIZE.height, drawTerraceGate);
+    this.makeTexture('chalk-ground', GAME_WIDTH, GAME_HEIGHT, drawChalkGround);
+    this.makeTexture('chalk-dot', CHALK_DOT_SIZE, CHALK_DOT_SIZE, drawChalkDot);
+    this.makeTexture('chalk-eraser', ERASER_SIZE, ERASER_SIZE, drawEraser);
+    this.makeTexture('chalk-tray', CHALK_LAYOUT.tray.w + 10, CHALK_LAYOUT.tray.h + 16, drawChalkTray);
+    this.makeTexture('chalk-sponge', SPONGE_SIZE.width, SPONGE_SIZE.height, drawSponge);
+    this.makeTexture('chalk-bucket', BUCKET_SIZE.width, BUCKET_SIZE.height, drawBucket);
+    this.makeTexture('chalk-sign', CHALK_LAYOUT.exit.w + 10, CHALK_LAYOUT.exit.h + 12, drawExitSign);
+    CHALK_COLORS.forEach((color, i) => {
+      this.makeTexture(`chalk-stick-${i}`, CHALK_STICK_SIZE.width, CHALK_STICK_SIZE.height, (g) => drawChalkStick(g, color));
+    });
+    // Fotoleine für die Kamera
+    this.makeTexture('photo-line', PHOTO_LINE_SIZE.width, PHOTO_LINE_SIZE.height, drawPhotoLine);
+    this.makeTexture('photo-peg', PHOTO_PEG_SIZE.width, PHOTO_PEG_SIZE.height, drawPhotoPeg);
+
+    // Strom-Werkstatt (Elektro-Baukasten)
+    this.makeTexture('circuit-board', GAME_WIDTH, GAME_HEIGHT, drawBoard);
+    this.makeTexture('circuit-battery', BATTERY_SIZE.width, BATTERY_SIZE.height, drawBattery);
+    this.makeTexture('circuit-lamp', LAMP_SIZE.width, LAMP_SIZE.height, (g) => drawLamp(g, false));
+    this.makeTexture('circuit-lamp-on', LAMP_SIZE.width, LAMP_SIZE.height, (g) => drawLamp(g, true));
+    this.makeTexture('circuit-glow', GLOW_SIZE, GLOW_SIZE, drawGlow);
+    this.makeTexture('circuit-switch', SWITCH_SIZE.width, SWITCH_SIZE.height, (g) => drawSwitch(g, false));
+    this.makeTexture('circuit-switch-on', SWITCH_SIZE.width, SWITCH_SIZE.height, (g) => drawSwitch(g, true));
+    this.makeTexture('circuit-bandaid', BANDAID_SIZE.width, BANDAID_SIZE.height, drawBandaid);
+    for (const kind of ['and', 'or', 'not'] as const) {
+      this.makeTexture(`circuit-${kind}`, LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawLogicGate(g, kind));
+    }
+    this.makeTexture('circuit-slot-1', LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawSlot(g, 1));
+    this.makeTexture('circuit-slot-2', LOGIC_GATE_SIZE.width, LOGIC_GATE_SIZE.height, (g) => drawSlot(g, 2));
+    this.makeTexture('circuit-tray', TRAY_SIZE.width, TRAY_SIZE.height, drawCircuitTray);
+    this.makeTexture('circuit-sign', CIRCUIT.exit.w + 10, CIRCUIT.exit.h + 12, drawCircuitSign);
   }
 
   private makeTexture(

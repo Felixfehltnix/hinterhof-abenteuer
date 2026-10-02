@@ -58,6 +58,28 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
+- **Steinterrasse mit Straßenmalkreide** (`src/scenes/ChalkScene.ts`, `scene.openChalk()`): Graues Tor mit hellblauer Tür im
+  Zaun (`TerraceGate`, Position `TERRACE_GATE` in `src/data/chalk.ts`, Lücke in den Büschen) öffnet das Malspiel; die Wiese
+  schläft solange. Steinplatten von oben, Kreideschachtel mit 9 Farben (`CHALK_COLORS`, die letzte ist Regenbogenkreide),
+  Stück antippen = Farbe, mit Fingern (auch mehreren) malen (Tupfer `chalk-dot` eingefärbt auf eine RenderTexture),
+  Schwamm aus dem Eimer = wegwischen, Holzschild oben links = zurück. Zeichnungen in `src/scenes/placeholders/chalk.ts`.
+  Das Bild wird beim Verlassen als WebP in einem eigenen localStorage-Eintrag gespeichert (`src/save/chalk.ts`, nicht im
+  AutoSave – zu groß für den 250-ms-Vergleich) und beim nächsten Besuch weitergemalt.
+- **Strom-Werkstatt** (`src/scenes/CircuitScene.ts`, `scene.openCircuit()`): Spielzeug `circuitkit` (Elektro-Baukasten, Baustein
+  `circuit`) antippen öffnet das Spiel; die Wiese schläft solange. Lochplatte mit Batterie, Kippschaltern (mit Pflaster: klemmt),
+  Logikgattern UND/ODER/NICHT (Bildzeichen statt Text) und Lampe mit Gesicht. Drähte von Anschluss zu Anschluss ziehen
+  (Ausgang = voller Stecker, Eingang = Buchse; je Anschluss ein Draht, Draht antippen = ab), Gatter aus der Ablage auf den
+  gestrichelten Platz ziehen. Strom: Drähte leuchten gelb mit Funken; ein Gatter mit offenem Eingang gibt nichts aus (NICHT
+  braucht einen angeschlossenen Eingang). 5 Level in `src/data/circuit.ts` (`LEVELS`: Teile, feste Drähte, Ablage), geschafft =
+  Lampe leuchtet; oben ein Lämpchen je Level (antippen = Level wählen). Geschaffte Level: Weltzustand `circuit`.
+  Zeichnungen in `src/scenes/placeholders/circuit.ts`.
+- **Snackbox** (`src/scenes/SnackScene.ts`, `scene.openSnack(kid)`, `src/data/snacks.ts`): Spielzeug `snackbox` (Bausteine `handheld`,
+  `snackbox`): Hält ein Kind sie und wird angetippt (`onUse`), öffnet sich das Zahlenspiel; die Wiese schläft solange. Zwei Kinder
+  (das haltende + ein weiteres) halten Karten mit Zahl + Snack hoch (ab Runde 2 oft verschiedene Früchte: je Art genau so viele auf den Teller, `needed()`); aus den vier Fächern der Box zieht man so viele Snacks auf den
+  Teller, wie beide Zahlen zusammen ergeben (Addition, Summe ≤ 10, mit den Runden wachsend: `maxNumber`). Stimmt die Menge, jubeln die
+  Kinder, die Rechnung erscheint (Ziffern und Zeichen sind wie beim Whirlpool die bewusste Ausnahme von „kein Text“) und jedes Kind
+  bekommt seine Snacks. Falscher Snack oder zu viele: Kopfschütteln, Snack vom Teller ziehen = zurück in die Box. Zeichnungen in
+  `src/scenes/placeholders/snack.ts`.
 - **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
   4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
   (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei
@@ -67,6 +89,18 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   darüber aus: `weather.setHighUp`), Weltall mit Sternen, Sternschnuppen, Planeten und Ufo (`SPACE_BODIES`,
   Parallaxe `PLANET_PARALLAX`), Zeichnungen in `src/scenes/placeholders/space.ts`. Bewegt sich die Kamera,
   setzt die Szene gezogene Objekte neu unter den Finger.
+- **Bunker** (`src/objects/Bunker.ts`, `scene.bunker`): Ein Kind mit Schaufel (Baustein `dig`), weit links im Gras
+  abgestellt (`BUNKER.zone` in `src/data/bunker.ts`), buddelt (Tätigkeit `dig` mit `scoop`, Loch und Erdhaufen wachsen)
+  und findet eine Stahlluke mit Handrad (Zeichnungen `src/scenes/placeholders/bunker.ts`). Es gibt nur eine Luke;
+  jedes weitere Loch schüttet sich wieder zu. Antippen = Handrad dreht, Luke klappert (bleibt zu – die Unterwelt
+  dahinter kommt später). Weltzustand `bunker` (`{ x, y, dir }`). Auslöser: `releaseKid` → `bunker.onKidLanded(kid)`.
+- **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
+  Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
+  (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
+  fliegen mit. Vorher enden alle Zieh-Vorgänge (`releaseAllDrags`). Rakete anfassen = fliegen, woanders tippen/halten = leuchtende
+  Sterne dorthin schießen. Groß → 2 mittel → 2 klein → Glitzer; Steine laufen am Rand herum, die Rakete nicht. Zusammenstoß
+  schubst nur (Kinder halten sich fest), keine Leben, keine Punkte; Welle geschafft = Jubel, goldener Stern oben, Ufo, nächste
+  Welle einen Stein mehr. Erde unten links = zurück (Rakete sinkt dann von oben).
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -119,7 +153,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.setActivity('seesaw', { up })` (jedes Bild aufrufen ist in Ordnung). Die Gelenke steuert
   allein das Kind: Grundpose je Tätigkeit (`ACTIVITY_POSE`) + Bewegung (`activityMotion`, aus
   Zeit, zurückgelegtem Weg und Geschwindigkeit). Kurze Gesten: `hop`, `cheer`, `giggle`, `yawn`,
-  `brace`, `kick`, `wave`, `yuck` (bäh), `no` (Kopfschütteln) (`GESTURES`), Landen nach dem Loslassen: `land()`.
+  `brace`, `kick`, `wave`, `yuck` (bäh), `no` (Kopfschütteln), `photo` (Kamera vors Gesicht) (`GESTURES`), Landen nach dem Loslassen: `land()`.
   Wer ein Kind auf einen Sitz setzt, legt die Hüfte auf den Sitz: `y = sitzY + kid.hipHeight()`
   (folgt der Pose, auch während des Überblendens), für Tweens `kid.sitHeight`.
   Gesichter (`kid-<id>-face-blink/-joy/-yawn`) liegen über dem Kopf; fehlen sie, bleibt das Gesicht gleich.
@@ -127,6 +161,17 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `portrait-<id>` (Kopf fürs Tor), Platzhalter in `src/scenes/placeholders/kids.ts`.
 - Kinder kommen nur über `scene.spawnKid()` auf die Wiese und gehen über `GardenGate.sendHome()`.
   Wer ein Kind festhält (`Seat`), muss `unseat()` sauber umsetzen.
+
+## Hund
+- Der Hund (schwarzer Labrador, `src/objects/Dog.ts`, `scene.dog`) lebt immer auf der Wiese (kein Kind, nicht im Gartentor).
+  Werte in `src/data/dog.ts` (`DOG`), Zeichnungen der Teile in `src/scenes/placeholders/dog.ts`
+  (`dog-body`, `dog-leg`, `dog-tail`, `dog-head`, `dog-head-open`, `dog-head-sleep`). Teile an Gelenken wie beim Kind,
+  Posen `stand`/`sit`/`lie`/`jump`, Sprünge über `lift` (y bleibt die Bodenlinie). Gespeichert als Weltzustand `dog`.
+- Von selbst: streunt, schnüffelt, sitzt, liegt, stupst Kinder an (`giggle`), schläft nachts. Antippen = bellen,
+  ziehen = Beine baumeln.
+- Apportieren: Toy sendet beim Werfen `scene.events.emit('toy-thrown', toy)`; zusätzlich jagt er schnell Fliegendes/Rollendes.
+  Bälle (`tags: ['ball']`), `glide` und `boomerang` fängt er im Sprung oder hebt sie auf und bringt sie dem nächsten Kind.
+- Wasser: `dog.soak(jump?)` (Gießkanne, Sprenger), Pfützen, ins Planschbecken ziehen → danach schüttelt er sich, Kinder daneben kichern.
 
 ## Töne
 - Alles, was klingen soll, sendet `scene.events.emit('sound', { kind, pitch?, value?, voice?, x? })`
@@ -146,7 +191,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
+  Bunker: `dig`, `bunker-found`, `hatch`;
+  Hund: `bark`, `dog-catch`, `dog-shake`;
+  Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`);
+  Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß);
+  Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
+  Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
@@ -185,7 +236,10 @@ vordere vor dem Kind, per `setCrop`), hört auf bei `kid.emit('tapped'|'grabbed'
 Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
-`drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
+`camera` (Kind antippen = es hebt die Kamera und fotografiert den Ausschnitt vor sich, `PHOTO` in `src/data/photos.ts`;
+auf der Wiese antippen = löst aus; das Sofortbild entwickelt sich und hängt an der Fotoleine unter der Pergola,
+`src/objects/Photos.ts`, `scene.photos`, höchstens `MAX_PHOTOS`, antippen = groß; gespeichert in eigenem localStorage-Eintrag
+`src/save/photos.ts`), `drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
 `handheld` (Kind hält es in der Hand, Haltung als Daten `hold: { pose, dx, dy, angle }` im Katalog,
 Armhaltungen `HOLD_POSES` in poses.ts), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
 **In der Hand:** Ein Kind hält immer nur eines (`kid.holding`, `toy.heldBy`); `takeInHand`/`takeFromHand`

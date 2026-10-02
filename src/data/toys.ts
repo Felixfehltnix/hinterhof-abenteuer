@@ -20,6 +20,8 @@ export interface HoldDef {
 
 export type BehaviorId =
   | 'draggable'
+  | 'camera'
+  | 'circuit'
   | 'fling'
   | 'kick'
   | 'wobble'
@@ -51,6 +53,7 @@ export type BehaviorId =
   | 'drum'
   | 'xylophone'
   | 'tent'
+  | 'snackbox'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -136,6 +139,15 @@ export const TOYS = [
     height: 80,
     behaviors: ['draggable', 'fling', 'kick', 'kidKick'],
     params: { bounce: 0.55, rollFriction: 3, spin: true },
+  },
+  {
+    // Ein Kind hält sie, Kind antippen: Zahlenspiel (Snacks für zwei Kinder abzählen und zusammenzählen).
+    id: 'snackbox',
+    width: 110,
+    height: 80,
+    hold: { pose: 'hang', dx: 4, dy: 62 },
+    behaviors: ['draggable', 'fling', 'handheld', 'snackbox'],
+    params: { bounce: 0.2, rollFriction: 12 },
   },
   {
     id: 'bucket',
@@ -408,6 +420,23 @@ export const TOYS = [
     height: 180,
     behaviors: ['draggable', 'tent'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Kind hält sie: Kind antippen = Foto (Sofortbild an der Fotoleine). Auf der Wiese antippen: löst aus.
+    id: 'camera',
+    width: 72,
+    height: 52,
+    hold: { pose: 'forward', dx: 10, dy: 28 },
+    behaviors: ['draggable', 'fling', 'camera', 'handheld'],
+    params: { bounce: 0.2, rollFriction: 8 },
+  },
+  {
+    // Elektro-Baukasten: Antippen öffnet die Strom-Werkstatt (Stromkreis-Rätsel mit Logikgattern).
+    id: 'circuitkit',
+    width: 120,
+    height: 84,
+    behaviors: ['draggable', 'fling', 'circuit'],
+    params: { bounce: 0.15, rollFriction: 12 },
   },
   {
     // Antippen: an/aus mit Lichtkegel. Auf ein Kind ziehen: Es hält sie.

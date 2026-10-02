@@ -22,6 +22,7 @@ export type Activity =
   | 'walk'
   | 'sit'
   | 'rocket'
+  | 'dig'
   | 'hidden';
 
 /** Zusatzwerte, die ein Spielgerät mitgeben kann (z. B. Sprunghöhe, oben/unten). */
@@ -34,6 +35,8 @@ export interface ActivityParams {
   up?: number;
   /** Rakete: schwerelos 0..1 (Arme und Beine schweben, winken). */
   float?: number;
+  /** Buddeln: Schaufelstich −1 (ausholen) … 1 (in die Erde stechen). */
+  scoop?: number;
 }
 
 export type Face = 'blink' | 'joy' | 'yawn' | 'yuck';
@@ -75,6 +78,7 @@ export const ACTIVITY_POSE: Record<Activity, PoseName> = {
   walk: 'stand',
   sit: 'sit',
   rocket: 'sit',
+  dig: 'stand',
   hidden: 'stand',
 };
 
@@ -237,13 +241,26 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
         head: { angle: c.look * (1 - f) + f * 8 * drift },
       });
     }
+    case 'dig': {
+      // Buddeln: beim Stechen nach vorn beugen und in die Knie, beim Ausholen aufrichten
+      const s = clamp(c.params.scoop ?? 0, -1, 1);
+      const down = Math.max(0, s);
+      return {
+        body: { angle: 6 + 12 * down, y: 4 * down },
+        head: { angle: 4 + 4 * down },
+        'arm-l': { angle: -14 * s },
+        'arm-r': { angle: -14 * s },
+        'leg-l': { angle: -8 * down, scaleY: 1 - 0.06 * down },
+        'leg-r': { angle: 8 * down, scaleY: 1 - 0.06 * down },
+      };
+    }
     case 'hidden':
       return {};
   }
 }
 
 /** Kurze Gesten, die eine Tätigkeit für einen Moment überlagern. */
-export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow' | 'yuck' | 'no';
+export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow' | 'yuck' | 'no' | 'photo';
 
 export interface GestureDef {
   duration: number;
@@ -342,6 +359,15 @@ export const GESTURES: Record<GestureName, GestureDef> = {
     face: 'joy',
     // Arm holt kräftig aus nach vorn oben, der Oberkörper geht mit
     motion: (p) => ({ 'arm-r': { angle: -150 * Math.sin(Math.PI * Math.min(1, p * 1.3)) }, body: { angle: -5 * env(p) } }),
+  },
+  photo: {
+    duration: 950,
+    face: 'joy',
+    // Kamera vors Gesicht heben, kurz stillhalten (Klick), wieder runter
+    motion: (p) => {
+      const k = Math.min(1, p * 4) * Math.min(1, (1 - p) * 4);
+      return { 'arm-r': { angle: -62 * k }, 'arm-l': { angle: -118 * k }, head: { angle: -3 * k } };
+    },
   },
   blow: {
     duration: 700,

@@ -114,6 +114,8 @@ export class Toy extends Phaser.GameObjects.Image {
     const release: Release = { vx: 0, vy: 0, ...r };
     this.behaviors.forEach((b) => b.onDragEnd?.(release));
     if (!release.handled) this.physics.launch(release.vx, release.vy, release.groundY, release.vdepth ?? 0);
+    // Richtig geworfen (nicht nur abgelegt): z. B. der Hund läuft hinterher
+    if (!release.handled && Math.hypot(release.vx, release.vy) > 300) this.scene.events.emit('toy-thrown', this);
   }
 
   // --- In der Hand eines Kindes (Baustein handheld/holdable) ---------------

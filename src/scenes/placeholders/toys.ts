@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { drawSnackboxToy } from './snack';
 import type { ToyId } from '../../data/toys';
 import { drawRocket } from './space';
 
@@ -17,6 +18,8 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0xffffff, 0.5);
     g.fillCircle(26, 24, 8);
   },
+
+  snackbox: drawSnackboxToy,
 
   bucket: (g) => {
     g.lineStyle(5, 0x023047);
@@ -315,6 +318,53 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillStyle(0xffffff, 0.5);
     g.fillEllipse(110, 38, 60, 10);
     g.fillEllipse(200, 52, 40, 8);
+  },
+
+  camera: (g) => {
+    g.fillStyle(0x343a40);
+    g.fillRoundedRect(8, 2, 22, 12, 3); // Sucher
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(0, 10, 72, 42, 8); // Gehäuse
+    g.fillStyle(0xb5212e);
+    g.fillRect(0, 40, 72, 6);
+    g.fillStyle(0xf1f3f5);
+    g.fillRoundedRect(54, 14, 13, 9, 2); // Blitz
+    g.fillStyle(0xffd166);
+    g.fillRoundedRect(46, 5, 12, 6, 2); // Auslöser
+    g.fillStyle(0x212529);
+    g.fillCircle(34, 31, 16); // Objektiv
+    g.fillStyle(0x495057);
+    g.fillCircle(34, 31, 11);
+    g.fillStyle(0x74c0fc, 0.8);
+    g.fillCircle(34, 31, 6);
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(30, 27, 3);
+  },
+
+  circuitkit: (g) => {
+    // Kasten mit Deckelbild: Glühbirne, Blitz; oben schauen bunte Drähte heraus
+    g.lineStyle(6, 0xe63946);
+    g.beginPath();
+    g.arc(30, 22, 18, Math.PI, 0, false);
+    g.strokePath();
+    g.lineStyle(6, 0x1d70b8);
+    g.beginPath();
+    g.arc(86, 20, 16, Math.PI * 1.1, -0.1, false);
+    g.strokePath();
+    g.fillStyle(0x264653);
+    g.fillRoundedRect(0, 20, 120, 64, 10);
+    g.fillStyle(0x2a9d8f);
+    g.fillRoundedRect(6, 26, 108, 52, 8);
+    g.fillStyle(0xffe066);
+    g.fillCircle(40, 46, 15);
+    g.fillRect(34, 58, 12, 10);
+    g.fillStyle(0x868e96);
+    g.fillRect(34, 66, 12, 5);
+    g.fillStyle(0xffd60a);
+    g.fillPoints(
+      [new Phaser.Math.Vector2(84, 32), new Phaser.Math.Vector2(72, 54), new Phaser.Math.Vector2(82, 54), new Phaser.Math.Vector2(76, 72), new Phaser.Math.Vector2(94, 46), new Phaser.Math.Vector2(84, 46)],
+      true,
+    );
   },
 
   shovel: (g) => {

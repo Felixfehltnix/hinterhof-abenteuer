@@ -31,6 +31,11 @@ export class Space {
   private readonly backClouds: Phaser.GameObjects.Image[] = [];
   private readonly bodies: Phaser.GameObjects.GameObject[] = [];
   private nextShootingStar = 0;
+  /**
+   * Warp in den Sternenflug (0..1, setzt die Rakete): Die Sterne werden zu Strichen und rasen nach unten.
+   */
+  warp = 0;
+  private warpShift = 0;
   /** Wo die Kamera gerade ist: 0 Wiese/Himmel, 1 in den Wolken, 2 Weltall (für je einen Ton beim Hineinfliegen). */
   private zone = 0;
 
@@ -128,9 +133,16 @@ export class Space {
 
     const high = altitude > 1;
     const t = this.scene.time.now / 1000;
+    const w = this.warp;
+    if (w > 0) this.warpShift += w * w * (this.scene.game.loop.delta / 1000) * 2600;
+    else this.warpShift = 0;
     this.stars.forEach((star, i) => {
       star.setVisible(space > 0);
-      if (space > 0) star.setAlpha(space * (0.55 + 0.45 * Math.sin(t * (1.5 + (i % 5) * 0.4) + i)));
+      if (space <= 0) return;
+      const size = 0.35 + (i % 4) * 0.2;
+      const y = (i * 311 + 17) % GAME_HEIGHT;
+      star.setScale(size, size * (1 + w * 14)).setY((y + this.warpShift * (0.6 + (i % 4) * 0.3)) % GAME_HEIGHT);
+      star.setAlpha(Math.max(w, space * (0.55 + 0.45 * Math.sin(t * (1.5 + (i % 5) * 0.4) + i))));
     });
     const tint = this.scene.dayCycle.cloudTint;
     for (const c of [...this.backClouds, ...this.frontClouds]) c.setVisible(high).setTint(tint);

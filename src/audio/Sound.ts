@@ -24,6 +24,9 @@ const SYNTH_LENGTH: Record<SynthId, number> = {
   whoosh: 0.7,
   beep: 0.08,
   rise: 0.75,
+  bark: 0.15,
+  zap: 0.12,
+  crack: 0.3,
 };
 
 /**
@@ -242,6 +245,23 @@ export class SoundSystem {
         this.tone({ freq: 260, to: 1040, type: 'sine', dur: 0.7, vol, pan, attack: 0.08 });
         this.tone({ freq: 390, to: 1560, type: 'triangle', dur: 0.55, vol: vol * 0.25, pan, attack: 0.08 });
         break;
+      case 'bark':
+        // Kurzes „Wuff“: rauer Ton, der schnell nach unten fällt
+        this.tone({ freq: 520, to: 280, type: 'sawtooth', dur: 0.13, vol: vol * 0.3, pan, attack: 0.005 });
+        this.tone({ freq: 260, to: 150, type: 'square', dur: 0.12, vol: vol * 0.18, pan, attack: 0.005 });
+        this.noise({ dur: 0.05, vol: vol * 0.25, filter: 1500, pan });
+        break;
+      case 'zap':
+        // Kurzes, helles „Piu“ (Stern-Schuss)
+        this.tone({ freq: 1500, to: 600, type: 'sine', dur: 0.12, vol, pan, attack: 0.004 });
+        break;
+      case 'crack': {
+        // Stein zerbricht: dumpfer Schlag mit Bröseln, tiefer je größer (pitch klein = groß)
+        const f = SCALE[Phaser.Math.Clamp(Math.round(pitch ?? 0), 0, SCALE.length - 1)] / 2;
+        this.tone({ freq: f, to: f * 0.5, type: 'triangle', dur: 0.25, vol, pan, attack: 0.003 });
+        this.noise({ dur: 0.18, vol: vol * 0.5, filter: 1800, pan });
+        break;
+      }
     }
     this.note(`synth:${id}`);
   }

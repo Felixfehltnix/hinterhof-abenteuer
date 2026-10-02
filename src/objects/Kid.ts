@@ -745,7 +745,7 @@ export class Kid extends Phaser.GameObjects.Container {
   }
 
   /** Kurze Bewegung beim Benutzen eines gehaltenen Spielzeugs (trommeln, werfen, pusten). */
-  act(name: 'drum' | 'throw' | 'blow'): void {
+  act(name: 'drum' | 'throw' | 'blow' | 'photo'): void {
     if (this.mode === 'leaving' || this.mode === 'hiding' || this.mode === 'dragging') return;
     this.playGesture(name);
   }

@@ -5,6 +5,8 @@ import { drum } from './drum';
 import { fillable } from './fillable';
 import { boomerang } from './boomerang';
 import { bubbles } from './bubbles';
+import { camera } from './camera';
+import { circuit } from './circuit';
 import { cans } from './cans';
 import { float } from './float';
 import { goal } from './goal';
@@ -25,6 +27,7 @@ import { rocket } from './rocket';
 import { seesaw } from './seesaw';
 import { snowmerge } from './snowmerge';
 import { sprinkler } from './sprinkler';
+import { snackbox } from './snackbox';
 import { tent } from './tent';
 import { trampoline } from './trampoline';
 import { water } from './water';
@@ -42,6 +45,8 @@ export type { BehaviorFactory, Release, ToyBehavior } from './types';
 
 /** Alle Bausteine. Neuer Baustein: Datei anlegen, hier eintragen, BehaviorId erweitern. */
 export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
+  camera,
+  circuit,
   draggable,
   fling,
   kick,
@@ -73,6 +78,7 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   sprinkler,
   drum,
   xylophone,
+  snackbox,
   tent,
   handheld,
   flashlight,

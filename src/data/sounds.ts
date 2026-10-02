@@ -31,7 +31,10 @@ export type SynthId =
   | 'whoosh'
   | 'kick'
   | 'beep'
-  | 'rise';
+  | 'rise'
+  | 'bark'
+  | 'zap'
+  | 'crack';
 
 export interface SoundDef {
   synth: SynthId;
@@ -77,6 +80,42 @@ export const SOUNDS: Record<string, SoundDef> = {
   planet: { synth: 'mallet', pitched: true, volume: 0.45 },
   ufo: { synth: 'beep', volume: 0.3 },
   'shooting-star': { synth: 'chime', volume: 0.18 },
+  // Bunker: buddeln, Luke gefunden, Luke klappert
+  dig: { synth: 'whoosh', volume: 0.18 },
+  'bunker-found': { synth: 'chime', volume: 0.5 },
+  hatch: { synth: 'drum', volume: 0.5 },
+  // Hund
+  bark: { synth: 'bark', volume: 0.55 },
+  'dog-catch': { synth: 'pop', volume: 0.4 },
+  'dog-shake': { synth: 'splash', volume: 0.3 },
+  // Steinterrasse mit Straßenmalkreide
+  chalk: { synth: 'whoosh', volume: 0.12 },
+  'chalk-pick': { synth: 'click', volume: 0.4 },
+  // Kamera: Auslöser, Foto hängt an der Leine
+  camera: { synth: 'click', volume: 0.8 },
+  photo: { synth: 'pop', volume: 0.3 },
+  // Strom-Werkstatt
+  'circuit-switch': { synth: 'click', volume: 0.6 },
+  'circuit-wire': { synth: 'pop', volume: 0.45 },
+  'circuit-unwire': { synth: 'click', volume: 0.35 },
+  'circuit-gate': { synth: 'kick', volume: 0.5 },
+  'circuit-nope': { synth: 'honk', volume: 0.15 },
+  'circuit-lamp': { synth: 'rise', volume: 0.35 },
+  'circuit-win': { synth: 'chime', volume: 0.55 },
+  // Snackbox-Spiel
+  'snack-take': { synth: 'pop', volume: 0.4 },
+  'snack-put': { synth: 'mallet', pitched: true, volume: 0.5 },
+  'snack-back': { synth: 'click', volume: 0.35 },
+  'snack-nope': { synth: 'honk', volume: 0.15 },
+  'snack-win': { synth: 'chime', volume: 0.55 },
+  // Sternenflug (Asteroiden): Warp hinein, Stern-Schuss, Stein zerbricht (tiefer = größer),
+  // Glitzer (Tonhöhe steigt mit jedem kleinen Stein), Zusammenstoß, Welle geschafft
+  warp: { synth: 'rise', volume: 0.5 },
+  zap: { synth: 'zap', volume: 0.25 },
+  crack: { synth: 'crack', pitched: true, volume: 0.5 },
+  sparkle: { synth: 'mallet', pitched: true, volume: 0.4 },
+  bonk: { synth: 'drum', volume: 0.45 },
+  'wave-done': { synth: 'chime', volume: 0.5 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

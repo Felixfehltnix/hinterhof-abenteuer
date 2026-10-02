@@ -12,8 +12,12 @@ import {
 import { CHARACTERS, getCharacterDef, type CharacterDef, type CharacterId } from '../data/characters';
 import { EQUIPMENT, GARDEN_GATE, PLACED_KIDS, PLACED_TOYS, TOY_BOX } from '../data/playground';
 import { getToyDef, TOYS, type ToyDef } from '../data/toys';
+import { DOG } from '../data/dog';
 import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
+import { Bunker } from '../objects/Bunker';
+import { Dog } from '../objects/Dog';
 import { Garden } from '../objects/Garden';
+import { Photos } from '../objects/Photos';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { LightLayer } from '../world/LightLayer';
@@ -24,7 +28,13 @@ import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
+import type { AsteroidData } from './AsteroidScene';
 import type { GrillData } from './GrillScene';
+import type { ChalkData } from './ChalkScene';
+import { TerraceGate } from '../objects/TerraceGate';
+import { TERRACE_GATE } from '../data/chalk';
+import type { CircuitData } from './CircuitScene';
+import type { SnackData } from './SnackScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { Space } from '../world/Space';
@@ -50,6 +60,12 @@ export class PlaygroundScene extends Phaser.Scene {
   private gate!: GardenGate;
   /** Blumen und Sandkuchen */
   garden!: Garden;
+  /** Bunker-Eingang, den ein Kind mit Schaufel ausgräbt */
+  bunker!: Bunker;
+  /** Der Hund (schwarzer Labrador), lebt immer auf der Wiese */
+  dog!: Dog;
+  /** Fotos der Kamera an der Fotoleine */
+  photos!: Photos;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
@@ -72,6 +88,8 @@ export class PlaygroundScene extends Phaser.Scene {
   /** Der Finger, der gerade das Scrollen am Rand steuert. */
   private edgePointer?: number;
   private savedWorld: Record<string, unknown> = {};
+  /** Geschaffte Level der Strom-Werkstatt. */
+  private circuitSolved = new Set<number>();
   /** Kamera-Stand im letzten Bild (bewegt sie sich, folgen gezogene Objekte dem Finger neu). */
   private lastScroll = { x: 0, y: 0 };
 
@@ -84,6 +102,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.lightLayer = new LightLayer(this);
     new Backdrop(this);
     this.felixGarden = new FelixGarden(this);
+    new TerraceGate(this, TERRACE_GATE.x, TERRACE_GATE.y);
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
@@ -101,6 +120,13 @@ export class PlaygroundScene extends Phaser.Scene {
       },
     });
 
+    this.registerWorldState('circuit', {
+      save: () => [...this.circuitSolved].sort(),
+      load: (v) => {
+        if (Array.isArray(v)) v.forEach((n) => Number.isInteger(n) && n >= 0 && n < 20 && this.circuitSolved.add(n));
+      },
+    });
+
     const save = loadSave();
     if (save) this.restore(save);
     else {
@@ -110,10 +136,13 @@ export class PlaygroundScene extends Phaser.Scene {
     }
 
     this.garden = new Garden(this);
+    this.bunker = new Bunker(this);
+    this.photos = new Photos(this);
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);
     this.space = new Space(this);
+    this.dog = new Dog(this, DOG.start.x, DOG.start.y);
     this.audio = new SoundSystem(this);
 
     this.setupInput();
@@ -342,6 +371,8 @@ export class PlaygroundScene extends Phaser.Scene {
       // Neu angekommene Kinder freuen sich mit einem Hüpfer; in einer Pfütze spritzt es.
       this.weather.onKidLanded(kid);
       if (arriving) kid.hop();
+      // Mit Schaufel weit links im Gras: buddelt nach dem Bunker
+      else this.bunker.onKidLanded(kid);
     });
   }
 
@@ -407,6 +438,103 @@ export class PlaygroundScene extends Phaser.Scene {
     });
   }
 
+  /** Kreide-Malspiel auf der Steinterrasse hinter dem grauen Tor. Die Wiese schläft solange. */
+  openChalk(): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: ChalkData = {
+        onDone: () => {
+          this.scene.stop('Chalk');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Chalk', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Strom-Werkstatt (Elektro-Baukasten). Die Wiese schläft solange; geschaffte Level werden gespeichert. */
+  openCircuit(): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: CircuitData = {
+        solved: [...this.circuitSolved],
+        onSolved: (level) => this.circuitSolved.add(level),
+        onDone: () => {
+          this.scene.stop('Circuit');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Circuit', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Snackbox-Spiel: das Kind mit der Box und ein zweites (von der Wiese oder aus den Figuren) halten die Zahlen hoch. */
+  openSnack(holder: Kid): void {
+    this.closeInventories();
+    const others = [...this.kids].filter((k) => k !== holder && k.visible && k.mode !== 'leaving');
+    const kids = [holder, ...others].slice(0, 2).map((k) => ({ def: k.def, outfit: k.outfit }));
+    for (const def of CHARACTERS) {
+      if (kids.length >= 2) break;
+      if (!kids.some((k) => k.def.id === def.id)) kids.push({ def, outfit: this.outfits.get(def.id) ?? {} });
+    }
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: SnackData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Snack');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Snack', data);
+      this.scene.sleep();
+    });
+  }
+
+  /**
+   * Sternenflug: Die Rakete ist oben aus dem Weltall hinausgeflogen (Warp). Alle Finger lassen los
+   * (Ziehen endet sauber, sonst hinge die Rakete nach dem Aufwachen an einem Finger, der längst weg ist),
+   * die Kinder in der Rakete fliegen mit. Zurück steht die Rakete oben im Weltall und sinkt.
+   */
+  openAsteroids(riders: Kid[]): void {
+    this.closeInventories();
+    this.releaseAllDrags();
+    const kids = riders.map((k) => ({ def: k.def, outfit: k.outfit }));
+    const cam = this.cameras.main;
+    cam.fadeOut(400, 255, 255, 255);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: AsteroidData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Asteroids');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Asteroids', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Beendet jedes laufende Ziehen, als hätten alle Finger losgelassen. */
+  private releaseAllDrags(): void {
+    // processDragUpEvent ist in Phasers Typen nicht veröffentlicht, sendet aber genau die dragend-Ereignisse
+    const input = this.input as unknown as { processDragUpEvent(p: Phaser.Input.Pointer): void };
+    for (const d of [...this.drags.values()]) input.processDragUpEvent(d.pointer);
+    this.drags.clear();
+    this.edgePointer = undefined;
+  }
+
   private isFull(): boolean {
     return this.toys.size + this.kids.size >= MAX_OBJECTS;
   }
@@ -440,7 +568,7 @@ export class PlaygroundScene extends Phaser.Scene {
     };
 
     this.input.on('dragstart', (p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-      if (!(obj instanceof Toy) && !(obj instanceof Kid)) return;
+      if (!(obj instanceof Toy) && !(obj instanceof Kid) && !(obj instanceof Dog)) return;
       obj.handleDragStart();
       this.beginDrag(p, obj, (pp, x, y) => obj.handleDrag(pp, x, y));
     });
@@ -455,6 +583,7 @@ export class PlaygroundScene extends Phaser.Scene {
         return;
       }
       if (obj instanceof Kid) this.releaseKid(obj, p);
+      if (obj instanceof Dog) obj.release();
     });
 
     // Tippen auf eine freie Stelle schließt offene Leisten.
@@ -483,6 +612,7 @@ export class PlaygroundScene extends Phaser.Scene {
  */
 function touchRank(obj: Phaser.GameObjects.GameObject): number {
   if (obj instanceof Kid) return obj.mode === 'riding' ? 1 : 0;
+  if (obj instanceof Dog) return 0;
   if (obj instanceof Toy) return obj.def.large ? 1 : 0;
   if (obj.getData('scenery') === true) return 2;
   return -1;

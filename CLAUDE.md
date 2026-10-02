@@ -58,6 +58,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.yuck()` und neue Bestellung, falsch → `kid.shakeHead()`, richtig → freuen, hinten wieder anstellen).
   Eigene Eingabe (Finger je Zeiger), Töne gehen an die Wiese. Blick aus Felix' Garten auf die Wiese; das
   Holzschild mit Pfeil am Baum links führt zurück.
+- **Steinterrasse mit Straßenmalkreide** (`src/scenes/ChalkScene.ts`, `scene.openChalk()`): Graues Tor mit hellblauer Tür im
+  Zaun (`TerraceGate`, Position `TERRACE_GATE` in `src/data/chalk.ts`, Lücke in den Büschen) öffnet das Malspiel; die Wiese
+  schläft solange. Steinplatten von oben, Kreideschachtel mit 9 Farben (`CHALK_COLORS`, die letzte ist Regenbogenkreide),
+  Stück antippen = Farbe, mit Fingern (auch mehreren) malen (Tupfer `chalk-dot` eingefärbt auf eine RenderTexture),
+  Schwamm aus dem Eimer = wegwischen, Holzschild oben links = zurück. Zeichnungen in `src/scenes/placeholders/chalk.ts`.
+  Das Bild wird beim Verlassen als WebP in einem eigenen localStorage-Eintrag gespeichert (`src/save/chalk.ts`, nicht im
+  AutoSave – zu groß für den 250-ms-Vergleich) und beim nächsten Besuch weitergemalt.
 - **Rakete und Weltall** (#75): Spielzeug `rocket` (Baustein `rocket`, `src/objects/toys/behaviors/rocket.ts`) mit
   4 Plätzen (Kinder verkleinert in der Kabine, Modus `riding`, Tätigkeit `rocket` mit `float`). Ziehen steuert nur
   (Hook `onSteer`: das Spielzeug fliegt selbst zum Finger, `Toy.handleDrag` setzt es dann nicht), die Spitze zeigt dabei
@@ -165,6 +172,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
   Bunker: `dig`, `bunker-found`, `hatch`;
   Hund: `bark`, `dog-catch`, `dog-shake`.
+  Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`).
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

@@ -86,7 +86,7 @@ export interface BushPlacement {
   scale?: number;
 }
 
-// Hecken und Büsche vor dem Zaun, teils herbstlich. Lücke am Gartentor (x 1790).
+// Hecken und Büsche vor dem Zaun, teils herbstlich. Lücken am Gartentor (x 1790) und am Tor zur Steinterrasse (x 4085).
 export const BUSHES: BushPlacement[] = [
   { kind: 'green', x: 60, scale: 1.1 },
   { kind: 'red', x: 500 },
@@ -100,8 +100,8 @@ export const BUSHES: BushPlacement[] = [
   { kind: 'dark', x: 3010, scale: 1.1 },
   { kind: 'orange', x: 3260, scale: 0.9 },
   { kind: 'green', x: 3600, scale: 1.2 },
-  { kind: 'red', x: 3920 },
-  { kind: 'green', x: 4230, scale: 0.95 },
+  { kind: 'red', x: 3860 },
+  { kind: 'green', x: 4300, scale: 0.95 },
   { kind: 'orange', x: 4490, scale: 1.1 },
   { kind: 'dark', x: 4660, scale: 0.9 },
 ];

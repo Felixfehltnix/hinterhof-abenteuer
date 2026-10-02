@@ -86,6 +86,9 @@ export const SOUNDS: Record<string, SoundDef> = {
   bark: { synth: 'bark', volume: 0.55 },
   'dog-catch': { synth: 'pop', volume: 0.4 },
   'dog-shake': { synth: 'splash', volume: 0.3 },
+  // Steinterrasse mit Straßenmalkreide
+  chalk: { synth: 'whoosh', volume: 0.12 },
+  'chalk-pick': { synth: 'click', volume: 0.4 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

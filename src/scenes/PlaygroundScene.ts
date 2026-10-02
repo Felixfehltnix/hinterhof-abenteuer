@@ -28,6 +28,9 @@ import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
 import type { GrillData } from './GrillScene';
+import type { ChalkData } from './ChalkScene';
+import { TerraceGate } from '../objects/TerraceGate';
+import { TERRACE_GATE } from '../data/chalk';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
 import { Space } from '../world/Space';
@@ -91,6 +94,7 @@ export class PlaygroundScene extends Phaser.Scene {
     this.lightLayer = new LightLayer(this);
     new Backdrop(this);
     this.felixGarden = new FelixGarden(this);
+    new TerraceGate(this, TERRACE_GATE.x, TERRACE_GATE.y);
 
     this.equipment = EQUIPMENT.map((def) => createEquipment(this, def));
     this.gate = new GardenGate(this, GARDEN_GATE.x, GARDEN_GATE.y);
@@ -414,6 +418,24 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Grill', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Kreide-Malspiel auf der Steinterrasse hinter dem grauen Tor. Die Wiese schläft solange. */
+  openChalk(): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: ChalkData = {
+        onDone: () => {
+          this.scene.stop('Chalk');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Chalk', data);
       this.scene.sleep();
     });
   }

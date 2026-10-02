@@ -131,7 +131,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   `kid.setActivity('seesaw', { up })` (jedes Bild aufrufen ist in Ordnung). Die Gelenke steuert
   allein das Kind: Grundpose je Tätigkeit (`ACTIVITY_POSE`) + Bewegung (`activityMotion`, aus
   Zeit, zurückgelegtem Weg und Geschwindigkeit). Kurze Gesten: `hop`, `cheer`, `giggle`, `yawn`,
-  `brace`, `kick`, `wave`, `yuck` (bäh), `no` (Kopfschütteln) (`GESTURES`), Landen nach dem Loslassen: `land()`.
+  `brace`, `kick`, `wave`, `yuck` (bäh), `no` (Kopfschütteln), `photo` (Kamera vors Gesicht) (`GESTURES`), Landen nach dem Loslassen: `land()`.
   Wer ein Kind auf einen Sitz setzt, legt die Hüfte auf den Sitz: `y = sitzY + kid.hipHeight()`
   (folgt der Pose, auch während des Überblendens), für Tweens `kid.sitHeight`.
   Gesichter (`kid-<id>-face-blink/-joy/-yawn`) liegen über dem Kopf; fehlen sie, bleibt das Gesicht gleich.
@@ -173,6 +173,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Bunker: `dig`, `bunker-found`, `hatch`;
   Hund: `bark`, `dog-catch`, `dog-shake`.
   Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`).
+  Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß).
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).
@@ -211,7 +212,10 @@ vordere vor dem Kind, per `setCrop`), hört auf bei `kid.emit('tapped'|'grabbed'
 Blumen), `sprinkler` (Partikel-Fontäne). Blumen und Sandkuchen verwaltet `src/objects/Garden.ts`
 (`scene.garden`, gespeichert als Weltzustand `garden`, Obergrenzen 30 bzw. 5).
 Hook `onReceive(kind, amount)` über `toy.receive()` (z. B. Sand in den Eimer).
-`drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
+`camera` (Kind antippen = es hebt die Kamera und fotografiert den Ausschnitt vor sich, `PHOTO` in `src/data/photos.ts`;
+auf der Wiese antippen = löst aus; das Sofortbild entwickelt sich und hängt an der Fotoleine unter der Pergola,
+`src/objects/Photos.ts`, `scene.photos`, höchstens `MAX_PHOTOS`, antippen = groß; gespeichert in eigenem localStorage-Eintrag
+`src/save/photos.ts`), `drum`, `xylophone` (Platte aus der Tippstelle), `tent` (Kinder verstecken sich, Modus `hiding`),
 `handheld` (Kind hält es in der Hand, Haltung als Daten `hold: { pose, dx, dy, angle }` im Katalog,
 Armhaltungen `HOLD_POSES` in poses.ts), `flashlight` (Lichtkegel über die Lichtebene, auf der Tiefe des haltenden Kindes).
 **In der Hand:** Ein Kind hält immer nur eines (`kid.holding`, `toy.heldBy`); `takeInHand`/`takeFromHand`

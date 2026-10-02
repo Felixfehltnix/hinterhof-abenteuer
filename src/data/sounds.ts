@@ -89,6 +89,9 @@ export const SOUNDS: Record<string, SoundDef> = {
   // Steinterrasse mit Straßenmalkreide
   chalk: { synth: 'whoosh', volume: 0.12 },
   'chalk-pick': { synth: 'click', volume: 0.4 },
+  // Kamera: Auslöser, Foto hängt an der Leine
+  camera: { synth: 'click', volume: 0.8 },
+  photo: { synth: 'pop', volume: 0.3 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

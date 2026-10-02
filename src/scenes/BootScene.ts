@@ -74,6 +74,7 @@ import {
   SPONGE_SIZE,
   TERRACE_GATE_SIZE,
 } from './placeholders/chalk';
+import { drawPhotoLine, drawPhotoPeg, PHOTO_LINE_SIZE, PHOTO_PEG_SIZE } from './placeholders/photos';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -626,6 +627,9 @@ export class BootScene extends Phaser.Scene {
     CHALK_COLORS.forEach((color, i) => {
       this.makeTexture(`chalk-stick-${i}`, CHALK_STICK_SIZE.width, CHALK_STICK_SIZE.height, (g) => drawChalkStick(g, color));
     });
+    // Fotoleine für die Kamera
+    this.makeTexture('photo-line', PHOTO_LINE_SIZE.width, PHOTO_LINE_SIZE.height, drawPhotoLine);
+    this.makeTexture('photo-peg', PHOTO_PEG_SIZE.width, PHOTO_PEG_SIZE.height, drawPhotoPeg);
   }
 
   private makeTexture(

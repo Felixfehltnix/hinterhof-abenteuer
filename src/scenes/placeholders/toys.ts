@@ -317,6 +317,27 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
     g.fillEllipse(200, 52, 40, 8);
   },
 
+  camera: (g) => {
+    g.fillStyle(0x343a40);
+    g.fillRoundedRect(8, 2, 22, 12, 3); // Sucher
+    g.fillStyle(0xe63946);
+    g.fillRoundedRect(0, 10, 72, 42, 8); // Gehäuse
+    g.fillStyle(0xb5212e);
+    g.fillRect(0, 40, 72, 6);
+    g.fillStyle(0xf1f3f5);
+    g.fillRoundedRect(54, 14, 13, 9, 2); // Blitz
+    g.fillStyle(0xffd166);
+    g.fillRoundedRect(46, 5, 12, 6, 2); // Auslöser
+    g.fillStyle(0x212529);
+    g.fillCircle(34, 31, 16); // Objektiv
+    g.fillStyle(0x495057);
+    g.fillCircle(34, 31, 11);
+    g.fillStyle(0x74c0fc, 0.8);
+    g.fillCircle(34, 31, 6);
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(30, 27, 3);
+  },
+
   shovel: (g) => {
     g.fillStyle(0xfb8500);
     g.fillRoundedRect(20, 0, 10, 72, 4); // Stiel

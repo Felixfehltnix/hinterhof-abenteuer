@@ -17,6 +17,7 @@ import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
 import { Bunker } from '../objects/Bunker';
 import { Dog } from '../objects/Dog';
 import { Garden } from '../objects/Garden';
+import { Photos } from '../objects/Photos';
 import { GardenGate } from '../objects/GardenGate';
 import { Kid } from '../objects/Kid';
 import { LightLayer } from '../world/LightLayer';
@@ -60,6 +61,8 @@ export class PlaygroundScene extends Phaser.Scene {
   bunker!: Bunker;
   /** Der Hund (schwarzer Labrador), lebt immer auf der Wiese */
   dog!: Dog;
+  /** Fotos der Kamera an der Fotoleine */
+  photos!: Photos;
   /** Tageszeiten, Himmel, Einfärbung */
   dayCycle!: DayCycle;
   /** Wetter (Regen, Pfützen, Regenbogen) */
@@ -122,6 +125,7 @@ export class PlaygroundScene extends Phaser.Scene {
 
     this.garden = new Garden(this);
     this.bunker = new Bunker(this);
+    this.photos = new Photos(this);
     this.dayCycle = new DayCycle(this);
     this.weather = new Weather(this, this.dayCycle);
     this.cameraControl = new CameraControl(this);

@@ -260,7 +260,7 @@ export function activityMotion(a: Activity, c: MotionContext): Deltas {
 }
 
 /** Kurze Gesten, die eine Tätigkeit für einen Moment überlagern. */
-export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow' | 'yuck' | 'no';
+export type GestureName = 'hop' | 'cheer' | 'giggle' | 'yawn' | 'brace' | 'kick' | 'wave' | 'greet' | 'land' | 'drum' | 'throw' | 'blow' | 'yuck' | 'no' | 'photo';
 
 export interface GestureDef {
   duration: number;
@@ -359,6 +359,15 @@ export const GESTURES: Record<GestureName, GestureDef> = {
     face: 'joy',
     // Arm holt kräftig aus nach vorn oben, der Oberkörper geht mit
     motion: (p) => ({ 'arm-r': { angle: -150 * Math.sin(Math.PI * Math.min(1, p * 1.3)) }, body: { angle: -5 * env(p) } }),
+  },
+  photo: {
+    duration: 950,
+    face: 'joy',
+    // Kamera vors Gesicht heben, kurz stillhalten (Klick), wieder runter
+    motion: (p) => {
+      const k = Math.min(1, p * 4) * Math.min(1, (1 - p) * 4);
+      return { 'arm-r': { angle: -62 * k }, 'arm-l': { angle: -118 * k }, head: { angle: -3 * k } };
+    },
   },
   blow: {
     duration: 700,

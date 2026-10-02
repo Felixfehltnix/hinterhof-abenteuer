@@ -24,6 +24,7 @@ const SYNTH_LENGTH: Record<SynthId, number> = {
   whoosh: 0.7,
   beep: 0.08,
   rise: 0.75,
+  bark: 0.15,
 };
 
 /**
@@ -241,6 +242,12 @@ export class SoundSystem {
         // Aufsteigendes „Fiuuu“ (Rakete startet), weich und kurz
         this.tone({ freq: 260, to: 1040, type: 'sine', dur: 0.7, vol, pan, attack: 0.08 });
         this.tone({ freq: 390, to: 1560, type: 'triangle', dur: 0.55, vol: vol * 0.25, pan, attack: 0.08 });
+        break;
+      case 'bark':
+        // Kurzes „Wuff“: rauer Ton, der schnell nach unten fällt
+        this.tone({ freq: 520, to: 280, type: 'sawtooth', dur: 0.13, vol: vol * 0.3, pan, attack: 0.005 });
+        this.tone({ freq: 260, to: 150, type: 'square', dur: 0.12, vol: vol * 0.18, pan, attack: 0.005 });
+        this.noise({ dur: 0.05, vol: vol * 0.25, filter: 1500, pan });
         break;
     }
     this.note(`synth:${id}`);

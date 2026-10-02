@@ -42,6 +42,7 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { DOG_BODY_SIZE, DOG_HEAD_SIZE, DOG_LEG_SIZE, DOG_TAIL_SIZE, drawDogBody, drawDogHead, drawDogLeg, drawDogTail } from './placeholders/dog';
 import {
   BUNKER_FRAME_SIZE,
   BUNKER_LID_SIZE,
@@ -587,6 +588,13 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('bunker-frame', BUNKER_FRAME_SIZE.width, BUNKER_FRAME_SIZE.height, drawBunkerFrame);
     this.makeTexture('bunker-lid', BUNKER_LID_SIZE.width, BUNKER_LID_SIZE.height, drawBunkerLid);
     this.makeTexture('bunker-wheel', BUNKER_WHEEL_SIZE.width, BUNKER_WHEEL_SIZE.height, drawBunkerWheel);
+    // Hund (schwarzer Labrador) aus Einzelteilen
+    this.makeTexture('dog-body', DOG_BODY_SIZE.width, DOG_BODY_SIZE.height, drawDogBody);
+    this.makeTexture('dog-leg', DOG_LEG_SIZE.width, DOG_LEG_SIZE.height, drawDogLeg);
+    this.makeTexture('dog-tail', DOG_TAIL_SIZE.width, DOG_TAIL_SIZE.height, drawDogTail);
+    this.makeTexture('dog-head', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'normal'));
+    this.makeTexture('dog-head-open', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'open'));
+    this.makeTexture('dog-head-sleep', DOG_HEAD_SIZE.width, DOG_HEAD_SIZE.height, (g) => drawDogHead(g, 'sleep'));
   }
 
   private makeTexture(

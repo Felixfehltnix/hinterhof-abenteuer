@@ -13,7 +13,7 @@ const POUR_TIME = 1600;
 
 /**
  * Gießkanne: Ziehen → kippt und tropft. Wo es gießt, wachsen Blumen; ein Kind darunter schüttelt
- * sich lachend. Hält sie ein Kind: Kind antippen = es gießt eine Weile dort, wo es steht.
+ * sich lachend, der Hund schnappt nach dem Wasser. Hält sie ein Kind: Kind antippen = es gießt eine Weile dort, wo es steht.
  */
 export const water: BehaviorFactory = (toy) => {
   let nextDrop = 0;
@@ -59,6 +59,7 @@ export const water: BehaviorFactory = (toy) => {
         // Ein Kind im Wasserstrahl schüttelt sich lachend
         const kid = scene.kidsOnMeadow().find((k) => k !== toy.heldBy && (k.getBounds().contains(sx, sy + FALL / 2) || k.getBounds().contains(sx, ly)));
         if (kid) kid.giggle();
+        else if (scene.dog.area().contains(sx, sy + FALL / 2) || scene.dog.area().contains(sx, ly)) scene.dog.soak();
         else if (!scene.isInSandbox(fx, ly)) scene.garden.growFlower(fx, ly);
       }
     },

@@ -31,7 +31,8 @@ export type SynthId =
   | 'whoosh'
   | 'kick'
   | 'beep'
-  | 'rise';
+  | 'rise'
+  | 'bark';
 
 export interface SoundDef {
   synth: SynthId;
@@ -81,6 +82,10 @@ export const SOUNDS: Record<string, SoundDef> = {
   dig: { synth: 'whoosh', volume: 0.18 },
   'bunker-found': { synth: 'chime', volume: 0.5 },
   hatch: { synth: 'drum', volume: 0.5 },
+  // Hund
+  bark: { synth: 'bark', volume: 0.55 },
+  'dog-catch': { synth: 'pop', volume: 0.4 },
+  'dog-shake': { synth: 'splash', volume: 0.3 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

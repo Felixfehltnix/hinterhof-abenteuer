@@ -94,6 +94,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   und findet eine Stahlluke mit Handrad (Zeichnungen `src/scenes/placeholders/bunker.ts`). Es gibt nur eine Luke;
   jedes weitere Loch schüttet sich wieder zu. Antippen = Handrad dreht, Luke klappert (bleibt zu – die Unterwelt
   dahinter kommt später). Weltzustand `bunker` (`{ x, y, dir }`). Auslöser: `releaseKid` → `bunker.onKidLanded(kid)`.
+- **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
+  Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
+  (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
+  fliegen mit. Vorher enden alle Zieh-Vorgänge (`releaseAllDrags`). Rakete anfassen = fliegen, woanders tippen/halten = leuchtende
+  Sterne dorthin schießen. Groß → 2 mittel → 2 klein → Glitzer; Steine laufen am Rand herum, die Rakete nicht. Zusammenstoß
+  schubst nur (Kinder halten sich fest), keine Leben, keine Punkte; Welle geschafft = Jubel, goldener Stern oben, Ufo, nächste
+  Welle einen Stein mehr. Erde unten links = zurück (Rakete sinkt dann von oben).
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -189,7 +196,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Hund: `bark`, `dog-catch`, `dog-shake`;
   Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`);
   Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß);
-  Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`.
+  Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
+  Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

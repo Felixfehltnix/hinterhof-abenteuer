@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../../../config';
+import { WARP } from '../../../data/asteroids';
 import { ALTITUDE_MAX, ROCKET, ROCKET_FLY_DEPTH, WEIGHTLESS_FROM } from '../../../data/space';
 import type { PlaygroundScene } from '../../../scenes/PlaygroundScene';
 import { ROCKET_ART } from '../../../scenes/placeholders/space';
@@ -44,6 +45,8 @@ export const rocket: BehaviorFactory = (toy) => {
   let landY = toy.y;
   // Finger liegt still auf der fliegenden Rakete (noch nicht gezogen): sie schwebt auf der Stelle
   let holdPointer: number | undefined;
+  // So lange (s) wird die Rakete schon oben am Weltall-Rand weiter nach oben gezogen (Warp)
+  let warp = 0;
   // Kinder, deren Touch-Fläche im Flug aus ist (beim Aussteigen wieder an)
   const muted = new Set<Kid>();
 
@@ -140,10 +143,26 @@ export const rocket: BehaviorFactory = (toy) => {
       toy.y = GROUND_MAX_Y;
       vy = Math.min(0, vy);
     }
+    warpOut(dt, toy.y <= top + 2);
     // Über der Wiese abgesenkt oder zur Seite gesteuert: dort landet sie später
     // (beim Aufsteigen bleibt es bei der Stelle, an der sie gestartet ist)
     if (steering && toy.y >= GROUND_MIN_Y && vy >= 0) landY = groundLine(toy.y);
     if (!steering && toy.y >= landY) land();
+  };
+
+  /**
+   * Oben am Ende des Weltalls weiter nach oben ziehen: Die Sterne werden zu Strichen, nach
+   * WARP.holdTime geht es in den Sternenflug (Asteroiden). Loslassen oder zurück = Warp klingt ab.
+   */
+  const warpOut = (dt: number, atTop: boolean) => {
+    const pushing = steering && atTop && target.y < toy.y - WARP.pushMargin;
+    warp = pushing ? warp + dt : Math.max(0, warp - dt * 2);
+    scene.space.warp = Math.min(1, warp / WARP.holdTime);
+    if (warp < WARP.holdTime) return;
+    warp = 0;
+    scene.space.warp = 0;
+    scene.events.emit('sound', { kind: 'warp', x: toy.x });
+    scene.openAsteroids(seats.riders.filter((k): k is Kid => k !== undefined));
   };
 
   /** Flamme und Rauch an der Düse, je nach Schub. */
@@ -264,6 +283,7 @@ export const rocket: BehaviorFactory = (toy) => {
         if (kid.input) kid.input.enabled = true;
       });
       seats.dismountAll(airborne ? landY : toy.y);
+      scene.space.warp = 0;
       if (scene.cameraControl.isFollowing(toy)) scene.cameraControl.follow(undefined);
     },
     onDestroy: () => {

@@ -32,7 +32,9 @@ export type SynthId =
   | 'kick'
   | 'beep'
   | 'rise'
-  | 'bark';
+  | 'bark'
+  | 'zap'
+  | 'crack';
 
 export interface SoundDef {
   synth: SynthId;
@@ -106,6 +108,14 @@ export const SOUNDS: Record<string, SoundDef> = {
   'snack-back': { synth: 'click', volume: 0.35 },
   'snack-nope': { synth: 'honk', volume: 0.15 },
   'snack-win': { synth: 'chime', volume: 0.55 },
+  // Sternenflug (Asteroiden): Warp hinein, Stern-Schuss, Stein zerbricht (tiefer = größer),
+  // Glitzer (Tonhöhe steigt mit jedem kleinen Stein), Zusammenstoß, Welle geschafft
+  warp: { synth: 'rise', volume: 0.5 },
+  zap: { synth: 'zap', volume: 0.25 },
+  crack: { synth: 'crack', pitched: true, volume: 0.5 },
+  sparkle: { synth: 'mallet', pitched: true, volume: 0.4 },
+  bonk: { synth: 'drum', volume: 0.45 },
+  'wave-done': { synth: 'chime', volume: 0.5 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

@@ -108,6 +108,8 @@ import {
   TRAY_SIZE,
 } from './placeholders/circuit';
 import { CIRCUIT } from '../data/circuit';
+import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
+import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -542,6 +544,17 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
+  private makeAsteroids(): void {
+    for (const size of [0, 1, 2] as RockSize[]) {
+      const d = rockTextureSize(size);
+      for (let shape = 0; shape < ROCK_SHAPES; shape++) this.makeTexture(`rock-${size}-${shape}`, d, d, (g) => drawRock(g, size, shape));
+    }
+    this.makeTexture('astro-shot', SHOT_SIZE.width, SHOT_SIZE.height, drawShot);
+    this.makeTexture('gold-star', GOLD_STAR_SIZE, GOLD_STAR_SIZE, drawGoldStar);
+    this.makeTexture('earth', EARTH_SIZE, EARTH_SIZE, drawEarth);
+  }
+
   /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Tuch. */
   private makeGrill(): void {
     this.makeTexture('grill-bg', GAME_WIDTH, GAME_HEIGHT, drawGrillBackground);
@@ -640,6 +653,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('snack-card', CARD_SIZE.width, CARD_SIZE.height, drawCard);
     this.makeTexture('snack-sign', SNACK.exit.w + 10, SNACK.exit.h + 12, drawSnackSign);
     for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
+    this.makeAsteroids();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

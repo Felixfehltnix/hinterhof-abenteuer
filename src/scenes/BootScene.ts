@@ -42,6 +42,8 @@ import {
   SLIDE_AREA,
 } from './placeholders/playhouse';
 import { drawWhirlpool, TOY_PLACEHOLDERS } from './placeholders/toys';
+import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
+import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
   ALIEN_SIZE,
@@ -476,6 +478,17 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
+  private makeAsteroids(): void {
+    for (const size of [0, 1, 2] as RockSize[]) {
+      const d = rockTextureSize(size);
+      for (let shape = 0; shape < ROCK_SHAPES; shape++) this.makeTexture(`rock-${size}-${shape}`, d, d, (g) => drawRock(g, size, shape));
+    }
+    this.makeTexture('astro-shot', SHOT_SIZE.width, SHOT_SIZE.height, drawShot);
+    this.makeTexture('gold-star', GOLD_STAR_SIZE, GOLD_STAR_SIZE, drawGoldStar);
+    this.makeTexture('earth', EARTH_SIZE, EARTH_SIZE, drawEarth);
+  }
+
   /** Grill-Spiel (#66): Hintergrund, Grill, Grillgut in 5 Garstufen, Teller, Flaschen, Tuch. */
   private makeGrill(): void {
     this.makeTexture('grill-bg', GAME_WIDTH, GAME_HEIGHT, drawGrillBackground);
@@ -566,6 +579,7 @@ export class BootScene extends Phaser.Scene {
     this.makeDressUp();
     this.makeGrill();
     this.makeSpace();
+    this.makeAsteroids();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
   }

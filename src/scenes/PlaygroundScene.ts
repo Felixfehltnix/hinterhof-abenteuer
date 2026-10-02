@@ -24,6 +24,7 @@ import { Toy } from '../objects/toys/Toy';
 import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
+import type { AsteroidData } from './AsteroidScene';
 import type { GrillData } from './GrillScene';
 import { DayCycle } from '../world/DayCycle';
 import { Weather } from '../world/Weather';
@@ -405,6 +406,40 @@ export class PlaygroundScene extends Phaser.Scene {
       this.scene.launch('Grill', data);
       this.scene.sleep();
     });
+  }
+
+  /**
+   * Sternenflug: Die Rakete ist oben aus dem Weltall hinausgeflogen (Warp). Alle Finger lassen los
+   * (Ziehen endet sauber, sonst hinge die Rakete nach dem Aufwachen an einem Finger, der längst weg ist),
+   * die Kinder in der Rakete fliegen mit. Zurück steht die Rakete oben im Weltall und sinkt.
+   */
+  openAsteroids(riders: Kid[]): void {
+    this.closeInventories();
+    this.releaseAllDrags();
+    const kids = riders.map((k) => ({ def: k.def, outfit: k.outfit }));
+    const cam = this.cameras.main;
+    cam.fadeOut(400, 255, 255, 255);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: AsteroidData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Asteroids');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Asteroids', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Beendet jedes laufende Ziehen, als hätten alle Finger losgelassen. */
+  private releaseAllDrags(): void {
+    // processDragUpEvent ist in Phasers Typen nicht veröffentlicht, sendet aber genau die dragend-Ereignisse
+    const input = this.input as unknown as { processDragUpEvent(p: Phaser.Input.Pointer): void };
+    for (const d of [...this.drags.values()]) input.processDragUpEvent(d.pointer);
+    this.drags.clear();
+    this.edgePointer = undefined;
   }
 
   private isFull(): boolean {

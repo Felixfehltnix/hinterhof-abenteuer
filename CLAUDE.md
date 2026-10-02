@@ -67,6 +67,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   darüber aus: `weather.setHighUp`), Weltall mit Sternen, Sternschnuppen, Planeten und Ufo (`SPACE_BODIES`,
   Parallaxe `PLANET_PARALLAX`), Zeichnungen in `src/scenes/placeholders/space.ts`. Bewegt sich die Kamera,
   setzt die Szene gezogene Objekte neu unter den Finger.
+- **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
+  Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
+  (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
+  fliegen mit. Vorher enden alle Zieh-Vorgänge (`releaseAllDrags`). Rakete anfassen = fliegen, woanders tippen/halten = leuchtende
+  Sterne dorthin schießen. Groß → 2 mittel → 2 klein → Glitzer; Steine laufen am Rand herum, die Rakete nicht. Zusammenstoß
+  schubst nur (Kinder halten sich fest), keine Leben, keine Punkte; Welle geschafft = Jubel, goldener Stern oben, Ufo, nächste
+  Welle einen Stein mehr. Erde unten links = zurück (Rakete sinkt dann von oben).
 - Wetter (`src/world/Weather.ts`): Wolke antippen → nächstes Wetter (`WEATHER_ORDER`).
   Abfragen über `environment.weather` / `isRaining()` / `environment.wind`. Kein Gewitter,
   keine Blitze. Pfützen: `scene.weather.puddleAt(x, y)`.
@@ -146,7 +153,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
 - Bisherige Töne: `honk`, `drum`, `xylophone` (pitch 0–7), `pop`, `bubble`, `splash`, `click`, `kick`,
   `peekaboo`, `daytime`, `sprinkler-on`/`-off`, `gust`, `weather-<art>`, `count`,
   Grill: `sizzle`, `cut`, `squirt`, `wipe`, `yum`, `yuck`; Rakete: `liftoff`, `rocket`, `rocket-land`,
-  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt).
+  `clouds`, `space`, `planet` (pitch), `ufo`, `shooting-star` (kein Dauer-Triebwerkston – der nervt);
+  Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

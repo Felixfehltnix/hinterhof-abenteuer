@@ -7,6 +7,7 @@ import { ChalkScene } from './scenes/ChalkScene';
 import { CircuitScene } from './scenes/CircuitScene';
 import { SnackScene } from './scenes/SnackScene';
 import { GrillScene } from './scenes/GrillScene';
+import { MakeupScene } from './scenes/MakeupScene';
 import { PlaygroundScene } from './scenes/PlaygroundScene';
 
 new Phaser.Game({
@@ -24,5 +25,5 @@ new Phaser.Game({
   input: {
     activePointers: 3, // mehrere Kinderfinger gleichzeitig
   },
-  scene: [BootScene, PlaygroundScene, DressUpScene, GrillScene, ChalkScene, CircuitScene, SnackScene, AsteroidScene],
+  scene: [BootScene, PlaygroundScene, DressUpScene, GrillScene, ChalkScene, CircuitScene, SnackScene, AsteroidScene, MakeupScene],
 });

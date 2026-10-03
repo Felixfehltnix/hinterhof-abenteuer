@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { drawMakeupCaseToy } from './makeup';
 import { drawSnackboxToy } from './snack';
 import type { ToyId } from '../../data/toys';
 import { drawRocket } from './space';
@@ -20,6 +21,8 @@ export const TOY_PLACEHOLDERS: Record<ToyId, Draw> = {
   },
 
   snackbox: drawSnackboxToy,
+
+  makeupcase: drawMakeupCaseToy,
 
   bucket: (g) => {
     g.lineStyle(5, 0x023047);

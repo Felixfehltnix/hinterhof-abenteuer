@@ -94,6 +94,12 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   und findet eine Stahlluke mit Handrad (Zeichnungen `src/scenes/placeholders/bunker.ts`). Es gibt nur eine Luke;
   jedes weitere Loch schüttet sich wieder zu. Antippen = Handrad dreht, Luke klappert (bleibt zu – die Unterwelt
   dahinter kommt später). Weltzustand `bunker` (`{ x, y, dir }`). Auslöser: `releaseKid` → `bunker.onKidLanded(kid)`.
+- **Zaubertrank** (`src/scenes/BrewScene.ts`, `scene.openBrew(bucket)`, Daten `src/data/brew.ts`, Zeichnungen `src/scenes/placeholders/brew.ts`):
+  Eimer (`bucket`, Baustein `brew`) am Boden antippen (oder das Kind mit Eimer) öffnet das Spiel; die Wiese schläft. Korb mit 12 Zutaten
+  (`INGREDIENTS`, beliebig oft nehmen), in den Eimer ziehen: der Trank mischt die Farben (`mixColor`). Mit dem Finger Kreise um den Eimer
+  = rühren (Winkelsumme, `BREW.turns` Umdrehungen), dann steigt eine Fee auf (`pickFairy`: höchste Punkte, bei Gleichstand oder
+  ≥ `BREW.mixedKinds` Sorten die Regenbogenfee). 8 Feen (`FAIRIES`). Zurück schwebt sie als `Fairy` (`src/objects/Fairy.ts`) neben dem
+  Eimer auf der Wiese, höchstens `MAX_FAIRIES` (die älteste geht mit Glitzer), gespeichert als Weltzustand `fairies`; Antippen = wirbelt. Nachts leuchtet sie (Lichtebene: Schein + helles Abbild, `dayCycle.darkness`).
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
   (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
@@ -197,6 +203,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`);
   Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß);
   Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
+  Zaubertrank: `brew-take`, `brew-add`, `brew-stir`, `brew-fairy`;
   Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`.
 
 ## Speichern

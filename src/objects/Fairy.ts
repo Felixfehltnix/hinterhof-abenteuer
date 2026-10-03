@@ -3,6 +3,7 @@ import { FAIRY_DEFS, type FairyId } from '../data/brew';
 import { WORLD_WIDTH } from '../config';
 import type { PlaygroundScene } from '../scenes/PlaygroundScene';
 import { sparkBurst } from './sparks';
+import type { LightSource } from '../world/LightLayer';
 
 /** Höhe, in der die Fee über ihrem Platz schwebt (px). */
 const HOVER = 130;
@@ -16,6 +17,10 @@ export class Fairy extends Phaser.GameObjects.Sprite {
   private home: { x: number; y: number };
   private t = Math.random() * 10;
   private sparkAt = 0;
+  /** Leuchten nachts über der Dunkelheit (Lichtebene): Schein und ein helles Abbild der Fee. */
+  private readonly halo: Phaser.GameObjects.Image;
+  private readonly bright: Phaser.GameObjects.Image;
+  private readonly light: LightSource;
 
   constructor(scene: PlaygroundScene, id: FairyId, x: number, y: number) {
     super(scene, x, y - HOVER, `fairy-${id}`);
@@ -25,6 +30,16 @@ export class Fairy extends Phaser.GameObjects.Sprite {
     scene.add.existing(this);
     this.setInteractive({ useHandCursor: true });
     this.setData('onTap', () => this.twirl());
+
+    this.halo = scene.add.image(x, y, 'glow-soft').setTint(FAIRY_DEFS[id].spark).setBlendMode('ADD').setVisible(false);
+    this.bright = scene.add.image(x, y, `fairy-${id}`).setOrigin(0.5, 1).setVisible(false);
+    this.light = { objects: [this.halo, this.bright], depth: () => this.depth + 0.5, active: () => this.halo.visible };
+    scene.lightLayer.add(this.light);
+    this.once(Phaser.GameObjects.Events.DESTROY, () => {
+      scene.lightLayer.remove(this.light);
+      this.halo.destroy();
+      this.bright.destroy();
+    });
   }
 
   /** Platz am Boden (für Speichern). */
@@ -53,6 +68,19 @@ export class Fairy extends Phaser.GameObjects.Sprite {
     this.setPosition(this.home.x + Math.sin(this.t * 0.8) * 26, this.home.y - HOVER + Math.sin(this.t * 1.7) * 12);
     this.setAngle(Math.sin(this.t * 1.3) * 5);
     this.setDepth(this.home.y);
+    // Nachts: Schein pulsiert, das helle Abbild deckt die dunkle Fee zu
+    const dark = (this.scene as PlaygroundScene).dayCycle.darkness * this.alpha;
+    this.halo.setVisible(dark > 0.02 && this.visible);
+    this.bright.setVisible(this.halo.visible);
+    if (this.halo.visible) {
+      const pulse = 0.85 + Math.sin(this.t * 2.4) * 0.15;
+      this.halo.setPosition(this.x, this.y - 80).setScale(2.6 * pulse).setAlpha(dark * 0.7);
+      this.bright
+        .setPosition(this.x, this.y)
+        .setScale(this.scaleX, this.scaleY)
+        .setAngle(this.angle)
+        .setAlpha(dark * 0.55);
+    }
     if (time > this.sparkAt && !this.scene.tweens.isTweening(this)) {
       this.sparkAt = time + 600 + Math.random() * 700;
       sparkBurst(this.scene, this.x + 40, this.y - 120, FAIRY_DEFS[this.fairyId].spark, 1, this.depth + 1, 0.4);

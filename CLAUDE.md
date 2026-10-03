@@ -99,7 +99,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   (`INGREDIENTS`, beliebig oft nehmen), in den Eimer ziehen: der Trank mischt die Farben (`mixColor`). Mit dem Finger Kreise um den Eimer
   = rühren (Winkelsumme, `BREW.turns` Umdrehungen), dann steigt eine Fee auf (`pickFairy`: höchste Punkte, bei Gleichstand oder
   ≥ `BREW.mixedKinds` Sorten die Regenbogenfee). 8 Feen (`FAIRIES`). Zurück schwebt sie als `Fairy` (`src/objects/Fairy.ts`) neben dem
-  Eimer auf der Wiese, höchstens `MAX_FAIRIES` (die älteste geht mit Glitzer), gespeichert als Weltzustand `fairies`; Antippen = wirbelt.
+  Eimer auf der Wiese, höchstens `MAX_FAIRIES` (die älteste geht mit Glitzer), gespeichert als Weltzustand `fairies`; Antippen = wirbelt. Nachts leuchtet sie (Lichtebene: Schein + helles Abbild, `dayCycle.darkness`).
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
   (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete

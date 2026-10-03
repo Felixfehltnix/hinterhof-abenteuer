@@ -27,6 +27,7 @@ import { rocket } from './rocket';
 import { seesaw } from './seesaw';
 import { snowmerge } from './snowmerge';
 import { sprinkler } from './sprinkler';
+import { makeup } from './makeup';
 import { snackbox } from './snackbox';
 import { tent } from './tent';
 import { trampoline } from './trampoline';
@@ -79,6 +80,7 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   drum,
   xylophone,
   snackbox,
+  makeup,
   tent,
   handheld,
   flashlight,

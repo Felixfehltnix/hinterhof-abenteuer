@@ -109,6 +109,8 @@ import {
 } from './placeholders/circuit';
 import { CIRCUIT } from '../data/circuit';
 import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
+import { CUP_SIZE, drawBrushDot, drawGrain, drawJar, drawJarFill, drawJarRainbow, drawMakeupBg, drawMirror, drawPan, drawPanFill, drawPenCup, drawPen, drawPuffHandle, drawPuffHead, drawMakeupSponge, JAR_SIZE, PAN_SIZE, PUFF_HANDLE, PUFF_HEAD, MAKEUP_SPONGE_SIZE } from './placeholders/makeup';
+import { MIRROR, PEN_SIZE } from '../data/makeup';
 import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
@@ -544,6 +546,24 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Kinderschminken: Zimmer, Becher, Stifte, Puder, Glitzerdosen, Schwamm, Spiegel. */
+  private makeMakeup(): void {
+    this.makeTexture('mk-bg', GAME_WIDTH, GAME_HEIGHT, drawMakeupBg);
+    this.makeTexture('mk-cup', CUP_SIZE.width, CUP_SIZE.height, drawPenCup);
+    this.makeTexture('mk-pen', PEN_SIZE.width, PEN_SIZE.height, drawPen);
+    this.makeTexture('mk-pan', PAN_SIZE, PAN_SIZE, drawPan);
+    this.makeTexture('mk-pan-fill', PAN_SIZE, PAN_SIZE, drawPanFill);
+    this.makeTexture('mk-puff-handle', PUFF_HANDLE.width, PUFF_HANDLE.height, drawPuffHandle);
+    this.makeTexture('mk-puff-head', PUFF_HEAD, PUFF_HEAD, drawPuffHead);
+    this.makeTexture('mk-jar', JAR_SIZE.width, JAR_SIZE.height, drawJar);
+    this.makeTexture('mk-jar-fill', JAR_SIZE.width, JAR_SIZE.height, drawJarFill);
+    this.makeTexture('mk-jar-rainbow', JAR_SIZE.width, JAR_SIZE.height, drawJarRainbow);
+    this.makeTexture('mk-sponge', MAKEUP_SPONGE_SIZE.width, MAKEUP_SPONGE_SIZE.height, drawMakeupSponge);
+    this.makeTexture('mk-mirror', MIRROR.w, MIRROR.h, drawMirror);
+    this.makeTexture('mk-dot', 64, 64, drawBrushDot);
+    this.makeTexture('mk-grain', 16, 16, drawGrain);
+  }
+
   /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
   private makeAsteroids(): void {
     for (const size of [0, 1, 2] as RockSize[]) {
@@ -654,6 +674,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('snack-sign', SNACK.exit.w + 10, SNACK.exit.h + 12, drawSnackSign);
     for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
     this.makeAsteroids();
+    this.makeMakeup();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

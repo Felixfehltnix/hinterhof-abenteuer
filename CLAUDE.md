@@ -94,6 +94,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   und findet eine Stahlluke mit Handrad (Zeichnungen `src/scenes/placeholders/bunker.ts`). Es gibt nur eine Luke;
   jedes weitere Loch schüttet sich wieder zu. Antippen = Handrad dreht, Luke klappert (bleibt zu – die Unterwelt
   dahinter kommt später). Weltzustand `bunker` (`{ x, y, dir }`). Auslöser: `releaseKid` → `bunker.onKidLanded(kid)`.
+- **Kinderschminken** (`src/scenes/MakeupScene.ts`, `scene.openMakeup(guest)`, Daten `src/data/makeup.ts`, Zeichnungen
+  `src/scenes/placeholders/makeup.ts`): Spielzeug `makeupcase` (Bausteine `makeup` **vor** `handheld`, Tag `makeup`). Hält ein Kind den
+  Koffer und man zieht ein anderes Kind darauf (oder auf das haltende Kind: `releaseKid`), öffnet sich das Spiel; die Wiese schläft.
+  Man sieht nur den großen Kopf des Gastes (Textur `kid-<id>-head`, Gesichtsoval `FACE`) und zieht Werkzeuge aus dem Regal: 8 Stifte,
+  4 Puder (Quaste), 6 Glitzerdosen (eine bunt), Schwamm (wischt alles weg). Gemalt wird in eine Zeichenfläche (RenderTexture, auf das
+  Gesicht maskiert). Der Handspiegel unten rechts ist „fertig“. Das Make-up wird **nicht gespeichert** (das Kind ist danach wieder
+  „normal“); Speichern wäre ein eigener Schritt (Auflage auf dem Kind, `SAVE_VERSION`).
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
   (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
@@ -197,7 +204,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Kreide: `chalk`, `chalk-pick` (Wischen: `wipe`);
   Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß);
   Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
-  Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`.
+  Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`;
+  Schminken: `paint`, `puff`, `glitter`, `tattoo-done`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

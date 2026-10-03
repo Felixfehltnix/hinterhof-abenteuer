@@ -28,6 +28,7 @@ import { seesaw } from './seesaw';
 import { snowmerge } from './snowmerge';
 import { sprinkler } from './sprinkler';
 import { snackbox } from './snackbox';
+import { brew } from './brew';
 import { tent } from './tent';
 import { trampoline } from './trampoline';
 import { water } from './water';
@@ -79,6 +80,7 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   drum,
   xylophone,
   snackbox,
+  brew,
   tent,
   handheld,
   flashlight,

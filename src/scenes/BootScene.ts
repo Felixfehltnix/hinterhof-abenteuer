@@ -109,8 +109,8 @@ import {
 } from './placeholders/circuit';
 import { CIRCUIT } from '../data/circuit';
 import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
-import { CUP_SIZE, drawBrushDot, drawGrain, drawJar, drawJarFill, drawJarRainbow, drawMakeupBg, drawMirror, drawPan, drawPanFill, drawPenCup, drawPen, drawPuffHandle, drawPuffHead, drawMakeupSponge, JAR_SIZE, PAN_SIZE, PUFF_HANDLE, PUFF_HEAD, MAKEUP_SPONGE_SIZE } from './placeholders/makeup';
-import { MIRROR, PEN_SIZE } from '../data/makeup';
+import { CURL_SIZE, drawCurl, drawGlueBrush, drawGluePot, drawPaper, drawSheet, drawShape, drawModeSwitch, GLUE_BRUSH_SIZE, GLUE_POT_SIZE, MODE_SWITCH_SIZE, CUP_SIZE, drawBrushDot, drawGrain, drawJar, drawJarFill, drawJarRainbow, drawMakeupBg, drawMirror, drawPan, drawPanFill, drawPenCup, drawPen, drawPuffHandle, drawPuffHead, drawMakeupSponge, JAR_SIZE, PAN_SIZE, PUFF_HANDLE, PUFF_HEAD, MAKEUP_SPONGE_SIZE } from './placeholders/makeup';
+import { MIRROR, PEN_SIZE, SHAPES, SHEET, STENCIL } from '../data/makeup';
 import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
@@ -546,6 +546,26 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Vorlage `mk-stencil-<id>`: das Papier mit der Form ausgestanzt (wie die Rakete: Canvas, destination-out). */
+  private makeStencil(id: string): void {
+    const key = `mk-stencil-${id}`;
+    if (this.textures.exists(key)) return;
+    const size = STENCIL.size;
+    const canvas = this.textures.createCanvas(key, size, size);
+    if (!canvas) return;
+    const ctx = canvas.context;
+    ctx.drawImage(this.textures.get('mk-paper').getSourceImage() as CanvasImageSource, 0, 0);
+    // Alles außerhalb der Form voll deckend (sonst bleibt Kleber im Schatten/Rand der Vorlage)
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.globalCompositeOperation = 'destination-out';
+    const o = (size - STENCIL.shapeSize) / 2;
+    ctx.drawImage(this.textures.get(`mk-shape-${id}`).getSourceImage() as CanvasImageSource, o, o);
+    ctx.globalCompositeOperation = 'source-over';
+    canvas.refresh();
+  }
+
   /** Kinderschminken: Zimmer, Becher, Stifte, Puder, Glitzerdosen, Schwamm, Spiegel. */
   private makeMakeup(): void {
     this.makeTexture('mk-bg', GAME_WIDTH, GAME_HEIGHT, drawMakeupBg);
@@ -562,6 +582,18 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('mk-mirror', MIRROR.w, MIRROR.h, drawMirror);
     this.makeTexture('mk-dot', 64, 64, drawBrushDot);
     this.makeTexture('mk-grain', 16, 16, drawGrain);
+    // Glitzertattoo: Umrisse, Vorlagen-Papier mit ausgestanzter Form, Bogen, Knöpfe, Kleber
+    this.makeTexture('mk-paper', STENCIL.size, STENCIL.size, drawPaper);
+    for (const id of SHAPES) {
+      this.makeTexture(`mk-shape-${id}`, STENCIL.shapeSize, STENCIL.shapeSize, (g) => drawShape(g, id));
+      this.makeStencil(id);
+    }
+    this.makeTexture('mk-curl', CURL_SIZE, CURL_SIZE, drawCurl);
+    this.makeTexture('mk-sheet', SHEET.size + 12, SHEET.size + 14, drawSheet);
+    this.makeTexture('mk-sw-face', MODE_SWITCH_SIZE, MODE_SWITCH_SIZE, (g) => drawModeSwitch(g, 'face'));
+    this.makeTexture('mk-sw-arm', MODE_SWITCH_SIZE, MODE_SWITCH_SIZE, (g) => drawModeSwitch(g, 'arm'));
+    this.makeTexture('mk-glue-pot', GLUE_POT_SIZE.width, GLUE_POT_SIZE.height, drawGluePot);
+    this.makeTexture('mk-glue-brush', GLUE_BRUSH_SIZE.width, GLUE_BRUSH_SIZE.height, drawGlueBrush);
   }
 
   /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */

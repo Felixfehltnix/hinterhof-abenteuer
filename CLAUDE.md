@@ -99,7 +99,12 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Koffer und man zieht ein anderes Kind darauf (oder auf das haltende Kind: `releaseKid`), öffnet sich das Spiel; die Wiese schläft.
   Man sieht nur den großen Kopf des Gastes (Textur `kid-<id>-head`, Gesichtsoval `FACE`) und zieht Werkzeuge aus dem Regal: 8 Stifte,
   4 Puder (Quaste), 6 Glitzerdosen (eine bunt), Schwamm (wischt alles weg). Gemalt wird in eine Zeichenfläche (RenderTexture, auf das
-  Gesicht maskiert). Der Handspiegel unten rechts ist „fertig“. Das Make-up wird **nicht gespeichert** (das Kind ist danach wieder
+  Gesicht maskiert). Der Handspiegel unten rechts ist „fertig“.
+  **Glitzertattoos** (Umschalter unten Mitte: Gesicht/Arm): Arm des Kindes quer im Bild, Vorlagenbogen links mit 9 Formen
+  (Fantasie, Essen, Tiere; `SHAPES` in `data/makeup.ts`). Form auf den Arm ziehen = Schablone (Textur `mk-stencil-<id>`, Form
+  ausgestanzt), Kleber aus dem Topf (nur innerhalb der Form), Glitzer bleibt nur auf Kleber haften; ist beides genug da
+  (`TATTOO`), zeigt sich eine Ecke zum Abziehen. Schablone abziehen = nur die Tattoo-Form bleibt. Schwamm wischt Tattoos weg.
+  Das Make-up wird **nicht gespeichert** (das Kind ist danach wieder
   „normal“); Speichern wäre ein eigener Schritt (Auflage auf dem Kind, `SAVE_VERSION`).
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
@@ -205,7 +210,7 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Kamera: `camera` (Auslöser), `photo` (Foto an der Leine/groß);
   Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
   Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`;
-  Schminken: `paint`, `puff`, `glitter`, `tattoo-done`.
+  Schminken: `paint`, `puff`, `glitter`, `tattoo-done`, `glue`, `peel`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

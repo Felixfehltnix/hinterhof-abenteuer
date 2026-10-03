@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
-import { MIRROR, PEN_SIZE, RAINBOW } from '../../data/makeup';
+import { ARM, MIRROR, PEN_SIZE, RAINBOW, SHEET, STENCIL, SWITCH, type ShapeId } from '../../data/makeup';
 
 // Kinderschminken: Hintergrund, Becher, Stifte, Puderdose und Quaste, Glitzerdosen, Schwamm, Spiegel.
 // Was eingefärbt wird (Stiftkörper, Puder, Glitzer), ist weiß/grau gezeichnet und bekommt per Tint seine Farbe.
@@ -254,4 +254,249 @@ export function drawMakeupCaseToy(g: G): void {
   // Verschluss
   g.fillStyle(0xffd23f);
   g.fillCircle(92, 56, 7);
+}
+
+// --- Glitzertattoos ---------------------------------------------------------------------------
+
+const ci = (g: G, x: number, y: number, r: number) => g.fillCircle(x, y, r);
+const poly = (g: G, pts: number[]) => {
+  const out: Phaser.Math.Vector2[] = [];
+  for (let i = 0; i < pts.length; i += 2) out.push(v(pts[i], pts[i + 1]));
+  g.fillPoints(out, true);
+};
+
+function star(g: G, cx: number, cy: number, r: number): void {
+  const pts: number[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const d = i % 2 === 0 ? r : r * 0.45;
+    pts.push(cx + Math.cos(a) * d, cy + Math.sin(a) * d);
+  }
+  poly(g, pts);
+}
+
+/** Umriss einer Vorlage (weiß auf durchsichtig) in einer Fläche von STENCIL.shapeSize². */
+export function drawShape(g: G, id: ShapeId): void {
+  g.fillStyle(0xffffff);
+  switch (id) {
+    case 'unicorn':
+      poly(g, [60, 185, 75, 110, 70, 70, 95, 55, 125, 60, 150, 85, 172, 105, 178, 125, 160, 140, 140, 138, 130, 160, 122, 185]);
+      poly(g, [95, 58, 104, 22, 120, 60]);
+      poly(g, [118, 64, 152, 4, 136, 74]);
+      for (const [x, y, r] of [[62, 88, 16], [52, 120, 16], [58, 152, 16], [68, 180, 12]]) ci(g, x, y, r);
+      star(g, 150, 30, 12);
+      break;
+    case 'dragon':
+      g.fillEllipse(96, 128, 112, 80);
+      ci(g, 150, 86, 34);
+      g.fillRoundedRect(150, 82, 46, 28, 12);
+      poly(g, [132, 62, 138, 30, 152, 58]);
+      poly(g, [154, 58, 166, 28, 174, 62]);
+      poly(g, [70, 104, 28, 30, 60, 62, 76, 34, 100, 88]);
+      for (const [x, y, r] of [[44, 150, 16], [26, 145, 12], [14, 132, 9], [10, 116, 7]]) ci(g, x, y, r);
+      poly(g, [4, 108, 22, 96, 14, 120]);
+      g.fillRoundedRect(76, 158, 24, 32, 8);
+      g.fillRoundedRect(122, 158, 24, 32, 8);
+      for (const x of [72, 96, 120]) poly(g, [x - 10, 94, x, 74, x + 10, 94]);
+      break;
+    case 'fairy':
+      g.fillEllipse(62, 92, 48, 84);
+      g.fillEllipse(138, 92, 48, 84);
+      ci(g, 100, 50, 22);
+      ci(g, 100, 26, 10);
+      poly(g, [100, 70, 56, 152, 144, 152]);
+      g.fillRoundedRect(86, 150, 12, 38, 5);
+      g.fillRoundedRect(104, 150, 12, 38, 5);
+      poly(g, [142, 100, 176, 62, 182, 68, 148, 108]);
+      star(g, 178, 46, 17);
+      break;
+    case 'icecream':
+      poly(g, [58, 102, 142, 102, 100, 192]);
+      ci(g, 100, 74, 46);
+      for (const x of [62, 100, 138]) ci(g, x, 102, 15);
+      ci(g, 100, 24, 13);
+      poly(g, [100, 14, 112, -2, 116, 2, 106, 18]);
+      break;
+    case 'strawberry':
+      ci(g, 58, 92, 34);
+      ci(g, 142, 92, 34);
+      ci(g, 100, 110, 52);
+      poly(g, [48, 120, 152, 120, 100, 192]);
+      poly(g, [58, 62, 78, 24, 92, 52, 100, 14, 108, 52, 122, 24, 142, 62]);
+      break;
+    case 'pizza':
+      poly(g, [30, 46, 170, 46, 100, 192]);
+      g.fillRoundedRect(18, 22, 164, 34, 17);
+      break;
+    case 'butterfly':
+      g.fillEllipse(62, 78, 74, 84);
+      g.fillEllipse(138, 78, 74, 84);
+      g.fillEllipse(70, 140, 52, 62);
+      g.fillEllipse(130, 140, 52, 62);
+      g.fillRoundedRect(92, 52, 16, 124, 8);
+      poly(g, [96, 56, 76, 14, 82, 10, 102, 50]);
+      poly(g, [104, 56, 124, 14, 118, 10, 98, 50]);
+      ci(g, 79, 10, 8);
+      ci(g, 121, 10, 8);
+      break;
+    case 'cat':
+      ci(g, 100, 68, 42);
+      poly(g, [64, 52, 66, 8, 98, 36]);
+      poly(g, [136, 52, 134, 8, 102, 36]);
+      g.fillEllipse(100, 142, 104, 96);
+      g.fillRoundedRect(62, 168, 30, 24, 10);
+      g.fillRoundedRect(108, 168, 30, 24, 10);
+      for (const [x, y, r] of [[152, 172, 13], [168, 152, 12], [174, 128, 11], [168, 106, 10]]) ci(g, x, y, r);
+      break;
+    case 'fish':
+      g.fillEllipse(86, 102, 134, 88);
+      poly(g, [140, 102, 192, 56, 182, 102, 192, 148]);
+      poly(g, [56, 62, 88, 26, 114, 62]);
+      poly(g, [76, 140, 100, 176, 112, 138]);
+      ci(g, 24, 44, 9);
+      ci(g, 38, 22, 5);
+      break;
+  }
+}
+
+/** Vorlagen-Papier (ganz, die Form wird in BootScene ausgestanzt): hellblaue Folie mit Rand und Pünktchen. */
+export function drawPaper(g: G): void {
+  const w = STENCIL.size;
+  g.fillStyle(0x000000, 0.14);
+  g.fillRoundedRect(4, 6, w - 6, w - 6, 22);
+  g.fillStyle(0xdff0ff);
+  g.fillRoundedRect(0, 0, w - 6, w - 6, 22);
+  g.lineStyle(4, 0x9bb7d4);
+  g.strokeRoundedRect(3, 3, w - 12, w - 12, 20);
+  g.fillStyle(0xffffff, 0.7);
+  for (let i = 0; i < 8; i++) {
+    ci(g, 20 + i * 31, 14, 3);
+    ci(g, 20 + i * 31, w - 20, 3);
+    ci(g, 14, 20 + i * 31, 3);
+    ci(g, w - 20, 20 + i * 31, 3);
+  }
+}
+
+/** Eingerollte Ecke, wenn sich die Vorlage lösen lässt. */
+export const CURL_SIZE = 70;
+export function drawCurl(g: G): void {
+  const w = CURL_SIZE;
+  g.fillStyle(0x000000, 0.18);
+  poly(g, [6, 8, w, 4, w - 2, w]);
+  g.fillStyle(0xffffff);
+  poly(g, [0, 0, w - 6, 0, w - 6, w - 6]);
+  g.fillStyle(0xb8d4ee);
+  poly(g, [0, 0, w - 6, w - 6, 8, w - 24]);
+}
+
+/** Bogen mit den neun Feldern. */
+export function drawSheet(g: G): void {
+  const { size, pad, cell } = SHEET;
+  g.fillStyle(0x000000, 0.16);
+  g.fillRoundedRect(8, 10, size, size, 26);
+  g.fillStyle(0xffffff);
+  g.fillRoundedRect(0, 0, size, size, 26);
+  g.lineStyle(5, 0xffb3d1);
+  g.strokeRoundedRect(4, 4, size - 8, size - 8, 24);
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      g.fillStyle([0xf1e6ff, 0xffe3ec, 0xdff5ff][r]);
+      g.fillRoundedRect(pad + c * cell + 6, pad + r * cell + 6, cell - 12, cell - 12, 16);
+    }
+  }
+}
+
+export const MODE_SWITCH_SIZE = SWITCH.size;
+
+/** Knopf unten: 'face' zeigt ein Gesicht, 'arm' einen Arm mit Stern. */
+export function drawModeSwitch(g: G, kind: 'face' | 'arm'): void {
+  const c = MODE_SWITCH_SIZE / 2;
+  g.fillStyle(0x000000, 0.2);
+  g.fillCircle(c + 3, c + 5, c - 4);
+  g.fillStyle(0xffffff);
+  g.fillCircle(c, c, c - 4);
+  g.lineStyle(5, 0xff8fab);
+  g.strokeCircle(c, c, c - 6);
+  if (kind === 'face') {
+    g.fillStyle(0xf4c9a3);
+    g.fillCircle(c, c, 30);
+    g.fillStyle(0x222222);
+    g.fillCircle(c - 11, c - 6, 4);
+    g.fillCircle(c + 11, c - 6, 4);
+    g.lineStyle(4, 0x222222);
+    g.beginPath();
+    g.arc(c, c + 4, 12, 0.15 * Math.PI, 0.85 * Math.PI, false);
+    g.strokePath();
+    g.fillStyle(0xff8fab, 0.6);
+    g.fillCircle(c - 20, c + 8, 6);
+    g.fillCircle(c + 20, c + 8, 6);
+  } else {
+    g.fillStyle(0xf4c9a3);
+    g.fillRoundedRect(c - 36, c - 16, 72, 32, 14);
+    g.fillStyle(0xffd166);
+    star(g, c + 2, c, 13);
+  }
+}
+
+/** Kleber-Töpfchen: blauer Tiegel mit weißem Kleber obenauf und einem Tropfen auf dem Etikett. */
+export const GLUE_POT_SIZE = { width: 150, height: 150 };
+export function drawGluePot(g: G): void {
+  const { width: w, height: h } = GLUE_POT_SIZE;
+  g.fillStyle(0x000000, 0.18);
+  g.fillEllipse(w / 2 + 3, h - 8, w - 20, 24);
+  g.fillStyle(0x1d70b8);
+  g.fillRoundedRect(14, 44, w - 28, h - 56, 20);
+  g.fillStyle(0x2f8fdf);
+  g.fillRoundedRect(14, 44, w - 28, 26, 14);
+  g.fillStyle(0xffffff);
+  g.fillEllipse(w / 2, 46, w - 38, 28);
+  g.fillStyle(0xdff3ff);
+  g.fillEllipse(w / 2 - 6, 44, w - 70, 16);
+  g.fillStyle(0xffffff);
+  g.fillRoundedRect(36, 84, w - 72, 42, 12);
+  g.fillStyle(0x4cc9f0);
+  g.fillCircle(w / 2, 108, 12);
+  poly(g, [w / 2 - 9, 104, w / 2, 86, w / 2 + 9, 104]);
+}
+
+/** Kleberpinsel, Spitze unten. */
+export const GLUE_BRUSH_SIZE = { width: 36, height: 250 };
+export function drawGlueBrush(g: G): void {
+  const { width: w, height: h } = GLUE_BRUSH_SIZE;
+  g.fillStyle(0xe9b872);
+  g.fillRoundedRect(8, 0, w - 16, h - 90, 8);
+  g.fillStyle(0xffffff, 0.4);
+  g.fillRoundedRect(12, 8, 5, h - 110, 3);
+  g.fillStyle(0xadb5bd);
+  g.fillRoundedRect(4, h - 100, w - 8, 44, 6);
+  g.fillStyle(0x6c757d);
+  g.fillRect(4, h - 78, w - 8, 4);
+  g.fillStyle(0xeaf6ff);
+  g.fillPoints([v(5, h - 58), v(w - 5, h - 58), v(w / 2 + 3, h - 4), v(w / 2 - 3, h - 4)], true);
+  g.fillStyle(0xbfe3ff);
+  g.fillPoints([v(w / 2, h - 58), v(w - 5, h - 58), v(w / 2 + 3, h - 4)], true);
+}
+
+/** Arm in Hautfarbe mit Ärmel in der Farbe des Oberteils, von der Seite. Textur ARM.w × ARM.h. */
+export function drawArm(g: G, skin: number, shirt: number): void {
+  const { w, h } = ARM;
+  const shade = Phaser.Display.Color.IntegerToColor(skin).darken(10).color;
+  const light = Phaser.Display.Color.IntegerToColor(skin).lighten(8).color;
+  // Hand (rechts): Handfläche, Daumen, Finger
+  g.fillStyle(skin);
+  g.fillEllipse(w - 90, h / 2, 190, 240);
+  g.fillRoundedRect(w - 110, 0, 100, 74, 36);
+  for (let i = 0; i < 3; i++) g.fillRoundedRect(w - 70, 78 + i * 62, 70, 52, 24);
+  // Unterarm
+  g.fillStyle(skin);
+  g.fillRoundedRect(70, 16, w - 220, h - 32, 60);
+  g.fillStyle(shade);
+  g.fillRoundedRect(70, h - 62, w - 220, 46, 22);
+  g.fillStyle(light, 0.6);
+  g.fillRoundedRect(150, 26, w - 420, 26, 13);
+  // Ärmel
+  g.fillStyle(shirt);
+  g.fillRoundedRect(0, 4, 140, h - 8, 36);
+  g.fillStyle(0x000000, 0.12);
+  g.fillRoundedRect(112, 4, 28, h - 8, 14);
 }

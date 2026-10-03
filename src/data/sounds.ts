@@ -121,6 +121,8 @@ export const SOUNDS: Record<string, SoundDef> = {
   puff: { synth: 'pop', volume: 0.12 },
   glitter: { synth: 'click', volume: 0.12 },
   'tattoo-done': { synth: 'chime', volume: 0.5 },
+  glue: { synth: 'bubble', volume: 0.3 },
+  peel: { synth: 'whoosh', volume: 0.35 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

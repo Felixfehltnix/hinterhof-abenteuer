@@ -17,8 +17,12 @@ export const GLITTER_COLORS = [0xffd166, 0xdfe6ee, 0xff8fab, 0x4d96ff, 0x52b04a,
 
 export type GlitterColor = (typeof GLITTER_COLORS)[number];
 
+/** Gesicht schminken oder Glitzertattoo auf den Arm (Umschalter unten). */
+export type Mode = 'face' | 'arm';
+
 export type ToolDef =
   | { kind: 'pen'; color: number }
+  | { kind: 'glue' }
   | { kind: 'powder'; color: number }
   | { kind: 'glitter'; color: GlitterColor }
   | { kind: 'sponge' };
@@ -31,6 +35,8 @@ export interface RackItem {
   /** Anfass-Fläche (Mitte x, y; Breite, Höhe). */
   w: number;
   h: number;
+  /** In welchen Ansichten das Werkzeug im Regal liegt. */
+  modes: readonly Mode[];
 }
 
 /** Größe eines Stifts. */
@@ -47,6 +53,7 @@ export const RACK: RackItem[] = [
     y: PEN_BASE - PEN_SIZE.height / 2,
     w: PEN_STEP,
     h: PEN_SIZE.height,
+    modes: ['face'],
   })),
   ...POWDER_COLORS.map<RackItem>((color, i) => ({
     tool: { kind: 'powder', color },
@@ -54,6 +61,7 @@ export const RACK: RackItem[] = [
     y: 200 + Math.floor(i / 2) * 160,
     w: 170,
     h: 150,
+    modes: ['face'],
   })),
   ...GLITTER_COLORS.map<RackItem>((color, i) => ({
     tool: { kind: 'glitter', color },
@@ -61,9 +69,59 @@ export const RACK: RackItem[] = [
     y: 560 + Math.floor(i / 3) * 150,
     w: 120,
     h: 140,
+    modes: ['face', 'arm'],
   })),
-  { tool: { kind: 'sponge' }, x: 1580, y: 910, w: 190, h: 140 },
+  { tool: { kind: 'sponge' }, x: 1580, y: 910, w: 190, h: 140, modes: ['face', 'arm'] },
+  { tool: { kind: 'glue' }, x: 250, y: 790, w: 190, h: 200, modes: ['arm'] },
 ];
+
+/** Umschalter unten: Gesicht / Arm. */
+export const SWITCH = {
+  face: { x: 880, y: 985 },
+  arm: { x: 1040, y: 985 },
+  size: 104,
+};
+
+// --- Glitzertattoos ---------------------------------------------------------------------------
+
+/** Die Vorlagen: Fantasiefiguren, Essen, Tiere (je eine Reihe auf dem Bogen). */
+export const SHAPE_ROWS = [
+  ['unicorn', 'dragon', 'fairy'],
+  ['icecream', 'strawberry', 'pizza'],
+  ['butterfly', 'cat', 'fish'],
+] as const;
+export type ShapeId = (typeof SHAPE_ROWS)[number][number];
+export const SHAPES: ShapeId[] = SHAPE_ROWS.flatMap((r) => [...r]);
+/** Farbe der Aufkleber-Vorschau auf dem Bogen (je Reihe). */
+export const SHEET_COLORS = [0xb388eb, 0xff8fab, 0x4cc9f0] as const;
+
+/** Der Vorlagenbogen links: 3 × 3 Felder. */
+export const SHEET = { x: 60, y: 120, size: 460, pad: 20, cell: 140 };
+
+/** Der Arm, auf dem das Tattoo entsteht. `area` ist die Haut, auf die Vorlagen passen. */
+export const ARM = { x: 560, y: 410, w: 900, h: 300, area: { x0: 670, x1: 1250, y0: 425, y1: 695 } };
+
+/** Vorlage (Papier mit ausgeschnittener Form): Maße der Textur und wie groß sie auf dem Arm liegt. */
+export const STENCIL = {
+  size: 260,
+  /** Form (Textur `mk-shape-<id>`) liegt mittig im Papier. */
+  shapeSize: 200,
+  scale: 0.8,
+  /** Raster zum Merken, wo Kleber und Glitzer sind (Pixel der Vorlage). */
+  cell: 8,
+};
+
+export const TATTOO = {
+  /** Radius des Kleberpinsels (Bildschirm-px). */
+  glueRadius: 22,
+  /** Anteil der Form, der beklebt bzw. bestreut sein soll, bis sich die Vorlage ablösen lässt. */
+  glueNeed: 0.75,
+  glitterNeed: 0.55,
+  /** So weit (px) muss man die Vorlage wegziehen, damit sie abgerissen ist. */
+  peelDistance: 140,
+  /** So oft wischt der Schwamm über ein fertiges Tattoo, bis es ganz weg ist. */
+  wipeCount: 14,
+};
 
 /** Handspiegel unten rechts: antippen = fertig. */
 export const MIRROR = { x: 1790, y: 910, w: 150, h: 190 };

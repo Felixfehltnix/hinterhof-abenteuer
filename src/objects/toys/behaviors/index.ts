@@ -29,6 +29,7 @@ import { snowmerge } from './snowmerge';
 import { sprinkler } from './sprinkler';
 import { makeup } from './makeup';
 import { snackbox } from './snackbox';
+import { brew } from './brew';
 import { tent } from './tent';
 import { trampoline } from './trampoline';
 import { water } from './water';
@@ -81,6 +82,7 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   xylophone,
   snackbox,
   makeup,
+  brew,
   tent,
   handheld,
   flashlight,

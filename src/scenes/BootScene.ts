@@ -1,4 +1,21 @@
 import Phaser from 'phaser';
+import { FAIRIES, INGREDIENTS } from '../data/brew';
+import {
+  BASKET_SIZE,
+  FAIRY_SIZE,
+  INGREDIENT_SIZE,
+  POT_SIZE,
+  SPARK_SIZE,
+  SPOON_SIZE,
+  drawBasket,
+  drawBrewBg,
+  drawFairy,
+  drawIngredient,
+  drawPot,
+  drawPotRim,
+  drawSpark,
+  drawSpoon,
+} from './placeholders/brew';
 import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
@@ -596,6 +613,18 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('mk-glue-brush', GLUE_BRUSH_SIZE.width, GLUE_BRUSH_SIZE.height, drawGlueBrush);
   }
 
+  /** Zaubertrank: Gartenecke, Eimer-Topf, Rührlöffel, Korb, 12 Zutaten, 8 Feen, Funke. */
+  private makeBrew(): void {
+    this.makeTexture('brew-bg', GAME_WIDTH, GAME_HEIGHT, drawBrewBg);
+    this.makeTexture('brew-pot', POT_SIZE.width, POT_SIZE.height, drawPot);
+    this.makeTexture('brew-rim', POT_SIZE.width, POT_SIZE.height, drawPotRim);
+    this.makeTexture('brew-spoon', SPOON_SIZE.width, SPOON_SIZE.height, drawSpoon);
+    this.makeTexture('brew-basket', BASKET_SIZE.width, BASKET_SIZE.height, drawBasket);
+    this.makeTexture('brew-spark', SPARK_SIZE, SPARK_SIZE, drawSpark);
+    for (const id of INGREDIENTS) this.makeTexture(`brew-${id}`, INGREDIENT_SIZE, INGREDIENT_SIZE, (g) => drawIngredient(g, id));
+    for (const id of FAIRIES) this.makeTexture(`fairy-${id}`, FAIRY_SIZE.width, FAIRY_SIZE.height, (g) => drawFairy(g, id));
+  }
+
   /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
   private makeAsteroids(): void {
     for (const size of [0, 1, 2] as RockSize[]) {
@@ -707,6 +736,7 @@ export class BootScene extends Phaser.Scene {
     for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
     this.makeAsteroids();
     this.makeMakeup();
+    this.makeBrew();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

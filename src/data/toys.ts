@@ -55,6 +55,7 @@ export type BehaviorId =
   | 'tent'
   | 'snackbox'
   | 'makeup'
+  | 'brew'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -165,7 +166,7 @@ export const TOYS = [
     width: 90,
     height: 90,
     hold: { pose: 'hang', dx: 4, dy: 84 },
-    behaviors: ['draggable', 'fling', 'wobble', 'fillable', 'handheld'],
+    behaviors: ['draggable', 'fling', 'wobble', 'fillable', 'brew', 'handheld'],
     params: { bounce: 0.15, rollFriction: 10 },
   },
   {

@@ -108,6 +108,11 @@ export const SOUNDS: Record<string, SoundDef> = {
   'snack-back': { synth: 'click', volume: 0.35 },
   'snack-nope': { synth: 'honk', volume: 0.15 },
   'snack-win': { synth: 'chime', volume: 0.55 },
+  // Zaubertrank: Zutat nehmen, hineinfallen, rühren (blubbert), Fee erscheint
+  'brew-take': { synth: 'pop', volume: 0.35 },
+  'brew-add': { synth: 'splash', volume: 0.4 },
+  'brew-stir': { synth: 'bubble', volume: 0.35 },
+  'brew-fairy': { synth: 'chime', volume: 0.55 },
   // Sternenflug (Asteroiden): Warp hinein, Stern-Schuss, Stein zerbricht (tiefer = größer),
   // Glitzer (Tonhöhe steigt mit jedem kleinen Stein), Zusammenstoß, Welle geschafft
   warp: { synth: 'rise', volume: 0.5 },

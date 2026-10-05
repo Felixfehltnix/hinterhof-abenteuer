@@ -142,6 +142,11 @@ export class DayCycle {
   private target: TimeOfDay = 'noon';
   private from: Look = LOOKS.noon;
   private current: Look = LOOKS.noon;
+
+  /** Wie dunkel es gerade ist (0 hell … 1 Nacht), z. B. damit Feen leuchten. */
+  get darkness(): number {
+    return this.current.starsAlpha;
+  }
   /** Was gerade zu sehen ist (mit Wetter). */
   private shown: Look = LOOKS.noon;
   private progress = { t: 1 };

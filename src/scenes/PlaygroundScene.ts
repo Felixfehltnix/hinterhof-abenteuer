@@ -16,6 +16,9 @@ import { DOG } from '../data/dog';
 import { createEquipment, Sandbox, type Equipment } from '../objects/Equipment';
 import { Bunker } from '../objects/Bunker';
 import { Dog } from '../objects/Dog';
+import { Fairy, fairySpot } from '../objects/Fairy';
+import { FAIRIES, MAX_FAIRIES, type FairyId } from '../data/brew';
+import type { BrewData } from './BrewScene';
 import { Garden } from '../objects/Garden';
 import { Photos } from '../objects/Photos';
 import { GardenGate } from '../objects/GardenGate';
@@ -65,6 +68,8 @@ export class PlaygroundScene extends Phaser.Scene {
   bunker!: Bunker;
   /** Der Hund (schwarzer Labrador), lebt immer auf der Wiese */
   dog!: Dog;
+  /** Feen aus dem Zaubertrank, die älteste zuerst. */
+  private fairies: Fairy[] = [];
   /** Fotos der Kamera an der Fotoleine */
   photos!: Photos;
   /** Tageszeiten, Himmel, Einfärbung */
@@ -125,6 +130,19 @@ export class PlaygroundScene extends Phaser.Scene {
       save: () => [...this.circuitSolved].sort(),
       load: (v) => {
         if (Array.isArray(v)) v.forEach((n) => Number.isInteger(n) && n >= 0 && n < 20 && this.circuitSolved.add(n));
+      },
+    });
+
+    this.registerWorldState('fairies', {
+      save: () => this.fairies.map((f) => ({ id: f.fairyId, ...f.restPosition() })),
+      load: (v) => {
+        if (!Array.isArray(v)) return;
+        for (const f of v.slice(0, MAX_FAIRIES)) {
+          const o = f as { id?: unknown; x?: unknown; y?: unknown };
+          if (typeof o?.x !== 'number' || typeof o.y !== 'number' || !Number.isFinite(o.x) || !Number.isFinite(o.y)) continue;
+          if (!FAIRIES.includes(o.id as FairyId)) continue;
+          this.fairies.push(new Fairy(this, o.id as FairyId, o.x, o.y));
+        }
       },
     });
 
@@ -477,6 +495,32 @@ export class PlaygroundScene extends Phaser.Scene {
       this.scene.launch('Circuit', data);
       this.scene.sleep();
     });
+  }
+
+  /** Zaubertrank: Eimer antippen öffnet das Brau-Spiel. Zurück erscheint die neue Fee neben dem Eimer. */
+  openBrew(bucket: Toy): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: BrewData = {
+        onDone: (fairy) => {
+          this.scene.stop('Brew');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+          if (fairy) this.addFairy(fairy, bucket.x, bucket.y);
+        },
+      };
+      this.scene.launch('Brew', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Neue Fee auf der Wiese; sind es zu viele, geht die älteste mit Glitzer fort. */
+  addFairy(id: FairyId, nearX: number, nearY: number): void {
+    const spot = fairySpot(nearX, nearY);
+    this.fairies.push(new Fairy(this, id, spot.x, spot.y));
+    while (this.fairies.length > MAX_FAIRIES) this.fairies.shift()?.vanish();
   }
 
   /** Snackbox-Spiel: das Kind mit der Box und ein zweites (von der Wiese oder aus den Figuren) halten die Zahlen hoch. */

@@ -5,6 +5,7 @@ import {
   FACE,
   GLITTER_COLORS,
   HEAD_SCALE,
+  MAKEUP_DECAL,
   MIRROR,
   PEN_SIZE,
   RACK,
@@ -21,14 +22,18 @@ import {
   type ToolDef,
 } from '../data/makeup';
 import type { CharacterDef } from '../data/characters';
+import type { SavedMakeup, SavedTattoo } from '../save/makeup';
+import type { LoadedMakeup } from '../world/KidMakeup';
 import { drawArm } from './placeholders/makeup';
 import { FACE_X, FACE_Y } from './placeholders/kids';
 
 /** Was die Wiese dem Schminken mitgibt: das Kind, das geschminkt wird. */
 export interface MakeupData {
   def: CharacterDef;
-  /** Spiegel angetippt und Kind hat sich angeschaut: zurück auf die Wiese. */
-  onDone(): void;
+  /** Was das Kind schon trägt (wird weitergeschminkt). */
+  saved?: LoadedMakeup;
+  /** Spiegel angetippt und Kind hat sich angeschaut: zurück auf die Wiese, mit der neuen Schminke (undefined = ungeschminkt). */
+  onDone(result: SavedMakeup | undefined): void;
 }
 
 /** Ein Werkzeug in einer Hand (je Finger eins). */
@@ -146,6 +151,7 @@ export class MakeupScene extends Phaser.Scene {
     this.buildArm(data.def);
     this.buildRack();
     this.buildSwitches();
+    if (data.saved) this.restore(data.saved);
 
     this.mirror = this.add.image(MIRROR.x, MIRROR.y, 'mk-mirror').setDepth(DEPTH.rack);
     this.tweens.add({ targets: this.mirror, angle: { from: -4, to: 4 }, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -667,7 +673,7 @@ export class MakeupScene extends Phaser.Scene {
   }
 
   /** Die Vorlage klebt auf dem Arm: darunter entstehen Kleber- und Glitzerfläche. */
-  private stickStencil(id: ShapeId, x: number, y: number, stencil: Phaser.GameObjects.Image): void {
+  private stickStencil(id: ShapeId, x: number, y: number, stencil: Phaser.GameObjects.Image, quiet = false): void {
     const size = STENCIL.size;
     const left = x - (size * STENCIL.scale) / 2;
     const top = y - (size * STENCIL.scale) / 2;
@@ -693,7 +699,7 @@ export class MakeupScene extends Phaser.Scene {
     this.active = t;
     this.tattoos.push(t);
     this.sheetEnabled(false);
-    this.play('click', 0);
+    if (!quiet) this.play('click', 0);
   }
 
   /** Kleber auftragen: nur in der ausgeschnittenen Form (was daneben landet, bleibt auf dem Papier). */
@@ -836,10 +842,74 @@ export class MakeupScene extends Phaser.Scene {
     for (let i = 0; i < 4; i++) {
       this.time.delayedCall(i * 300, () => this.sparkles.emitParticleAt(Phaser.Math.Between(FACE.x - 200, FACE.x + 200), Phaser.Math.Between(FACE.y - 200, FACE.y + 120), 14));
     }
+    // Schminke einsammeln, während das Kind in den Spiegel schaut
+    const result = this.collect();
     this.time.delayedCall(1900, () => {
       // force: Läuft das Einblenden auf einem langsamen Gerät noch, würde ein normales fadeOut ignoriert
       this.cameras.main.fade(350, 0, 0, 0, true);
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.params.onDone());
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => void result.then((r) => this.params.onDone(r)));
     });
+  }
+
+  // --- Speichern (#88, #89) ----------------------------------------------------------------
+
+  /** Gespeicherte Schminke wieder auftragen: Gesicht auf die Zeichenfläche, Tattoos (abgezogen) auf den Arm. */
+  private restore(saved: LoadedMakeup): void {
+    const add = (key: string, img: HTMLImageElement) => {
+      if (this.textures.exists(key)) this.textures.remove(key);
+      this.textures.addImage(key, img);
+      return key;
+    };
+    if (saved.face) this.paint.stamp(add('mk-saved-face', saved.face), undefined, 0, 0, { originX: 0, originY: 0 });
+    saved.saved.tattoos.forEach((st, i) => {
+      const stencil = this.add.image(st.x, st.y, `mk-stencil-${st.id}`).setScale(STENCIL.scale).setDepth(DEPTH.stencil);
+      this.stickStencil(st.id, st.x, st.y, stencil, true);
+      const t = this.active!;
+      t.glitter.stamp(add(`mk-saved-tattoo-${i}`, saved.tattoos[i]), undefined, 0, 0, { originX: 0, originY: 0 });
+      t.glued = [...t.shape];
+      t.gluedCount = t.shapeCount;
+      t.peeled = true;
+      t.ready = true;
+      stencil.destroy();
+      this.active = undefined;
+    });
+    this.sheetEnabled(true);
+    this.grains = saved.saved.grains.map((g) => ({ ...g }));
+  }
+
+  /** Bild einer Zeichenfläche (verlustfrei, zum Zusammensetzen). */
+  private snap(rt: Phaser.GameObjects.RenderTexture): Promise<HTMLImageElement | undefined> {
+    return new Promise((resolve) => rt.snapshot((img) => resolve(img instanceof HTMLImageElement ? img : undefined), 'image/png'));
+  }
+
+  /** Setzt Bilder übereinander und speichert sie klein (WebP); undefined, wenn nichts darauf ist. */
+  private compress(images: (HTMLImageElement | undefined)[], size: number): string | undefined {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return undefined;
+    for (const img of images) if (img) ctx.drawImage(img, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    let visible = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 24 && ++visible > MAKEUP_DECAL.minPixels) break;
+    if (visible <= MAKEUP_DECAL.minPixels) return undefined;
+    return canvas.toDataURL('image/webp', MAKEUP_DECAL.quality);
+  }
+
+  /** Schminke einsammeln: Gesichtsfläche und alle fertigen Tattoos (Kleber + Glitzer in einem Bild). */
+  private async collect(): Promise<SavedMakeup | undefined> {
+    const face = this.compress([await this.snap(this.paint)], FACE.radius * 2);
+    const tattoos: SavedTattoo[] = [];
+    for (const t of this.tattoos) {
+      if (!t.peeled) continue;
+      const image = this.compress([await this.snap(t.glue), await this.snap(t.glitter)], STENCIL.size);
+      if (image) tattoos.push({ id: t.id, x: t.x, y: t.y, image });
+    }
+    if (!face && tattoos.length === 0) return undefined;
+    const grains = this.grains
+      .filter((g) => (g.mode === 'face' ? !!face : tattoos.length > 0))
+      .slice(-MAKEUP_DECAL.maxGrains)
+      .map((g) => ({ x: Math.round(g.x), y: Math.round(g.y), mode: g.mode }));
+    return { face, tattoos, grains };
   }
 }

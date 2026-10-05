@@ -123,6 +123,21 @@ export const TATTOO = {
   wipeCount: 14,
 };
 
+/**
+ * Schminke auf der Wiese (#88, #89): Auflagen auf Kopf und rechtem Arm der Figur.
+ * res = Pixel der Auflage je Rig-Einheit (schärfer, wenn ein Kind groß gezeigt wird);
+ * sleeve = wo am Arm (Rig-Einheiten von der Schulter) der Unterarm des Schminkspiels beginnt.
+ */
+export const MAKEUP_DECAL = {
+  face: { res: 3 },
+  arm: { res: 4, sleeve: 22 },
+  /** Gespeichert wird als WebP in dieser Qualität; weniger sichtbare Pixel als minPixels gilt als abgewischt. */
+  quality: 0.85,
+  minPixels: 40,
+  /** Höchstens so viele Glitzerkörnchen merken (dort funkelt es beim nächsten Mal wieder). */
+  maxGrains: 300,
+};
+
 /** Handspiegel unten rechts: antippen = fertig. */
 export const MIRROR = { x: 1790, y: 910, w: 150, h: 190 };
 

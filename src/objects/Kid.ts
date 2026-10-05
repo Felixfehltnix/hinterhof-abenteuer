@@ -3,6 +3,7 @@ import { DEPTH_DRAGGING, GROUND_MAX_Y, GROUND_MIN_Y, WORLD_WIDTH } from '../conf
 import type { CharacterDef } from '../data/characters';
 import { costumeKey, type Outfit, type Slot } from '../data/costumes';
 import { COSTUME_ART, layerLayout, type CostumeLayer } from '../scenes/placeholders/costumes';
+import { makeupArmKey, makeupFaceKey } from '../world/KidMakeup';
 import {
   ARM_REACH,
   HIP,
@@ -122,6 +123,8 @@ export class Kid extends Phaser.GameObjects.Container {
   private worn: Outfit = {};
   /** Auflagen der Verkleidung: folgen ihrem Körperteil (back = hinter allem, dreht mit dem Rumpf). */
   private overlays: { part: PartId; img: Phaser.GameObjects.Image; width: number; height: number; originX: number }[] = [];
+  /** Schminke (#88, #89): Gesicht auf dem Kopf, Glitzertattoos auf dem rechten Arm (im Format des Teils). */
+  private decals: { part: PartId; img: Phaser.GameObjects.Image }[] = [];
 
   // Animation
   private explicit?: { activity: Activity; mode: KidMode };
@@ -167,7 +170,7 @@ export class Kid extends Phaser.GameObjects.Container {
     }
     this.lastX = x;
     this.lastY = y;
-    this.applyPose();
+    this.refreshMakeup();
     // Fläche wie das frühere Einzelbild: Fußpunkt unten Mitte.
     this.setSize(KID_FRAME.width * s, KID_FRAME.height * s);
     this.setDepth(y);
@@ -502,6 +505,7 @@ export class Kid extends Phaser.GameObjects.Container {
     (byLayer.get('back') ?? []).forEach((img) => this.add(img));
     for (const id of PART_ORDER) {
       this.add(this.parts[id]);
+      this.decals.filter((d) => d.part === id).forEach((d) => this.add(d.img));
       if (id === 'head') faces.forEach((f) => this.add(f));
       const layer = layerOf[id];
       const before = this.overlays.length;
@@ -512,9 +516,38 @@ export class Kid extends Phaser.GameObjects.Container {
     return this;
   }
 
+  /**
+   * Legt die Schminke auf (Texturen `makeup-face-<id>` / `makeup-arm-<id>`, gezeichnet von `KidMakeup`).
+   * Neu aufrufen, wenn sich die Schminke geändert hat.
+   */
+  refreshMakeup(): this {
+    this.decals.forEach((d) => d.img.destroy());
+    this.decals = [];
+    for (const [part, key] of [
+      ['head', makeupFaceKey(this.def.id)],
+      ['arm-r', makeupArmKey(this.def.id)],
+    ] as const) {
+      if (!this.scene.textures.exists(key)) continue;
+      const rig = KID_RIG[part];
+      this.decals.push({ part, img: this.scene.add.image(0, 0, key).setOrigin(rig.originX, rig.originY) });
+    }
+    // Reihenfolge im Container neu (Schminke direkt über ihrem Teil)
+    return this.setOutfit(this.worn);
+  }
+
   /** Legt die Verkleidung auf ihre Körperteile (nach jeder Pose). */
   private placeOverlays(): void {
     const s = this.def.size;
+    for (const d of this.decals) {
+      const p = this.parts[d.part];
+      const rig = KID_RIG[d.part];
+      d.img
+        .setPosition(p.x, p.y)
+        .setRotation(p.rotation)
+        .setFlipX(this.mirrored)
+        .setScale((rig.width * s) / d.img.width, (rig.height * s * this.joints[d.part].scaleY) / d.img.height)
+        .setVisible(p.visible);
+    }
     for (const o of this.overlays) {
       const p = this.parts[o.part];
       const scaleY = this.joints[o.part].scaleY;
@@ -552,12 +585,14 @@ export class Kid extends Phaser.GameObjects.Container {
   setTint(color: number): this {
     for (const id of PART_ORDER) this.parts[id].setTint(color);
     this.overlays.forEach((o) => o.img.setTint(color));
+    this.decals.forEach((d) => d.img.setTint(color));
     return this;
   }
 
   clearTint(): this {
     for (const id of PART_ORDER) this.parts[id].clearTint();
     this.overlays.forEach((o) => o.img.clearTint());
+    this.decals.forEach((d) => d.img.clearTint());
     return this;
   }
 

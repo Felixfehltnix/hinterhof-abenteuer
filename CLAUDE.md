@@ -104,8 +104,13 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   (Fantasie, Essen, Tiere; `SHAPES` in `data/makeup.ts`). Form auf den Arm ziehen = Schablone (Textur `mk-stencil-<id>`, Form
   ausgestanzt), Kleber aus dem Topf (nur innerhalb der Form), Glitzer bleibt nur auf Kleber haften; ist beides genug da
   (`TATTOO`), zeigt sich eine Ecke zum Abziehen. Schablone abziehen = nur die Tattoo-Form bleibt. Schwamm wischt Tattoos weg.
-  Das Make-up wird **nicht gespeichert** (das Kind ist danach wieder
-  „normal“); Speichern wäre ein eigener Schritt (Auflage auf dem Kind, `SAVE_VERSION`).
+  **Gespeichert** (#88, #89) wird beim Spiegel: Gesichtsfläche und jedes fertige Tattoo als WebP je Kind im eigenen
+  localStorage-Eintrag (`src/save/makeup.ts`, nicht im AutoSave), dazu die Glitzer-Stellen (funkeln beim nächsten Mal wieder).
+  Auf der Wiese verwaltet `KidMakeup` (`src/world/KidMakeup.ts`, `scene.makeup`) daraus Canvas-Texturen im Format der Körperteile:
+  `makeup-face-<id>` (Kopf) und `makeup-arm-<id>` (rechter Arm, Unterarm um 90° gedreht, `MAKEUP_DECAL`). Jedes `Kid` legt sie
+  beim Erschaffen selbst als Auflage auf (auch in Grill, Snackbox, Ankleide …), `kid.refreshMakeup()` nach Änderungen.
+  Die Schminke bleibt (auch nach dem Heimgehen), bis man sie im Schminkspiel mit dem Schwamm wegwischt; wieder geöffnet wird
+  weitergeschminkt.
 - **Zaubertrank** (`src/scenes/BrewScene.ts`, `scene.openBrew(bucket)`, Daten `src/data/brew.ts`, Zeichnungen `src/scenes/placeholders/brew.ts`):
   Eimer (`bucket`, Baustein `brew`) am Boden antippen (oder das Kind mit Eimer) öffnet das Spiel; die Wiese schläft. Korb mit 12 Zutaten
   (`INGREDIENTS`, beliebig oft nehmen), in den Eimer ziehen: der Trank mischt die Farben (`mixColor`). Mit dem Finger Kreise um den Eimer

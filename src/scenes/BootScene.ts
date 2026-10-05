@@ -16,6 +16,8 @@ import {
   drawSpark,
   drawSpoon,
 } from './placeholders/brew';
+import { BALL_SIZE, drawBallShadow, drawModeButton, drawPongBall, drawPongBg, drawPongTable, drawRacket, RACKET_SIZE, TABLE_PAD } from './placeholders/pong';
+import { LAYOUT as PONG_LAYOUT, TABLE as PONG_TABLE } from '../data/pong';
 import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
@@ -613,6 +615,18 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('mk-glue-brush', GLUE_BRUSH_SIZE.width, GLUE_BRUSH_SIZE.height, drawGlueBrush);
   }
 
+  /** Tischtennis (Pong): Rasen, Platte von oben, zwei Schläger, Ball mit Schatten, Knöpfe 1P/2P. */
+  private makePong(): void {
+    this.makeTexture('pong-bg', GAME_WIDTH, GAME_HEIGHT, drawPongBg);
+    this.makeTexture('pong-table', PONG_TABLE.w + TABLE_PAD * 2 + 20, PONG_TABLE.h + TABLE_PAD * 2 + 20, drawPongTable);
+    this.makeTexture('pong-racket-red', RACKET_SIZE.width, RACKET_SIZE.height, (g) => drawRacket(g, 0xd62828));
+    this.makeTexture('pong-racket-black', RACKET_SIZE.width, RACKET_SIZE.height, (g) => drawRacket(g, 0x212529));
+    this.makeTexture('pong-ball', BALL_SIZE, BALL_SIZE, drawPongBall);
+    this.makeTexture('pong-shadow', BALL_SIZE, BALL_SIZE, drawBallShadow);
+    this.makeTexture('pong-mode-big', PONG_LAYOUT.choice.size, PONG_LAYOUT.choice.size, (g) => drawModeButton(g, PONG_LAYOUT.choice.size));
+    this.makeTexture('pong-mode-small', PONG_LAYOUT.switch.size, PONG_LAYOUT.switch.size, (g) => drawModeButton(g, PONG_LAYOUT.switch.size));
+  }
+
   /** Zaubertrank: Gartenecke, Eimer-Topf, Rührlöffel, Korb, 12 Zutaten, 8 Feen, Funke. */
   private makeBrew(): void {
     this.makeTexture('brew-bg', GAME_WIDTH, GAME_HEIGHT, drawBrewBg);
@@ -737,6 +751,7 @@ export class BootScene extends Phaser.Scene {
     this.makeAsteroids();
     this.makeMakeup();
     this.makeBrew();
+    this.makePong();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

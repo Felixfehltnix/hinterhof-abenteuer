@@ -108,6 +108,11 @@ export const SOUNDS: Record<string, SoundDef> = {
   'snack-back': { synth: 'click', volume: 0.35 },
   'snack-nope': { synth: 'honk', volume: 0.15 },
   'snack-win': { synth: 'chime', volume: 0.55 },
+  // Zaubertrank: Zutat nehmen, hineinfallen, rühren (blubbert), Fee erscheint
+  'brew-take': { synth: 'pop', volume: 0.35 },
+  'brew-add': { synth: 'splash', volume: 0.4 },
+  'brew-stir': { synth: 'bubble', volume: 0.35 },
+  'brew-fairy': { synth: 'chime', volume: 0.55 },
   // Sternenflug (Asteroiden): Warp hinein, Stern-Schuss, Stein zerbricht (tiefer = größer),
   // Glitzer (Tonhöhe steigt mit jedem kleinen Stein), Zusammenstoß, Welle geschafft
   warp: { synth: 'rise', volume: 0.5 },
@@ -116,6 +121,13 @@ export const SOUNDS: Record<string, SoundDef> = {
   sparkle: { synth: 'mallet', pitched: true, volume: 0.4 },
   bonk: { synth: 'drum', volume: 0.45 },
   'wave-done': { synth: 'chime', volume: 0.5 },
+  // Kinderschminken
+  paint: { synth: 'whoosh', volume: 0.07 },
+  puff: { synth: 'pop', volume: 0.12 },
+  glitter: { synth: 'click', volume: 0.12 },
+  'tattoo-done': { synth: 'chime', volume: 0.5 },
+  glue: { synth: 'bubble', volume: 0.3 },
+  peel: { synth: 'whoosh', volume: 0.35 },
 };
 
 /** Unbekannte Ereignisse: kurzer, leiser Pieps statt Stille oder Fehler. */

@@ -1,4 +1,21 @@
 import Phaser from 'phaser';
+import { FAIRIES, INGREDIENTS } from '../data/brew';
+import {
+  BASKET_SIZE,
+  FAIRY_SIZE,
+  INGREDIENT_SIZE,
+  POT_SIZE,
+  SPARK_SIZE,
+  SPOON_SIZE,
+  drawBasket,
+  drawBrewBg,
+  drawFairy,
+  drawIngredient,
+  drawPot,
+  drawPotRim,
+  drawSpark,
+  drawSpoon,
+} from './placeholders/brew';
 import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
@@ -109,6 +126,8 @@ import {
 } from './placeholders/circuit';
 import { CIRCUIT } from '../data/circuit';
 import { ROCK_SHAPES, type RockSize } from '../data/asteroids';
+import { CURL_SIZE, drawCurl, drawGlueBrush, drawGluePot, drawPaper, drawSheet, drawShape, drawModeSwitch, GLUE_BRUSH_SIZE, GLUE_POT_SIZE, MODE_SWITCH_SIZE, CUP_SIZE, drawBrushDot, drawGrain, drawJar, drawJarFill, drawJarRainbow, drawMakeupBg, drawMirror, drawPan, drawPanFill, drawPenCup, drawPen, drawPuffHandle, drawPuffHead, drawMakeupSponge, JAR_SIZE, PAN_SIZE, PUFF_HANDLE, PUFF_HEAD, MAKEUP_SPONGE_SIZE } from './placeholders/makeup';
+import { MIRROR, PEN_SIZE, SHAPES, SHEET, STENCIL } from '../data/makeup';
 import { drawEarth, drawGoldStar, drawRock, drawShot, EARTH_SIZE, GOLD_STAR_SIZE, rockTextureSize, SHOT_SIZE } from './placeholders/asteroids';
 import {
   ALIEN_ARM_SIZE,
@@ -544,6 +563,68 @@ export class BootScene extends Phaser.Scene {
     this.textures.remove('rocket-glass');
   }
 
+  /** Vorlage `mk-stencil-<id>`: das Papier mit der Form ausgestanzt (wie die Rakete: Canvas, destination-out). */
+  private makeStencil(id: string): void {
+    const key = `mk-stencil-${id}`;
+    if (this.textures.exists(key)) return;
+    const size = STENCIL.size;
+    const canvas = this.textures.createCanvas(key, size, size);
+    if (!canvas) return;
+    const ctx = canvas.context;
+    ctx.drawImage(this.textures.get('mk-paper').getSourceImage() as CanvasImageSource, 0, 0);
+    // Alles außerhalb der Form voll deckend (sonst bleibt Kleber im Schatten/Rand der Vorlage)
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.globalCompositeOperation = 'destination-out';
+    const o = (size - STENCIL.shapeSize) / 2;
+    ctx.drawImage(this.textures.get(`mk-shape-${id}`).getSourceImage() as CanvasImageSource, o, o);
+    ctx.globalCompositeOperation = 'source-over';
+    canvas.refresh();
+  }
+
+  /** Kinderschminken: Zimmer, Becher, Stifte, Puder, Glitzerdosen, Schwamm, Spiegel. */
+  private makeMakeup(): void {
+    this.makeTexture('mk-bg', GAME_WIDTH, GAME_HEIGHT, drawMakeupBg);
+    this.makeTexture('mk-cup', CUP_SIZE.width, CUP_SIZE.height, drawPenCup);
+    this.makeTexture('mk-pen', PEN_SIZE.width, PEN_SIZE.height, drawPen);
+    this.makeTexture('mk-pan', PAN_SIZE, PAN_SIZE, drawPan);
+    this.makeTexture('mk-pan-fill', PAN_SIZE, PAN_SIZE, drawPanFill);
+    this.makeTexture('mk-puff-handle', PUFF_HANDLE.width, PUFF_HANDLE.height, drawPuffHandle);
+    this.makeTexture('mk-puff-head', PUFF_HEAD, PUFF_HEAD, drawPuffHead);
+    this.makeTexture('mk-jar', JAR_SIZE.width, JAR_SIZE.height, drawJar);
+    this.makeTexture('mk-jar-fill', JAR_SIZE.width, JAR_SIZE.height, drawJarFill);
+    this.makeTexture('mk-jar-rainbow', JAR_SIZE.width, JAR_SIZE.height, drawJarRainbow);
+    this.makeTexture('mk-sponge', MAKEUP_SPONGE_SIZE.width, MAKEUP_SPONGE_SIZE.height, drawMakeupSponge);
+    this.makeTexture('mk-mirror', MIRROR.w, MIRROR.h, drawMirror);
+    this.makeTexture('mk-dot', 64, 64, drawBrushDot);
+    this.makeTexture('mk-grain', 16, 16, drawGrain);
+    // Glitzertattoo: Umrisse, Vorlagen-Papier mit ausgestanzter Form, Bogen, Knöpfe, Kleber
+    this.makeTexture('mk-paper', STENCIL.size, STENCIL.size, drawPaper);
+    for (const id of SHAPES) {
+      this.makeTexture(`mk-shape-${id}`, STENCIL.shapeSize, STENCIL.shapeSize, (g) => drawShape(g, id));
+      this.makeStencil(id);
+    }
+    this.makeTexture('mk-curl', CURL_SIZE, CURL_SIZE, drawCurl);
+    this.makeTexture('mk-sheet', SHEET.size + 12, SHEET.size + 14, drawSheet);
+    this.makeTexture('mk-sw-face', MODE_SWITCH_SIZE, MODE_SWITCH_SIZE, (g) => drawModeSwitch(g, 'face'));
+    this.makeTexture('mk-sw-arm', MODE_SWITCH_SIZE, MODE_SWITCH_SIZE, (g) => drawModeSwitch(g, 'arm'));
+    this.makeTexture('mk-glue-pot', GLUE_POT_SIZE.width, GLUE_POT_SIZE.height, drawGluePot);
+    this.makeTexture('mk-glue-brush', GLUE_BRUSH_SIZE.width, GLUE_BRUSH_SIZE.height, drawGlueBrush);
+  }
+
+  /** Zaubertrank: Gartenecke, Eimer-Topf, Rührlöffel, Korb, 12 Zutaten, 8 Feen, Funke. */
+  private makeBrew(): void {
+    this.makeTexture('brew-bg', GAME_WIDTH, GAME_HEIGHT, drawBrewBg);
+    this.makeTexture('brew-pot', POT_SIZE.width, POT_SIZE.height, drawPot);
+    this.makeTexture('brew-rim', POT_SIZE.width, POT_SIZE.height, drawPotRim);
+    this.makeTexture('brew-spoon', SPOON_SIZE.width, SPOON_SIZE.height, drawSpoon);
+    this.makeTexture('brew-basket', BASKET_SIZE.width, BASKET_SIZE.height, drawBasket);
+    this.makeTexture('brew-spark', SPARK_SIZE, SPARK_SIZE, drawSpark);
+    for (const id of INGREDIENTS) this.makeTexture(`brew-${id}`, INGREDIENT_SIZE, INGREDIENT_SIZE, (g) => drawIngredient(g, id));
+    for (const id of FAIRIES) this.makeTexture(`fairy-${id}`, FAIRY_SIZE.width, FAIRY_SIZE.height, (g) => drawFairy(g, id));
+  }
+
   /** Sternenflug: Asteroiden in 3 Größen und mehreren Formen, Schuss-Stern, goldener Stern, Erde. */
   private makeAsteroids(): void {
     for (const size of [0, 1, 2] as RockSize[]) {
@@ -654,6 +735,8 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('snack-sign', SNACK.exit.w + 10, SNACK.exit.h + 12, drawSnackSign);
     for (const id of SNACKS) this.makeTexture(`snack-${id}`, SNACK_SIZE, SNACK_SIZE, (g) => drawSnack(g, id));
     this.makeAsteroids();
+    this.makeMakeup();
+    this.makeBrew();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

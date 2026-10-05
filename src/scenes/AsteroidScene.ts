@@ -213,7 +213,7 @@ export class AsteroidScene extends Phaser.Scene {
   private leave(): void {
     this.leaving = true;
     this.events.emit('sound', { kind: 'pop' });
-    this.cameras.main.fadeOut(350, 0, 0, 0);
+    this.cameras.main.fade(350, 0, 0, 0, true);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.params.onDone());
   }
 

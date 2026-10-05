@@ -9,8 +9,8 @@ export const PORTRAIT_SIZE = 130;
 
 // Lage des Gesichtsmittelpunkts im Kopf-Bild (144 × 156): oben Platz für hohe Frisuren
 // (Stacheln, Dutt), unten für lange Haare.
-const FACE_X = 72;
-const FACE_Y = 86;
+export const FACE_X = 72;
+export const FACE_Y = 86;
 
 type G = Phaser.GameObjects.Graphics;
 

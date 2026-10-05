@@ -29,6 +29,7 @@ import { AutoSave } from '../save/AutoSave';
 import { parseOutfit, type Outfit } from '../data/costumes';
 import type { DressUpData } from './DressUpScene';
 import type { AsteroidData } from './AsteroidScene';
+import type { MakeupData } from './MakeupScene';
 import type { GrillData } from './GrillScene';
 import type { ChalkData } from './ChalkScene';
 import { TerraceGate } from '../objects/TerraceGate';
@@ -356,7 +357,9 @@ export class PlaygroundScene extends Phaser.Scene {
     for (const toy of this.toys) {
       const zone = this.dropZone(toy);
       const w = this.worldPoint(pointer);
-      if ((zone.contains(w.x, w.y) || zone.contains(kid.x, kid.y)) && toy.offerKid(kid)) {
+      const holder = toy.def.tags?.includes('makeup') ? toy.heldBy : undefined;
+      const overHolder = holder !== undefined && holder !== kid && holder.getBounds().contains(w.x, w.y);
+      if ((zone.contains(w.x, w.y) || zone.contains(kid.x, kid.y) || overHolder) && toy.offerKid(kid)) {
         // Hält das Kind nur etwas fest (Ballon), steht es auf der Wiese; sitzt es auf einem Fahrzeug, nicht.
         if (kid.mode === 'idle') kid.settle();
         return;
@@ -497,6 +500,25 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Snack', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Kinderschminken: Das Kind, das auf den Koffer gezogen wurde, wird geschminkt. Die Wiese schläft solange. */
+  openMakeup(guest: Kid): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: MakeupData = {
+        def: guest.def,
+        onDone: () => {
+          this.scene.stop('Makeup');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Makeup', data);
       this.scene.sleep();
     });
   }

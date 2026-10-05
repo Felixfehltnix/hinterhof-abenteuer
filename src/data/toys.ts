@@ -54,6 +54,7 @@ export type BehaviorId =
   | 'xylophone'
   | 'tent'
   | 'snackbox'
+  | 'makeup'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -61,7 +62,7 @@ export type BehaviorId =
   | 'rocket';
 
 /** Merkmale, auf die andere Spielzeuge reagieren (z. B. Treffer nur mit Bällen). */
-export type ToyTag = 'ball' | 'snow';
+export type ToyTag = 'ball' | 'snow' | 'makeup';
 
 export interface ToyParams {
   /** Schwerkraft in px/s². */
@@ -147,6 +148,16 @@ export const TOYS = [
     height: 80,
     hold: { pose: 'hang', dx: 4, dy: 62 },
     behaviors: ['draggable', 'fling', 'handheld', 'snackbox'],
+    params: { bounce: 0.2, rollFriction: 12 },
+  },
+  {
+    // Ein Kind hält ihn, ein anderes Kind darauf ziehen: Kinderschminken (Gesicht, Puder, Glitzer).
+    id: 'makeupcase',
+    tags: ['makeup'],
+    width: 110,
+    height: 80,
+    hold: { pose: 'hang', dx: 4, dy: 62 },
+    behaviors: ['draggable', 'fling', 'makeup', 'handheld'],
     params: { bounce: 0.2, rollFriction: 12 },
   },
   {

@@ -56,6 +56,7 @@ export type BehaviorId =
   | 'snackbox'
   | 'makeup'
   | 'brew'
+  | 'pong'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -466,6 +467,15 @@ export const TOYS = [
     width: 380,
     height: 230,
     behaviors: ['draggable', 'whirlpool'],
+    params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Tischtennisplatte (#90): Antippen öffnet Pong (allein oder zu zweit).
+    id: 'pingpong',
+    large: true,
+    width: 300,
+    height: 190,
+    behaviors: ['draggable', 'pong'],
     params: { bounce: 0, rollFriction: 20 },
   },
   {

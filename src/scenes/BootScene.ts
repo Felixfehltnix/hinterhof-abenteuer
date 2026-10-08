@@ -18,6 +18,8 @@ import {
 } from './placeholders/brew';
 import { BALL_SIZE, drawBallShadow, drawModeButton, drawPongBall, drawPongBg, drawPongTable, drawRacket, RACKET_SIZE, TABLE_PAD } from './placeholders/pong';
 import { LAYOUT as PONG_LAYOUT, TABLE as PONG_TABLE } from '../data/pong';
+import { BOARD as PUZZLE_BOARD, PUZZLE_LAYOUT, PUZZLE_LEVELS } from '../data/puzzle';
+import { drawLevelGlow, drawLevelTile, drawPuzzleBg, drawPuzzleBoard, drawPuzzleDot, drawPuzzleStar, PUZZLE_STAR_SIZE } from './placeholders/puzzle';
 import { GAME_HEIGHT, GAME_WIDTH, GROUND_TOP } from '../config';
 import { PERGOLAS, type BackTreeKind, type BushKind, type HouseKind } from '../data/backdrop';
 import { CHARACTERS } from '../data/characters';
@@ -627,6 +629,17 @@ export class BootScene extends Phaser.Scene {
     this.makeTexture('pong-mode-small', PONG_LAYOUT.switch.size, PONG_LAYOUT.switch.size, (g) => drawModeButton(g, PONG_LAYOUT.switch.size));
   }
 
+  /** Puzzle: Spieltisch, Holzrahmen, Stufen-Knöpfe (die Fotos lädt die PuzzleScene erst bei Bedarf). */
+  private makePuzzle(): void {
+    const { w, h } = PUZZLE_LAYOUT.levels;
+    this.makeTexture('puzzle-bg', GAME_WIDTH, GAME_HEIGHT, drawPuzzleBg);
+    this.makeTexture('puzzle-board', PUZZLE_BOARD.w + PUZZLE_BOARD.frame * 2 + 10, PUZZLE_BOARD.h + PUZZLE_BOARD.frame * 2 + 14, drawPuzzleBoard);
+    PUZZLE_LEVELS.forEach((l, i) => this.makeTexture(`puzzle-level-${i}`, w, h, (g) => drawLevelTile(g, l.cols, l.rows)));
+    this.makeTexture('puzzle-level-glow', w + 16, h + 16, drawLevelGlow);
+    this.makeTexture('puzzle-star', PUZZLE_STAR_SIZE, PUZZLE_STAR_SIZE, drawPuzzleStar);
+    this.makeTexture('puzzle-dot', PUZZLE_STAR_SIZE, PUZZLE_STAR_SIZE, drawPuzzleDot);
+  }
+
   /** Zaubertrank: Gartenecke, Eimer-Topf, Rührlöffel, Korb, 12 Zutaten, 8 Feen, Funke. */
   private makeBrew(): void {
     this.makeTexture('brew-bg', GAME_WIDTH, GAME_HEIGHT, drawBrewBg);
@@ -752,6 +765,7 @@ export class BootScene extends Phaser.Scene {
     this.makeMakeup();
     this.makeBrew();
     this.makePong();
+    this.makePuzzle();
     this.makeTexture('window-glow', WINDOW_GLOW_SIZE.width, WINDOW_GLOW_SIZE.height, drawWindowGlow);
     this.makeTexture('smoke', 48, 48, drawSmoke);
 

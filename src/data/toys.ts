@@ -57,6 +57,7 @@ export type BehaviorId =
   | 'makeup'
   | 'brew'
   | 'pong'
+  | 'puzzle'
   | 'handheld'
   | 'flashlight'
   | 'snowmerge'
@@ -477,6 +478,14 @@ export const TOYS = [
     height: 190,
     behaviors: ['draggable', 'pong'],
     params: { bounce: 0, rollFriction: 20 },
+  },
+  {
+    // Puzzlebrett: Antippen öffnet das Puzzle mit Tierfotos (Stufen von 4 bis 24 Teilen).
+    id: 'puzzleboard',
+    width: 130,
+    height: 96,
+    behaviors: ['draggable', 'fling', 'puzzle'],
+    params: { bounce: 0.15, rollFriction: 12 },
   },
   {
     // Rakete (#75): bis zu 4 Kinder in der Kabine. Festhalten und ziehen = fliegen (bis ins Weltall),

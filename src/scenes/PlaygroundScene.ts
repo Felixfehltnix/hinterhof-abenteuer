@@ -20,6 +20,8 @@ import { Fairy, fairySpot } from '../objects/Fairy';
 import { FAIRIES, MAX_FAIRIES, type FairyId } from '../data/brew';
 import type { BrewData } from './BrewScene';
 import type { PongData } from './PongScene';
+import type { PuzzleData } from './PuzzleScene';
+import { parsePuzzleProgress, PUZZLE_START, type PuzzleProgress } from '../data/puzzle';
 import { Garden } from '../objects/Garden';
 import { Photos } from '../objects/Photos';
 import { KidMakeup } from '../world/KidMakeup';
@@ -100,6 +102,8 @@ export class PlaygroundScene extends Phaser.Scene {
   private savedWorld: Record<string, unknown> = {};
   /** Geschaffte Level der Strom-Werkstatt. */
   private circuitSolved = new Set<number>();
+  /** Puzzle: erreichte Stufe und nächstes Bild. */
+  private puzzleProgress: PuzzleProgress = { ...PUZZLE_START };
   /** Kamera-Stand im letzten Bild (bewegt sie sich, folgen gezogene Objekte dem Finger neu). */
   private lastScroll = { x: 0, y: 0 };
 
@@ -134,6 +138,13 @@ export class PlaygroundScene extends Phaser.Scene {
       save: () => [...this.circuitSolved].sort(),
       load: (v) => {
         if (Array.isArray(v)) v.forEach((n) => Number.isInteger(n) && n >= 0 && n < 20 && this.circuitSolved.add(n));
+      },
+    });
+
+    this.registerWorldState('puzzle', {
+      save: () => this.puzzleProgress,
+      load: (v) => {
+        this.puzzleProgress = parsePuzzleProgress(v);
       },
     });
 
@@ -500,6 +511,26 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Circuit', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Puzzle mit Tierfotos. Die Wiese schläft solange; Stufe und nächstes Bild werden gespeichert. */
+  openPuzzle(): void {
+    this.closeInventories();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: PuzzleData = {
+        progress: { ...this.puzzleProgress },
+        onProgress: (progress) => (this.puzzleProgress = progress),
+        onDone: () => {
+          this.scene.stop('Puzzle');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Puzzle', data);
       this.scene.sleep();
     });
   }

@@ -125,6 +125,16 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Treffer machen den Ball schneller (`BALL`), Fingerschläger treffen großzügiger (`PADDLE.assist`). Kein Verlieren: Vorbei = das Kind
   kichert, neuer Ball zu ihm. Ballwechsel zählen als kleine Bälle oben, alle `RALLY` Treffer ein goldener Stern, beide jubeln.
   Holzschild oben links = zurück.
+- **Puzzle** (`src/scenes/PuzzleScene.ts`, `scene.openPuzzle()`, Daten `src/data/puzzle.ts`, Zeichnungen `src/scenes/placeholders/puzzle.ts`):
+  Spielzeug `puzzleboard` (Baustein `puzzle`) antippen öffnet das Spiel; die Wiese schläft. 12 Tierfotos (`PUZZLE_PICTURES`,
+  `public/assets/puzzle/<id>.webp`, alle CC0 von Wikimedia Commons, Herkunft in `QUELLEN.md` daneben; echte Fotos sind hier die
+  bewusste Ausnahme vom gezeichneten Stil). Die PuzzleScene lädt immer nur das gerade gebrauchte Foto (fehlt es: Ersatzbild) und
+  schneidet daraus Teile mit zufälligen Nasen (Canvas-Texturen `puzzle-piece-<n>`, Umrisse `puzzle-slots`), die beim Verlassen wieder
+  gelöscht werden. Das Bild zeigt sich erst ganz, dann fliegen die Teile verkleinert auf zwei Stapel links/rechts; anfassen = volle Größe,
+  nah am Platz loslassen = rastet ein (`PIECE.snap`, jedes Teil einen Ton höher). Fertig = Sterne, nächstes Bild (reihum).
+  **Stufen** (`PUZZLE_LEVELS`): 4, 6, 9, 12, 20, 24 Teile, die Vorlage im Rahmen wird blasser. Nach `PUZZLE_LEVEL_UP` gelösten Bildern
+  auf der höchsten Stufe kommt die nächste dazu (Punkte/Sterne unter dem Knopf); erreichte Stufen oben jederzeit antippbar, noch nicht
+  erreichte wackeln nur. Fortschritt: Weltzustand `puzzle`. Holzschild oben links = zurück.
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
   (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
@@ -231,7 +241,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Zaubertrank: `brew-take`, `brew-add`, `brew-stir`, `brew-fairy`;
   Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`;
   Schminken: `paint`, `puff`, `glitter`, `tattoo-done`, `glue`, `peel`;
-  Tischtennis: `pong-hit` (pitch), `pong-table` (pitch), `pong-miss`, `pong-star`.
+  Tischtennis: `pong-hit` (pitch), `pong-table` (pitch), `pong-miss`, `pong-star`;
+  Puzzle: `puzzle-pick`, `puzzle-drop`, `puzzle-snap` (pitch), `puzzle-scatter`, `puzzle-done`, `puzzle-level`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

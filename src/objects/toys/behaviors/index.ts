@@ -8,6 +8,7 @@ import { bubbles } from './bubbles';
 import { camera } from './camera';
 import { circuit } from './circuit';
 import { pong } from './pong';
+import { puzzle } from './puzzle';
 import { cans } from './cans';
 import { float } from './float';
 import { goal } from './goal';
@@ -51,6 +52,7 @@ export const BEHAVIORS: Record<BehaviorId, BehaviorFactory> = {
   camera,
   circuit,
   pong,
+  puzzle,
   draggable,
   fling,
   kick,

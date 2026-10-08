@@ -127,6 +127,13 @@ export const SOUNDS: Record<string, SoundDef> = {
   'pong-table': { synth: 'tock', pitched: true, volume: 0.35 },
   'pong-miss': { synth: 'pop', volume: 0.3 },
   'pong-star': { synth: 'chime', volume: 0.5 },
+  // Puzzle: Teil nehmen, ablegen, einrasten (jedes Teil höher), Bild fertig, neue Stufe
+  'puzzle-pick': { synth: 'click', volume: 0.3 },
+  'puzzle-drop': { synth: 'click', volume: 0.2 },
+  'puzzle-snap': { synth: 'mallet', pitched: true, volume: 0.5 },
+  'puzzle-scatter': { synth: 'whoosh', volume: 0.2 },
+  'puzzle-done': { synth: 'chime', volume: 0.55 },
+  'puzzle-level': { synth: 'rise', volume: 0.4 },
   // Kinderschminken
   paint: { synth: 'whoosh', volume: 0.07 },
   puff: { synth: 'pop', volume: 0.12 },

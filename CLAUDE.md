@@ -117,6 +117,14 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   = rühren (Winkelsumme, `BREW.turns` Umdrehungen), dann steigt eine Fee auf (`pickFairy`: höchste Punkte, bei Gleichstand oder
   ≥ `BREW.mixedKinds` Sorten die Regenbogenfee). 8 Feen (`FAIRIES`). Zurück schwebt sie als `Fairy` (`src/objects/Fairy.ts`) neben dem
   Eimer auf der Wiese, höchstens `MAX_FAIRIES` (die älteste geht mit Glitzer), gespeichert als Weltzustand `fairies`; Antippen = wirbelt. Nachts leuchtet sie (Lichtebene: Schein + helles Abbild, `dayCycle.darkness`).
+- **Tischtennis / Pong** (#90, `src/scenes/PongScene.ts`, `scene.openPong(table)`, Daten `src/data/pong.ts`, Zeichnungen
+  `src/scenes/placeholders/pong.ts`): Spielzeug `pingpong` (groß, Baustein `pong`) antippen öffnet das Spiel; die Wiese schläft.
+  Platte von oben, an den Enden die zwei Kinder, die der Platte am nächsten sind (wer links steht, spielt links), mit Schläger.
+  Beim Start zwei große Knöpfe mit Porträts: 1P (das linke Kind) oder 2P (beide); klein unten jederzeit umschaltbar. Finger hoch/runter
+  = Schläger (1P: jeder Finger links, rechts spielt der Computer gutmütig, `AI`; 2P: Bildschirmhälfte je Schläger, Finger je Zeiger).
+  Treffer machen den Ball schneller (`BALL`), Fingerschläger treffen großzügiger (`PADDLE.assist`). Kein Verlieren: Vorbei = das Kind
+  kichert, neuer Ball zu ihm. Ballwechsel zählen als kleine Bälle oben, alle `RALLY` Treffer ein goldener Stern, beide jubeln.
+  Holzschild oben links = zurück.
 - **Sternenflug** (Asteroiden, `src/scenes/AsteroidScene.ts`, `scene.openAsteroids(riders)`, Daten `src/data/asteroids.ts`,
   Zeichnungen `src/scenes/placeholders/asteroids.ts`): Rakete bis ans Ende des Weltalls fliegen und oben weiter nach oben ziehen
   (`WARP.holdTime`, die Sterne werden zu Strichen: `space.warp`) → weißer Blitz, die Wiese schläft, die Kinder aus der Rakete
@@ -222,7 +230,8 @@ Spielwiese antippen und herumziehen. Kein Gewinnen, kein Verlieren, kein Text im
   Strom-Werkstatt: `circuit-switch`, `circuit-wire`, `circuit-unwire`, `circuit-gate`, `circuit-nope`, `circuit-lamp`, `circuit-win`;
   Zaubertrank: `brew-take`, `brew-add`, `brew-stir`, `brew-fairy`;
   Sternenflug: `warp`, `zap`, `crack` (pitch), `sparkle` (pitch), `bonk`, `wave-done`;
-  Schminken: `paint`, `puff`, `glitter`, `tattoo-done`, `glue`, `peel`.
+  Schminken: `paint`, `puff`, `glitter`, `tattoo-done`, `glue`, `peel`;
+  Tischtennis: `pong-hit` (pitch), `pong-table` (pitch), `pong-miss`, `pong-star`.
 
 ## Speichern
 - Die Wiese speichert sich automatisch lokal (`src/save/`, localStorage, kein Netzwerk).

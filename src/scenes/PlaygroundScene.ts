@@ -19,6 +19,7 @@ import { Dog } from '../objects/Dog';
 import { Fairy, fairySpot } from '../objects/Fairy';
 import { FAIRIES, MAX_FAIRIES, type FairyId } from '../data/brew';
 import type { BrewData } from './BrewScene';
+import type { PongData } from './PongScene';
 import { Garden } from '../objects/Garden';
 import { Photos } from '../objects/Photos';
 import { KidMakeup } from '../world/KidMakeup';
@@ -499,6 +500,36 @@ export class PlaygroundScene extends Phaser.Scene {
         },
       };
       this.scene.launch('Circuit', data);
+      this.scene.sleep();
+    });
+  }
+
+  /** Tischtennis: Platte antippen öffnet Pong. Es spielen die zwei Kinder, die der Platte am nächsten sind. */
+  openPong(table: Toy): void {
+    this.closeInventories();
+    const near = [...this.kids]
+      .filter((k) => k.visible && k.mode !== 'leaving')
+      .sort((a, b) => Phaser.Math.Distance.Between(a.x, a.y, table.x, table.y) - Phaser.Math.Distance.Between(b.x, b.y, table.x, table.y));
+    const kids = near.slice(0, 2).map((k) => ({ def: k.def, outfit: k.outfit }));
+    for (const def of CHARACTERS) {
+      if (kids.length >= 2) break;
+      if (!kids.some((k) => k.def.id === def.id)) kids.push({ def, outfit: this.outfits.get(def.id) ?? {} });
+    }
+    // Wer links steht, spielt links
+    const [a, b] = near;
+    if (a && b && a.x > b.x) kids.reverse();
+    const cam = this.cameras.main;
+    cam.fadeOut(300, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const data: PongData = {
+        kids,
+        onDone: () => {
+          this.scene.stop('Pong');
+          this.scene.wake();
+          cam.fadeIn(300, 0, 0, 0);
+        },
+      };
+      this.scene.launch('Pong', data);
       this.scene.sleep();
     });
   }

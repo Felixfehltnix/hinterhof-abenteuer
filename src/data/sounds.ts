@@ -34,7 +34,8 @@ export type SynthId =
   | 'rise'
   | 'bark'
   | 'zap'
-  | 'crack';
+  | 'crack'
+  | 'tock';
 
 export interface SoundDef {
   synth: SynthId;
@@ -121,6 +122,11 @@ export const SOUNDS: Record<string, SoundDef> = {
   sparkle: { synth: 'mallet', pitched: true, volume: 0.4 },
   bonk: { synth: 'drum', volume: 0.45 },
   'wave-done': { synth: 'chime', volume: 0.5 },
+  // Tischtennis
+  'pong-hit': { synth: 'tock', pitched: true, volume: 0.6 },
+  'pong-table': { synth: 'tock', pitched: true, volume: 0.35 },
+  'pong-miss': { synth: 'pop', volume: 0.3 },
+  'pong-star': { synth: 'chime', volume: 0.5 },
   // Kinderschminken
   paint: { synth: 'whoosh', volume: 0.07 },
   puff: { synth: 'pop', volume: 0.12 },

@@ -27,6 +27,7 @@ const SYNTH_LENGTH: Record<SynthId, number> = {
   bark: 0.15,
   zap: 0.12,
   crack: 0.3,
+  tock: 0.06,
 };
 
 /**
@@ -260,6 +261,13 @@ export class SoundSystem {
         const f = SCALE[Phaser.Math.Clamp(Math.round(pitch ?? 0), 0, SCALE.length - 1)] / 2;
         this.tone({ freq: f, to: f * 0.5, type: 'triangle', dur: 0.25, vol, pan, attack: 0.003 });
         this.noise({ dur: 0.18, vol: vol * 0.5, filter: 1800, pan });
+        break;
+      }
+      case 'tock': {
+        // Tischtennis: kurzes, helles „Tock“ (höher je pitch)
+        const f = SCALE[Phaser.Math.Clamp(Math.round(pitch ?? 4), 0, SCALE.length - 1)] * 2;
+        this.tone({ freq: f, to: f * 0.7, type: 'triangle', dur: 0.06, vol, pan, attack: 0.002 });
+        this.noise({ dur: 0.025, vol: vol * 0.3, filter: 3500, pan });
         break;
       }
     }
